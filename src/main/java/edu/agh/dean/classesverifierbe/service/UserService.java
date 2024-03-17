@@ -6,6 +6,8 @@ import edu.agh.dean.classesverifierbe.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.*;
+
 @Service
 public class UserService {
     @Autowired
@@ -36,7 +38,15 @@ public class UserService {
     }
 
 
-    public Object getAllUsers() {
+    public Optional<User> getUserById(Long id) {
+        return userRepository.findById(id);
+    }
+
+    public Optional<User> getUserByIndexNumber(String indexNumber) {
+        return userRepository.findByIndexNumber(indexNumber);
+    }
+
+    public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 }
