@@ -15,7 +15,9 @@ public class Confirm {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long confirmId;
 
-    private String semesterFullName;
+    @ManyToOne
+    @JoinColumn(name = "semesterId")
+    private Semester semester;
 
     @Enumerated(EnumType.STRING)
     private ConfirmStatus confirmStatus;
