@@ -1,4 +1,4 @@
-package edu.agh.dean.classesverifierbe.controller.dto;
+package edu.agh.dean.classesverifierbe.dto;
 
 import edu.agh.dean.classesverifierbe.model.User;
 import jakarta.validation.constraints.NotBlank;
