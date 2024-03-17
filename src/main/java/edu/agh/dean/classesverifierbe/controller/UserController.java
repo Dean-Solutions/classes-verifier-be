@@ -9,6 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.*;
+
+
 @RestController
 @RequestMapping("/user")
 public class UserController {
@@ -17,10 +20,6 @@ public class UserController {
     private UserService studentService;
 
 
-    @GetMapping("/")
-    public ResponseEntity<?> getAllUsers() {
-        return new ResponseEntity<>(studentService.getAllUsers(), HttpStatus.OK);
-    }
     @PostMapping("/")
     public ResponseEntity<?> addUser(@Valid @RequestBody UserDTO userDto) {
         try {
@@ -29,5 +28,27 @@ public class UserController {
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @GetMapping("/")
+    public ResponseEntity<List<User>> getAllUsers() {
+        List<User> users = studentService.getAllUsers();
+        return ResponseEntity.ok(users);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+        Optional<User> user = studentService.getUserById(id);
+        return user
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/index/{indexNumber}")
+    public ResponseEntity<User> getUserByIndexNumber(@PathVariable String indexNumber) {
+        Optional<User> user = studentService.getUserByIndexNumber(indexNumber);
+        return user
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }
