@@ -1,0 +1,55 @@
+package edu.agh.dean.classesverifierbe.model;
+
+import edu.agh.dean.classesverifierbe.model.enums.Role;
+import edu.agh.dean.classesverifierbe.model.enums.UserStatus;
+import jakarta.persistence.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.Set;
+
+@Entity
+@Data
+@Table(name = "users")
+@NoArgsConstructor
+public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long userId;
+
+    private String firstName;
+
+    private String lastName;
+
+    private String indexNumber;
+
+    private String email;
+
+    private String hashPassword;
+
+    private int semester;
+
+    @Enumerated(EnumType.STRING)
+    private UserStatus status;
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @JoinTable(
+            name = "userTagAssigns",
+            joinColumns = @JoinColumn(name = "userId"),
+            inverseJoinColumns = @JoinColumn(name = "userTagId"))
+    private Set<UserTag> userTags;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "user")
+    private Set<UserRequest> userRequests;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "enrollStudent")
+    private Set<Enrollment> enrollments;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "user")
+    private Set<Confirm> confirms;
+
+}
