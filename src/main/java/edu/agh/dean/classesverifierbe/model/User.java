@@ -28,13 +28,13 @@ public class User {
 
     private String hashPassword;
 
-    private int semester;
+    private Integer semester = 1;
 
     @Enumerated(EnumType.STRING)
-    private UserStatus status;
+    private UserStatus status = UserStatus.ACTIVE;
 
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private Role role = Role.STUDENT;;
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinTable(
@@ -52,4 +52,17 @@ public class User {
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "user")
     private Set<Confirm> confirms;
 
+    @PrePersist
+    @PreUpdate
+    private void prepareData(){
+        if (role == null) {
+            role = Role.STUDENT;
+        }
+        if(status == null){
+            status = UserStatus.ACTIVE;
+        }
+        if(semester == null){
+            semester = 1;
+        }
+    }
 }
