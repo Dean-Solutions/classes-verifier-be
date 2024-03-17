@@ -21,10 +21,7 @@ public class UserDTO {
     @Email(message = "Email must be valid")
     @NotBlank(message = "Email is required")
     private String email;
-
-    @NotBlank(message = "Password is required")
-    private String password;
-
+    //password need to be generated and sent in response!
     @Min(value = 1, message = "Semester must be greater than 0")
     private int semester;
 

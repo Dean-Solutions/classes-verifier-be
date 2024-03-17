@@ -14,11 +14,15 @@ public class UserService {
     private UserRepository userRepository;
 
     public User addUser(UserDTO userDTO) {
-        //checking if user with this index number already exists or with email
+
         if (userRepository.existsByIndexNumber(userDTO.getIndexNumber())) {
             throw new IllegalArgumentException("User with this index number already exists");
         }
         User user = toUser(userDTO);
+
+        String newPassword = UUID.randomUUID().toString();
+        user.setHashPassword(newPassword);
+
         return userRepository.save(user);
     }
 
@@ -30,7 +34,6 @@ public class UserService {
         user.setLastName(userDTO.getLastName());
         user.setIndexNumber(userDTO.getIndexNumber());
         user.setEmail(userDTO.getEmail());
-        user.setHashPassword(userDTO.getPassword());
         user.setSemester(userDTO.getSemester());
         user.setStatus(userDTO.getStatus());
         user.setRole(userDTO.getRole());
