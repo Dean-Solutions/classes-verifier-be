@@ -47,7 +47,7 @@ public class UserControllerTest {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception{
 
         given(userService.addUser(any(UserDTO.class))).willAnswer(invocation -> {
             UserDTO dto = invocation.getArgument(0);

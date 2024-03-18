@@ -34,7 +34,7 @@ public class UserTagControllerTest {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception{
         given(userTagService.createTag(any(UserTagDTO.class))).willAnswer(invocation -> {
             UserTagDTO dto = invocation.getArgument(0);
             UserTag tag = new UserTag();
