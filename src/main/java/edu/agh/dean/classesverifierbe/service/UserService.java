@@ -1,6 +1,10 @@
 package edu.agh.dean.classesverifierbe.service;
 
 import edu.agh.dean.classesverifierbe.dto.UserDTO;
+import edu.agh.dean.classesverifierbe.exceptions.UserAlreadyExistsException;
+import edu.agh.dean.classesverifierbe.exceptions.UserNotFoundException;
+import edu.agh.dean.classesverifierbe.exceptions.UserTagAlreadyExistsException;
+import edu.agh.dean.classesverifierbe.exceptions.UserTagNotFoundException;
 import edu.agh.dean.classesverifierbe.model.User;
 import edu.agh.dean.classesverifierbe.model.UserTag;
 import edu.agh.dean.classesverifierbe.repository.UserRepository;
@@ -20,13 +24,13 @@ public class UserService {
     @Autowired
     private UserTagRepository userTagRepository;
 
-    public User addUser(UserDTO userDTO) {
+    public User addUser(UserDTO userDTO) throws UserAlreadyExistsException{
 
         if (userRepository.existsByIndexNumber(userDTO.getIndexNumber())) {
-            throw new IllegalArgumentException("User with this index number already exists");
+            throw new UserAlreadyExistsException("index number", userDTO.getIndexNumber());
         }
         if(userRepository.existsByEmail(userDTO.getEmail())){
-            throw new IllegalArgumentException("User with this email already exists");
+            throw new UserAlreadyExistsException("email", userDTO.getEmail());
         }
         User user = toUser(userDTO);
 
@@ -50,16 +54,16 @@ public class UserService {
         return user;
     }
 
-    public User addTagToUserByIndexAndTagName(String index, String tagName) {
+    public User addTagToUserByIndexAndTagName(String index, String tagName) throws UserNotFoundException, UserTagNotFoundException, UserTagAlreadyExistsException{
         User user = findUserByIndexNumber(index);
         UserTag tag = findUserTagByName(tagName);
         if (user.getUserTags().contains(tag)) {
-            throw new RuntimeException("User already has this tag");
+            throw new UserTagAlreadyExistsException("tag", tagName, "user");
         }
         user.getUserTags().add(tag);
         return userRepository.save(user);
     }
-    public User removeTagFromUserByIndexAndTagName(String index, String tagName) {
+    public User removeTagFromUserByIndexAndTagName(String index, String tagName) throws UserNotFoundException, UserTagNotFoundException{
         User user = findUserByIndexNumber(index);
         UserTag tag = findUserTagByName(tagName);
         if (!user.getUserTags().contains(tag)) {
@@ -69,14 +73,12 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User findUserByIndexNumber(String index){
-        return userRepository.findByIndexNumber(index)
-                .orElseThrow(() -> new RuntimeException("User not found with index: " + index));
+    public User findUserByIndexNumber(String index) throws UserNotFoundException {
+        return userRepository.findByIndexNumber(index).orElseThrow(() -> new UserNotFoundException("index number", index));
     }
 
-    public UserTag findUserTagByName(String name){
-        return userTagRepository.findByName(name)
-                .orElseThrow(() -> new RuntimeException("Tag not found with name: " + name));
+    public UserTag findUserTagByName(String name) throws UserTagNotFoundException {
+        return userTagRepository.findByName(name).orElseThrow(() -> new UserTagNotFoundException("name", name));
     }
 
 

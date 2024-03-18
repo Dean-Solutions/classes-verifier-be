@@ -2,6 +2,7 @@ package edu.agh.dean.classesverifierbe.service;
 
 
 import edu.agh.dean.classesverifierbe.dto.UserTagDTO;
+import edu.agh.dean.classesverifierbe.exceptions.UserTagAlreadyExistsException;
 import edu.agh.dean.classesverifierbe.model.User;
 import edu.agh.dean.classesverifierbe.model.UserTag;
 import edu.agh.dean.classesverifierbe.repository.UserTagRepository;
@@ -14,9 +15,9 @@ public class UserTagService {
     @Autowired
     private UserTagRepository userTagRepository;
 
-    public UserTag createTag(UserTagDTO tagDTO) {
+    public UserTag createTag(UserTagDTO tagDTO) throws UserTagAlreadyExistsException {
         if (userTagRepository.findByName(tagDTO.getName()).isPresent()) {
-            throw new IllegalArgumentException("Tag with this name already exists");
+            throw new UserTagAlreadyExistsException("name", tagDTO.getName());
         }
         UserTag newTag = new UserTag();
         newTag.setName(tagDTO.getName());
@@ -27,10 +28,6 @@ public class UserTagService {
 
     public Iterable<UserTag> getAllTags() {
         return userTagRepository.findAll();
-    }
-
-    public boolean tagExistsByName(String tagName) {
-        return userTagRepository.findByName(tagName).isPresent();
     }
 
 }

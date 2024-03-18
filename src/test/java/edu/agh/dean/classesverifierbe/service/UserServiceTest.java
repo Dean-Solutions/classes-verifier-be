@@ -2,6 +2,7 @@ package edu.agh.dean.classesverifierbe.service;
 
 import edu.agh.dean.classesverifierbe.dto.UserDTO;
 import edu.agh.dean.classesverifierbe.dto.UserTagDTO;
+import edu.agh.dean.classesverifierbe.exceptions.UserAlreadyExistsException;
 import edu.agh.dean.classesverifierbe.model.User;
 import edu.agh.dean.classesverifierbe.model.UserTag;
 import edu.agh.dean.classesverifierbe.repository.UserRepository;
@@ -48,7 +49,7 @@ class UserServiceTest {
         MockitoAnnotations.openMocks(this);
     }
     @Test
-    void whenAddUser_thenUserShouldBeSavedWithGeneratedPassword() {
+    void whenAddUser_thenUserShouldBeSavedWithGeneratedPassword() throws Exception{
         UserDTO userDTO = UserDTO.builder()
                 .firstName("John")
                 .lastName("Doe")
@@ -61,11 +62,10 @@ class UserServiceTest {
 
         when(userRepository.existsByIndexNumber(anyString())).thenReturn(false);
         when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArguments()[0]);
+            User result = userService.addUser(userDTO);
+            assertNotNull(result.getHashPassword(), "Password should be generated");
+            verify(userRepository).save(any(User.class));
 
-        User result = userService.addUser(userDTO);
-
-        assertNotNull(result.getHashPassword(), "Password should be generated");
-        verify(userRepository).save(any(User.class));
     }
 
     @Test
@@ -74,16 +74,16 @@ class UserServiceTest {
 
         when(userRepository.existsByIndexNumber("123456")).thenReturn(true);
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        Exception exception = assertThrows(UserAlreadyExistsException.class, () -> {
             userService.addUser(userDTO);
         });
-
-        assertEquals("User with this index number already exists", exception.getMessage());
+        //"User with "+ attribute + " : " + value + " already exists"
+        assertEquals("User with index number : " + 123456 + " already exists", exception.getMessage());
     }
 
 
     @Test
-    void whenAddTagToUser_thenTagShouldBeAdded() {
+    void whenAddTagToUser_thenTagShouldBeAdded() throws Exception{
         String index = "123456";
         UserDTO userDTO = UserDTO.builder()
                 .firstName("John")
