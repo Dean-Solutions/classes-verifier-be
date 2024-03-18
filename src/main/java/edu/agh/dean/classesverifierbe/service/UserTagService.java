@@ -29,5 +29,8 @@ public class UserTagService {
         return userTagRepository.findAll();
     }
 
+    public boolean tagExistsByName(String tagName) {
+        return userTagRepository.findByName(tagName).isPresent();
+    }
 
 }
