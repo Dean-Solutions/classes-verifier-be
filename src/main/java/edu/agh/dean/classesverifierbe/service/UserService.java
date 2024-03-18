@@ -3,7 +3,10 @@ package edu.agh.dean.classesverifierbe.service;
 import edu.agh.dean.classesverifierbe.dto.UserDTO;
 import edu.agh.dean.classesverifierbe.model.User;
 import edu.agh.dean.classesverifierbe.repository.UserRepository;
+import edu.agh.dean.classesverifierbe.specifications.UserSpecifications;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -51,5 +54,9 @@ public class UserService {
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
+    }
+
+    public Page<User> getStudentsByCriteria(Pageable pageable, String tag, String name, String lastName, String indexNumber, Integer semester) {
+        return userRepository.findAll(UserSpecifications.byCriteria(tag, name, lastName, indexNumber, semester), pageable);
     }
 }
