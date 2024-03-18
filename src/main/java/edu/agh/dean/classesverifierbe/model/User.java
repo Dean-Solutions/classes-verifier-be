@@ -1,9 +1,11 @@
 package edu.agh.dean.classesverifierbe.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import edu.agh.dean.classesverifierbe.model.enums.Role;
 import edu.agh.dean.classesverifierbe.model.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.Set;
@@ -12,6 +14,7 @@ import java.util.Set;
 @Data
 @Table(name = "users")
 @NoArgsConstructor
+@EqualsAndHashCode(exclude = {"userTags", "userRequests", "enrollments", "confirms"})
 public class User {
 
     @Id
@@ -41,6 +44,7 @@ public class User {
             name = "userTagAssigns",
             joinColumns = @JoinColumn(name = "userId"),
             inverseJoinColumns = @JoinColumn(name = "userTagId"))
+    @JsonManagedReference
     private Set<UserTag> userTags;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "user")
@@ -65,4 +69,6 @@ public class User {
             semester = 1;
         }
     }
+
+
 }

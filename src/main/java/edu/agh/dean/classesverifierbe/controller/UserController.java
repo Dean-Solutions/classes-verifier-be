@@ -45,6 +45,8 @@ public class UserController {
         }
     }
 
+
+
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
         Optional<User> user = userService.getUserById(id);
@@ -69,6 +71,26 @@ public class UserController {
                                   @RequestParam(required = false) String indexNumber,
                                   @RequestParam(required = false) Integer semester) {
         return userService.getStudentsByCriteria(pageable, tag, name, lastName, indexNumber, semester);
+    }
+
+    @PostMapping("/assign-tag")
+    public ResponseEntity<?> assignTagToUser(@RequestParam String index, @RequestParam String tagName) {
+        try {
+            User updatedUser = userService.addTagToUserByIndexAndTagName(index, tagName);
+            return ResponseEntity.ok(updatedUser);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @DeleteMapping("/remove-tag")
+    public ResponseEntity<?> removeTagFromUser(@RequestParam String index, @RequestParam String tagName) {
+        try{
+            User updatedUser = userService.removeTagFromUserByIndexAndTagName(index, tagName);
+            return ResponseEntity.ok(updatedUser);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
+        }
     }
 
 
