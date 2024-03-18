@@ -127,13 +127,13 @@ class UserServiceTest {
     @Test
     void getStudentsByCriteriaTest() {
         Pageable pageable = PageRequest.of(0, 10);
-        User user = new User(); // Uzupełnij obiekt user odpowiednimi danymi
+        User user = new User();
         Page<User> expectedPage = new PageImpl<>(Collections.singletonList(user));
 
         when(userRepository.findAll(any(Specification.class), eq(pageable)))
                 .thenReturn(expectedPage);
 
-        Page<User> resultPage = userService.getStudentsByCriteria(pageable, "Spring", "John", "Doe", "123456", 1);
+        Page<User> resultPage = userService.getStudentsByCriteria(pageable, "Spring", "John", "Doe", "123456", 1, "ACTIVE");
 
         assertThat(resultPage.getContent()).hasSize(1);
         assertThat(resultPage.getContent().get(0)).isEqualToComparingFieldByField(user);

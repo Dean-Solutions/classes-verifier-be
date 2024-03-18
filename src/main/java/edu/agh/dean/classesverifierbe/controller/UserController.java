@@ -6,6 +6,7 @@ import edu.agh.dean.classesverifierbe.exceptions.UserNotFoundException;
 import edu.agh.dean.classesverifierbe.exceptions.UserTagAlreadyExistsException;
 import edu.agh.dean.classesverifierbe.exceptions.UserTagNotFoundException;
 import edu.agh.dean.classesverifierbe.model.User;
+import edu.agh.dean.classesverifierbe.model.enums.UserStatus;
 import edu.agh.dean.classesverifierbe.service.UserService;
 
 import jakarta.validation.Valid;
@@ -97,8 +98,9 @@ public class UserController {
                                                   @RequestParam(required = false) String name,
                                                   @RequestParam(required = false) String lastName,
                                                   @RequestParam(required = false) String indexNumber,
-                                                  @RequestParam(required = false) Integer semester) {
-        Page<User> users = userService.getStudentsByCriteria(pageable, tag, name, lastName, indexNumber, semester);
+                                                  @RequestParam(required = false) Integer semester,
+                                                  @RequestParam(required = false) String status) {
+        Page<User> users = userService.getStudentsByCriteria(pageable, tag, name, lastName, indexNumber, semester,status);
         if(users.isEmpty()){
             return ResponseEntity.notFound().build();
         }
