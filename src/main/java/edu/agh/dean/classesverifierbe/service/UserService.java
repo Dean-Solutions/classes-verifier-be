@@ -7,6 +7,7 @@ import edu.agh.dean.classesverifierbe.exceptions.UserTagAlreadyExistsException;
 import edu.agh.dean.classesverifierbe.exceptions.UserTagNotFoundException;
 import edu.agh.dean.classesverifierbe.model.User;
 import edu.agh.dean.classesverifierbe.model.UserTag;
+import edu.agh.dean.classesverifierbe.model.enums.UserStatus;
 import edu.agh.dean.classesverifierbe.repository.UserRepository;
 import edu.agh.dean.classesverifierbe.repository.UserTagRepository;
 import edu.agh.dean.classesverifierbe.specifications.UserSpecifications;
@@ -91,8 +92,8 @@ public class UserService {
     }
 
 
-    public Page<User> getStudentsByCriteria(Pageable pageable, String tag, String name, String lastName, String indexNumber, Integer semester) {
-        return userRepository.findAll(UserSpecifications.byCriteria(tag, name, lastName, indexNumber, semester), pageable);
+    public Page<User> getStudentsByCriteria(Pageable pageable, String tag, String name, String lastName, String indexNumber, Integer semester, String status) {
+        return userRepository.findAll(UserSpecifications.byCriteria(tag, name, lastName, indexNumber, semester, status), pageable);
     }
 
 
