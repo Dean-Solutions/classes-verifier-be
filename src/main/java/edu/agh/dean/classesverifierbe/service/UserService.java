@@ -51,10 +51,8 @@ public class UserService {
     }
 
     public User addTagToUserByIndexAndTagName(String index, String tagName) {
-        User user = userRepository.findByIndexNumber(index)
-                .orElseThrow(() -> new RuntimeException("User not found with index: " + index));
-        UserTag tag = userTagRepository.findByName(tagName)
-                .orElseThrow(() -> new RuntimeException("Tag not found with name: " + tagName));
+        User user = findUserByIndexNumber(index);
+        UserTag tag = findUserTagByName(tagName);
         if (user.getUserTags().contains(tag)) {
             throw new RuntimeException("User already has this tag");
         }
@@ -62,15 +60,23 @@ public class UserService {
         return userRepository.save(user);
     }
     public User removeTagFromUserByIndexAndTagName(String index, String tagName) {
-        User user = userRepository.findByIndexNumber(index)
-                .orElseThrow(() -> new RuntimeException("User not found with index: " + index));
-        UserTag tag = userTagRepository.findByName(tagName)
-                .orElseThrow(() -> new RuntimeException("Tag not found with name: " + tagName));
+        User user = findUserByIndexNumber(index);
+        UserTag tag = findUserTagByName(tagName);
         if (!user.getUserTags().contains(tag)) {
             throw new RuntimeException("User does not have this tag");
         }
         user.getUserTags().remove(tag);
         return userRepository.save(user);
+    }
+
+    public User findUserByIndexNumber(String index){
+        return userRepository.findByIndexNumber(index)
+                .orElseThrow(() -> new RuntimeException("User not found with index: " + index));
+    }
+
+    public UserTag findUserTagByName(String name){
+        return userTagRepository.findByName(name)
+                .orElseThrow(() -> new RuntimeException("Tag not found with name: " + name));
     }
 
 
@@ -83,8 +89,9 @@ public class UserService {
     }
 
 
-
     public Page<User> getStudentsByCriteria(Pageable pageable, String tag, String name, String lastName, String indexNumber, Integer semester) {
         return userRepository.findAll(UserSpecifications.byCriteria(tag, name, lastName, indexNumber, semester), pageable);
     }
+
+
 }
