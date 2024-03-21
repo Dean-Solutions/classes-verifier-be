@@ -2,11 +2,8 @@ package edu.agh.dean.classesverifierbe.controller;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import edu.agh.dean.classesverifierbe.dto.UserDTO;
 import edu.agh.dean.classesverifierbe.dto.UserTagDTO;
-import edu.agh.dean.classesverifierbe.model.User;
 import edu.agh.dean.classesverifierbe.model.UserTag;
-import edu.agh.dean.classesverifierbe.service.UserService;
 import edu.agh.dean.classesverifierbe.service.UserTagService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,7 +46,7 @@ public class UserTagControllerTest {
         tagDTO.setName("Java");
         tagDTO.setDescription("Java programming");
 
-        mockMvc.perform(post("/user-tags/")
+        mockMvc.perform(post("/user-tag/")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(tagDTO)))
                 .andExpect(status().isOk());

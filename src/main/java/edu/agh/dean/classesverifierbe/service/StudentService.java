@@ -7,7 +7,6 @@ import edu.agh.dean.classesverifierbe.exceptions.UserTagAlreadyExistsException;
 import edu.agh.dean.classesverifierbe.exceptions.UserTagNotFoundException;
 import edu.agh.dean.classesverifierbe.model.User;
 import edu.agh.dean.classesverifierbe.model.UserTag;
-import edu.agh.dean.classesverifierbe.model.enums.UserStatus;
 import edu.agh.dean.classesverifierbe.repository.UserRepository;
 import edu.agh.dean.classesverifierbe.repository.UserTagRepository;
 import edu.agh.dean.classesverifierbe.specifications.UserSpecifications;
@@ -19,7 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Service
-public class UserService {
+public class StudentService {
     @Autowired
     private UserRepository userRepository;
     @Autowired

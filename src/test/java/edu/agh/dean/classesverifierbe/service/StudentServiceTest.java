@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 
 @SpringBootTest
-class UserServiceTest {
+class StudentServiceTest {
 
     @Mock
     private UserRepository userRepository;
@@ -39,7 +39,7 @@ class UserServiceTest {
     private UserTagRepository userTagRepository;
 
     @InjectMocks
-    private UserService userService;
+    private StudentService studentService;
 
     @InjectMocks
     private UserTagService userTagService;
@@ -62,7 +62,7 @@ class UserServiceTest {
 
         when(userRepository.existsByIndexNumber(anyString())).thenReturn(false);
         when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArguments()[0]);
-            User result = userService.addUser(userDTO);
+            User result = studentService.addUser(userDTO);
             assertNotNull(result.getHashPassword(), "Password should be generated");
             verify(userRepository).save(any(User.class));
 
@@ -75,7 +75,7 @@ class UserServiceTest {
         when(userRepository.existsByIndexNumber("123456")).thenReturn(true);
 
         Exception exception = assertThrows(UserAlreadyExistsException.class, () -> {
-            userService.addUser(userDTO);
+            studentService.addUser(userDTO);
         });
         //"User with "+ attribute + " : " + value + " already exists"
         assertEquals("User with index number : " + 123456 + " already exists", exception.getMessage());
@@ -118,7 +118,7 @@ class UserServiceTest {
 
         when(userTagRepository.findByName(any(String.class))).thenReturn(Optional.of(tag));
         when(userTagRepository.save(any(UserTag.class))).thenReturn(tag);
-        User updatedUser = userService.addTagToUserByIndexAndTagName(index, tagName);
+        User updatedUser = studentService.addTagToUserByIndexAndTagName(index, tagName);
         assertNotNull(updatedUser);
         assertTrue(updatedUser.getUserTags().contains(tag), "Tag should be added to the user");
     }
@@ -133,7 +133,7 @@ class UserServiceTest {
         when(userRepository.findAll(any(Specification.class), eq(pageable)))
                 .thenReturn(expectedPage);
 
-        Page<User> resultPage = userService.getStudentsByCriteria(pageable, "Spring", "John", "Doe", "123456", 1, "ACTIVE");
+        Page<User> resultPage = studentService.getStudentsByCriteria(pageable, "Spring", "John", "Doe", "123456", 1, "ACTIVE");
 
         assertThat(resultPage.getContent()).hasSize(1);
         assertThat(resultPage.getContent().get(0)).isEqualToComparingFieldByField(user);

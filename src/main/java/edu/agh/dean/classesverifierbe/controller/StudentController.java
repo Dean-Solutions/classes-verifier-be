@@ -6,8 +6,7 @@ import edu.agh.dean.classesverifierbe.exceptions.UserNotFoundException;
 import edu.agh.dean.classesverifierbe.exceptions.UserTagAlreadyExistsException;
 import edu.agh.dean.classesverifierbe.exceptions.UserTagNotFoundException;
 import edu.agh.dean.classesverifierbe.model.User;
-import edu.agh.dean.classesverifierbe.model.enums.UserStatus;
-import edu.agh.dean.classesverifierbe.service.UserService;
+import edu.agh.dean.classesverifierbe.service.StudentService;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,11 +23,11 @@ import java.util.*;
 
 
 @RestController
-@RequestMapping("/user")
-public class UserController {
+@RequestMapping("/student")
+public class StudentController {
 
     @Autowired
-    private UserService userService;
+    private StudentService studentService;
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -65,7 +64,7 @@ public class UserController {
     @PostMapping("/")
     public ResponseEntity<?> addUser(@Valid @RequestBody UserDTO userDto) {
         try {
-            User newUser = userService.addUser(userDto);
+            User newUser = studentService.addUser(userDto);
             return new ResponseEntity<>(newUser, HttpStatus.CREATED);
         } catch (UserAlreadyExistsException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
@@ -78,7 +77,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        Optional<User> user = userService.getUserById(id);
+        Optional<User> user = studentService.getUserById(id);
         return user
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
@@ -86,7 +85,7 @@ public class UserController {
 
     @GetMapping("/index/{indexNumber}")
     public ResponseEntity<User> getUserByIndexNumber(@PathVariable String indexNumber) {
-        Optional<User> user = userService.getUserByIndexNumber(indexNumber);
+        Optional<User> user = studentService.getUserByIndexNumber(indexNumber);
         return user
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
@@ -100,17 +99,17 @@ public class UserController {
                                                   @RequestParam(required = false) String indexNumber,
                                                   @RequestParam(required = false) Integer semester,
                                                   @RequestParam(required = false) String status) {
-        Page<User> users = userService.getStudentsByCriteria(pageable, tag, name, lastName, indexNumber, semester,status);
+        Page<User> users = studentService.getStudentsByCriteria(pageable, tag, name, lastName, indexNumber, semester,status);
         if(users.isEmpty()){
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(users);
     }
 
-    @PostMapping("/assign-tag")
+    @PostMapping("/tag")
     public ResponseEntity<?> assignTagToUser(@RequestParam String index, @RequestParam String tagName) {
         try {
-            User updatedUser = userService.addTagToUserByIndexAndTagName(index, tagName);
+            User updatedUser = studentService.addTagToUserByIndexAndTagName(index, tagName);
             return ResponseEntity.ok(updatedUser);
 
         } catch (UserNotFoundException | UserTagNotFoundException e) {
@@ -122,10 +121,10 @@ public class UserController {
         }
     }
 
-    @DeleteMapping("/remove-tag")
+    @DeleteMapping("/tag")
     public ResponseEntity<?> removeTagFromUser(@RequestParam String index, @RequestParam String tagName) {
         try {
-            User updatedUser = userService.removeTagFromUserByIndexAndTagName(index, tagName);
+            User updatedUser = studentService.removeTagFromUserByIndexAndTagName(index, tagName);
             return ResponseEntity.ok(updatedUser);
         } catch (UserNotFoundException | UserTagNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
