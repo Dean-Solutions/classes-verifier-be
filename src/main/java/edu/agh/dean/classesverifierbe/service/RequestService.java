@@ -1,10 +1,12 @@
 package edu.agh.dean.classesverifierbe.service;
 
 import edu.agh.dean.classesverifierbe.dto.RequestDTO;
+import edu.agh.dean.classesverifierbe.exceptions.RequestNotFoundException;
 import edu.agh.dean.classesverifierbe.model.Request;
 import edu.agh.dean.classesverifierbe.repository.RequestRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -30,6 +32,14 @@ public class RequestService {
 
     public Optional<Request> getRequestById(Long id) {
         return requestRepository.findById(id);
+    }
+
+    public void deleteRequestById(Long id) throws RequestNotFoundException {
+        try {
+            requestRepository.deleteById(id);
+        } catch (EmptyResultDataAccessException e) {
+            throw new RequestNotFoundException("ID", id.toString());
+        }
     }
 
 }
