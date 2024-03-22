@@ -24,4 +24,10 @@ public class Enrollment {
     @JoinColumn(name = "subjectId")
     private Subject enrollSubject;
 
+
+    @ManyToOne
+    @JoinColumn(name = "semesterId")
+    private Semester semester; // the semester in which we will complete or retake the subject
+
+
 }

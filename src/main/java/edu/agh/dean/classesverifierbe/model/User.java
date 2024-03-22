@@ -1,9 +1,11 @@
 package edu.agh.dean.classesverifierbe.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import edu.agh.dean.classesverifierbe.model.enums.Role;
 import edu.agh.dean.classesverifierbe.model.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.Set;
@@ -12,6 +14,7 @@ import java.util.Set;
 @Data
 @Table(name = "users")
 @NoArgsConstructor
+@EqualsAndHashCode(exclude = {"userTags", "userRequests", "enrollments", "confirms"})
 public class User {
 
     @Id
@@ -28,19 +31,20 @@ public class User {
 
     private String hashPassword;
 
-    private int semester;
+    private Integer semester = 1;
 
     @Enumerated(EnumType.STRING)
-    private UserStatus status;
+    private UserStatus status = UserStatus.ACTIVE;
 
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private Role role = Role.STUDENT;;
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinTable(
             name = "userTagAssigns",
             joinColumns = @JoinColumn(name = "userId"),
             inverseJoinColumns = @JoinColumn(name = "userTagId"))
+    @JsonManagedReference
     private Set<UserTag> userTags;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "user")
@@ -51,5 +55,20 @@ public class User {
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "user")
     private Set<Confirm> confirms;
+
+    @PrePersist
+    @PreUpdate
+    private void prepareData(){
+        if (role == null) {
+            role = Role.STUDENT;
+        }
+        if(status == null){
+            status = UserStatus.ACTIVE;
+        }
+        if(semester == null){
+            semester = 1;
+        }
+    }
+
 
 }

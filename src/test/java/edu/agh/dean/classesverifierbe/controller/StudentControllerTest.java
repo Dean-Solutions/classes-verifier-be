@@ -1,0 +1,84 @@
+package edu.agh.dean.classesverifierbe.controller;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.agh.dean.classesverifierbe.dto.UserDTO;
+import edu.agh.dean.classesverifierbe.model.User;
+import edu.agh.dean.classesverifierbe.model.enums.Role;
+import edu.agh.dean.classesverifierbe.model.enums.UserStatus;
+import edu.agh.dean.classesverifierbe.service.StudentService;
+import edu.agh.dean.classesverifierbe.service.UserTagService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+
+@WebMvcTest(StudentController.class)
+public class StudentControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private StudentService studentService;
+
+    @MockBean
+    private UserTagService userTagService;
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    @BeforeEach
+    void setUp() throws Exception{
+
+        given(studentService.addUser(any(UserDTO.class))).willAnswer(invocation -> {
+            UserDTO dto = invocation.getArgument(0);
+            User user = new User();
+            user.setFirstName(dto.getFirstName());
+            user.setLastName(dto.getLastName());
+
+            return user;
+        });
+
+    }
+
+    @Test
+    public void whenAddUserWithValidData_thenRespondWithCreated() throws Exception {
+        UserDTO userDTO = UserDTO.builder()
+                .firstName("John")
+                .lastName("Doe")
+                .indexNumber("123456")
+                .email("john@example.com")
+                .semester(1)
+                .status(UserStatus.ACTIVE)
+                .role(Role.STUDENT)
+                .build();
+
+        mockMvc.perform(post("/student/")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(userDTO)))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    public void whenAddUserWithInvalidData_thenRespondWithBadRequest() throws Exception {
+        String invalidUserJson = "{}";
+
+        mockMvc.perform(post("/student/")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidUserJson))
+                .andExpect(status().isBadRequest());
+    }
+
+
+
+
+}
