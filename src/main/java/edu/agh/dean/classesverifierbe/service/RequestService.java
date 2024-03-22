@@ -7,6 +7,8 @@ import edu.agh.dean.classesverifierbe.repository.RequestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class RequestService {
     @Autowired
@@ -25,4 +27,9 @@ public class RequestService {
         request.setRequestType(requestDTO.getRequestType());
         return request;
     }
+
+    public Optional<Request> getRequestById(Long id) {
+        return requestRepository.findById(id);
+    }
+
 }
