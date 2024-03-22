@@ -5,6 +5,8 @@ import edu.agh.dean.classesverifierbe.model.enums.EnrollStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.Set;
+
 @Entity
 @Data
 @Table(name = "enrollments")
@@ -29,5 +31,7 @@ public class Enrollment {
     @JoinColumn(name = "semesterId")
     private Semester semester; // the semester in which we will complete or retake the subject
 
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "enrollment")
+    private Set<RequestEnroll> requestEnrollment;
 
 }

@@ -18,13 +18,6 @@ public class Subject {
 
     private String description;
 
-    @ManyToOne
-    @JoinColumn(name = "semesterId")
-    private Semester semester; // the semester to which a given subject is assigned
-
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "subject")
-    private Set<UserRequest> userRequests;
-
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinTable(
             name = "subTagAssigns",

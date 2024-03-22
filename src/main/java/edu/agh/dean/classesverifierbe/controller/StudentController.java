@@ -106,32 +106,5 @@ public class StudentController {
         return ResponseEntity.ok(users);
     }
 
-    @PostMapping("/tag")
-    public ResponseEntity<?> assignTagToUser(@RequestParam String index, @RequestParam String tagName) {
-        try {
-            User updatedUser = studentService.addTagToUserByIndexAndTagName(index, tagName);
-            return ResponseEntity.ok(updatedUser);
-
-        } catch (UserNotFoundException | UserTagNotFoundException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-        } catch (UserTagAlreadyExistsException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @DeleteMapping("/tag")
-    public ResponseEntity<?> removeTagFromUser(@RequestParam String index, @RequestParam String tagName) {
-        try {
-            User updatedUser = studentService.removeTagFromUserByIndexAndTagName(index, tagName);
-            return ResponseEntity.ok(updatedUser);
-        } catch (UserNotFoundException | UserTagNotFoundException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-    }
-
 
 }
