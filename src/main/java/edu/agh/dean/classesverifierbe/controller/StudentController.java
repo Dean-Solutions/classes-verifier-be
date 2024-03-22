@@ -1,10 +1,7 @@
 package edu.agh.dean.classesverifierbe.controller;
 
 import edu.agh.dean.classesverifierbe.dto.UserDTO;
-import edu.agh.dean.classesverifierbe.exceptions.UserAlreadyExistsException;
-import edu.agh.dean.classesverifierbe.exceptions.UserNotFoundException;
-import edu.agh.dean.classesverifierbe.exceptions.UserTagAlreadyExistsException;
-import edu.agh.dean.classesverifierbe.exceptions.UserTagNotFoundException;
+import edu.agh.dean.classesverifierbe.exceptions.*;
 import edu.agh.dean.classesverifierbe.model.User;
 import edu.agh.dean.classesverifierbe.service.StudentService;
 
@@ -29,23 +26,9 @@ public class StudentController {
     @Autowired
     private StudentService studentService;
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
-        });
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
-    }
     @ExceptionHandler({UserAlreadyExistsException.class, UserNotFoundException.class, UserTagAlreadyExistsException.class, UserTagNotFoundException.class})
     public ResponseEntity<?> handleCustomExceptions(Exception ex) {
-        if(ex instanceof MethodArgumentNotValidException){
-            return handleValidationExceptions((MethodArgumentNotValidException) ex);
-        }
-        else if (ex instanceof UserNotFoundException) {
+        if (ex instanceof UserNotFoundException) {
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
         }
         else if(ex instanceof UserAlreadyExistsException){

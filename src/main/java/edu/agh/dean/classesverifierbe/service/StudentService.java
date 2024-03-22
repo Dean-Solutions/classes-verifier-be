@@ -5,7 +5,9 @@ import edu.agh.dean.classesverifierbe.exceptions.UserAlreadyExistsException;
 import edu.agh.dean.classesverifierbe.exceptions.UserNotFoundException;
 import edu.agh.dean.classesverifierbe.exceptions.UserTagAlreadyExistsException;
 import edu.agh.dean.classesverifierbe.exceptions.UserTagNotFoundException;
+import edu.agh.dean.classesverifierbe.model.Semester;
 import edu.agh.dean.classesverifierbe.model.User;
+import edu.agh.dean.classesverifierbe.repository.SemesterRepository;
 import edu.agh.dean.classesverifierbe.repository.UserRepository;
 import edu.agh.dean.classesverifierbe.specifications.UserSpecifications;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,9 @@ public class StudentService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private SemesterRepository semesterRepository;
 
     public User addUser(UserDTO userDTO) throws UserAlreadyExistsException{
 
@@ -65,8 +70,12 @@ public class StudentService {
 
 
     public Page<User> getStudentsByCriteria(Pageable pageable, String tag, String name, String lastName, String indexNumber, Integer semester, String status) {
-        return userRepository.findAll(UserSpecifications.byCriteria(tag, name, lastName, indexNumber, semester, status), pageable);
+
+        Semester currentSemester = semesterRepository.findCurrentSemester().orElseThrow(() -> new IllegalStateException("No current semester found"));
+
+        return userRepository.findAll(UserSpecifications.byCriteria(tag, name, lastName, indexNumber, semester,status,currentSemester), pageable);
     }
+
 
 
 }

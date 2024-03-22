@@ -4,6 +4,7 @@ import edu.agh.dean.classesverifierbe.model.enums.EduPath;
 import edu.agh.dean.classesverifierbe.model.enums.Role;
 import edu.agh.dean.classesverifierbe.model.enums.UserStatus;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -15,6 +16,7 @@ import java.util.Set;
 @Table(name = "users")
 @NoArgsConstructor
 @EqualsAndHashCode(exclude = {"requests", "enrollments"})
+
 public class User {
 
     @Id
