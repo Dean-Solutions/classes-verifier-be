@@ -13,7 +13,7 @@ public class Semester {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long configId;
+    private Long semesterId;
 
     @Enumerated(EnumType.STRING)
     private SemesterType semesterType;
