@@ -6,7 +6,6 @@ import edu.agh.dean.classesverifierbe.model.User;
 import edu.agh.dean.classesverifierbe.model.enums.Role;
 import edu.agh.dean.classesverifierbe.model.enums.UserStatus;
 import edu.agh.dean.classesverifierbe.service.StudentService;
-import edu.agh.dean.classesverifierbe.service.UserTagService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +31,6 @@ public class StudentControllerTest {
     @MockBean
     private StudentService studentService;
 
-    @MockBean
-    private UserTagService userTagService;
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach

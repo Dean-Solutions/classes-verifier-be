@@ -6,9 +6,7 @@ import edu.agh.dean.classesverifierbe.exceptions.UserNotFoundException;
 import edu.agh.dean.classesverifierbe.exceptions.UserTagAlreadyExistsException;
 import edu.agh.dean.classesverifierbe.exceptions.UserTagNotFoundException;
 import edu.agh.dean.classesverifierbe.model.User;
-import edu.agh.dean.classesverifierbe.model.UserTag;
 import edu.agh.dean.classesverifierbe.repository.UserRepository;
-import edu.agh.dean.classesverifierbe.repository.UserTagRepository;
 import edu.agh.dean.classesverifierbe.specifications.UserSpecifications;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,10 +17,9 @@ import java.util.*;
 
 @Service
 public class StudentService {
+
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private UserTagRepository userTagRepository;
 
     public User addUser(UserDTO userDTO) throws UserAlreadyExistsException{
 
@@ -54,33 +51,9 @@ public class StudentService {
         return user;
     }
 
-    public User addTagToUserByIndexAndTagName(String index, String tagName) throws UserNotFoundException, UserTagNotFoundException, UserTagAlreadyExistsException{
-        User user = findUserByIndexNumber(index);
-        UserTag tag = findUserTagByName(tagName);
-        if (user.getUserTags().contains(tag)) {
-            throw new UserTagAlreadyExistsException("tag", tagName, "user");
-        }
-        user.getUserTags().add(tag);
-        return userRepository.save(user);
-    }
-    public User removeTagFromUserByIndexAndTagName(String index, String tagName) throws UserNotFoundException, UserTagNotFoundException{
-        User user = findUserByIndexNumber(index);
-        UserTag tag = findUserTagByName(tagName);
-        if (!user.getUserTags().contains(tag)) {
-            throw new RuntimeException("User does not have this tag");
-        }
-        user.getUserTags().remove(tag);
-        return userRepository.save(user);
-    }
-
     public User findUserByIndexNumber(String index) throws UserNotFoundException {
         return userRepository.findByIndexNumber(index).orElseThrow(() -> new UserNotFoundException("index number", index));
     }
-
-    public UserTag findUserTagByName(String name) throws UserTagNotFoundException {
-        return userTagRepository.findByName(name).orElseThrow(() -> new UserTagNotFoundException("name", name));
-    }
-
 
     public Optional<User> getUserById(Long id) {
         return userRepository.findById(id);

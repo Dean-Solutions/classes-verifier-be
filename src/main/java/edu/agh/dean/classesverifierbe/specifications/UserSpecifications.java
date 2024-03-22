@@ -1,7 +1,6 @@
 package edu.agh.dean.classesverifierbe.specifications;
 
 import edu.agh.dean.classesverifierbe.model.User;
-import edu.agh.dean.classesverifierbe.model.UserTag;
 import edu.agh.dean.classesverifierbe.model.enums.Role;
 import edu.agh.dean.classesverifierbe.model.enums.UserStatus;
 import io.micrometer.common.util.StringUtils;
@@ -14,21 +13,6 @@ import java.util.List;
 import java.util.Optional;
 
 public class UserSpecifications {
-
-    public static Specification<User> withTag(String[] tagNames) {
-        return (root, query, cb) -> {
-            if (tagNames == null || tagNames.length == 0) return null;
-            Join<User, UserTag> tagsJoin = root.join("userTags", JoinType.LEFT);
-            List<Predicate> predicates = new ArrayList<>();
-            for (String tagName : tagNames) {
-                if (StringUtils.isNotBlank(tagName)) {
-                    predicates.add(cb.like(tagsJoin.get("name"), "%" + tagName.trim() + "%"));
-                }
-            }
-            return cb.or(predicates.toArray(new Predicate[0]));
-        };
-    }
-
 
     public static Specification<User> withStatus(UserStatus status) {
         return (root, query, cb) -> {
@@ -73,9 +57,7 @@ public class UserSpecifications {
 
     public static Specification<User> byCriteria(String tags, String name, String lastName, String indexNumber, Integer semester, String status) {
         UserStatus userStatus = convertStringToUserStatus(status).orElse(null);
-        String[] tagArray = tags != null ? tags.split(",") : new String[]{};
-        return Specification.where(withTag(tagArray))
-                .and(hasRoleStudentOrStudentRep())
+        return Specification.where(hasRoleStudentOrStudentRep())
                 .and(withName(name))
                 .and(withLastName(lastName))
                 .and(withIndex(indexNumber))

@@ -6,15 +6,16 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
-@Table(name = "userRequests")
+@Table(name = "requests")
 @Data
-public class UserRequest {
+public class Request {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userRequestId;
+    private Long requestId;
 
     private String description;
 
@@ -30,8 +31,6 @@ public class UserRequest {
     @JoinColumn(name = "userId")
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "subjectId")
-    private Subject subject;
-
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "request")
+    private Set<RequestEnroll> requestEnrollment;
 }

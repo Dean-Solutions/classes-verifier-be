@@ -1,20 +1,24 @@
 package edu.agh.dean.classesverifierbe.model;
 
+import edu.agh.dean.classesverifierbe.model.enums.SemesterType;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Data
-@Table(name="Semester")
+@Table(name = "semesters")
 public class Semester {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long semesterId;
+    private Long configId;
 
-    private String name;
+    @Enumerated(EnumType.STRING)
+    private SemesterType semesterType;
 
-    @Column(columnDefinition = "TEXT")
-    private String description;
+    private Integer year;
 
+    private LocalDateTime deadline;
 }
