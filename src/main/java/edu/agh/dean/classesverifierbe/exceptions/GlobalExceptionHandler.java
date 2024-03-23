@@ -46,4 +46,41 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler({SemesterNotFoundException.class, SemesterAlreadyExistsException.class})
+    @ResponseBody
+    public ResponseEntity<?> handleSemesterExceptions(Exception ex) {
+        if (ex instanceof SemesterNotFoundException) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+        }
+        else if(ex instanceof SemesterAlreadyExistsException){
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+        }
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler({SubjectNotFoundException.class, SubjectAlreadyExistsException.class})
+    @ResponseBody
+    public ResponseEntity<?> handleSubjectExceptions(Exception ex) {
+        if (ex instanceof SubjectNotFoundException) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+        }
+        else if(ex instanceof SubjectAlreadyExistsException){
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+        }
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler({SubjectTagNotFoundException.class, SubjectTagAlreadyExistsException.class})
+    @ResponseBody
+    public ResponseEntity<?> handleSubjectTagExceptions(Exception ex) {
+        if (ex instanceof SubjectTagNotFoundException) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+        }
+        else if(ex instanceof SubjectTagAlreadyExistsException){
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+        }
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+
 }
