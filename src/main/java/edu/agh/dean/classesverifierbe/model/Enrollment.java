@@ -1,18 +1,22 @@
 package edu.agh.dean.classesverifierbe.model;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import edu.agh.dean.classesverifierbe.model.enums.EnrollStatus;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.util.Set;
 
 @Entity
 @Data
 @Table(name = "enrollments")
+@EqualsAndHashCode(exclude = {"enrollStudent", "enrollSubject", "semester", "requestEnrollment"})
 public class Enrollment {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long enrollmentId;
 
     @Enumerated(EnumType.STRING)
@@ -20,10 +24,12 @@ public class Enrollment {
 
     @ManyToOne
     @JoinColumn(name = "userId")
+    @JsonBackReference
     private User enrollStudent;
 
     @ManyToOne
     @JoinColumn(name = "subjectId")
+    @JsonManagedReference
     private Subject enrollSubject;
 
 
