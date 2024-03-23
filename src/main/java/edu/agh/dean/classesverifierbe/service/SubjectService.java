@@ -8,7 +8,11 @@ import edu.agh.dean.classesverifierbe.model.Subject;
 import edu.agh.dean.classesverifierbe.model.SubjectTag;
 import edu.agh.dean.classesverifierbe.repository.SubjectRepository;
 import edu.agh.dean.classesverifierbe.repository.SubjectTagRepository;
+import edu.agh.dean.classesverifierbe.specifications.SubjectSpecifications;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,13 +55,20 @@ public class SubjectService {
         return subject;
     }
 
-    public List<Subject> getAllSubjects() throws SubjectNotFoundException{
-        List <Subject> subjects = (List<Subject>) subjectRepository.findAll();
-        if(subjects.isEmpty()){
+    public Page<Subject> getAllSubjects(String tags, String name, Pageable pageable) throws SubjectNotFoundException {
+        Specification<Subject> spec = Specification
+                .where(SubjectSpecifications.withTags(tags))
+                .and(SubjectSpecifications.withNameLike(name));
+
+        Page<Subject> subjects = subjectRepository.findAll(spec, pageable);
+
+        if (subjects.isEmpty()) {
             throw new SubjectNotFoundException();
         }
-        return (List<Subject>) subjectRepository.findAll();
+
+        return subjects;
     }
+
 
     public Subject addTagToSubject(Long subjectId, Long tagId) throws SubjectNotFoundException, SubjectTagNotFoundException, SubjectTagAlreadyExistsException{
         Subject subject = subjectRepository.findById(subjectId)
