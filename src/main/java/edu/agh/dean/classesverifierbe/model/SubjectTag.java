@@ -1,14 +1,19 @@
 package edu.agh.dean.classesverifierbe.model;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.util.Set;
 
 @Entity
 @Data
+@AllArgsConstructor
+@Builder
+@NoArgsConstructor
 @Table(name = "subjectTags")
+@EqualsAndHashCode(exclude = "subjects")
 public class SubjectTag {
 
     @Id
@@ -20,10 +25,8 @@ public class SubjectTag {
     @Column(columnDefinition = "LONGTEXT")
     private String description;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {
-            CascadeType.PERSIST,
-            CascadeType.MERGE
-    }, mappedBy = "subjectTags")
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "subjectTags")
+    @JsonBackReference
     private Set<Subject> subjects;
 
 }

@@ -1,25 +1,35 @@
 package edu.agh.dean.classesverifierbe.service;
 
+import edu.agh.dean.classesverifierbe.RO.UserRO;
 import edu.agh.dean.classesverifierbe.dto.UserDTO;
 import edu.agh.dean.classesverifierbe.exceptions.UserAlreadyExistsException;
 import edu.agh.dean.classesverifierbe.exceptions.UserNotFoundException;
-import edu.agh.dean.classesverifierbe.exceptions.UserTagAlreadyExistsException;
-import edu.agh.dean.classesverifierbe.exceptions.UserTagNotFoundException;
+import edu.agh.dean.classesverifierbe.model.Semester;
 import edu.agh.dean.classesverifierbe.model.User;
+import edu.agh.dean.classesverifierbe.repository.SemesterRepository;
 import edu.agh.dean.classesverifierbe.repository.UserRepository;
 import edu.agh.dean.classesverifierbe.specifications.UserSpecifications;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class StudentService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private SemesterRepository semesterRepository;
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     public User addUser(UserDTO userDTO) throws UserAlreadyExistsException{
 
@@ -55,18 +65,31 @@ public class StudentService {
         return userRepository.findByIndexNumber(index).orElseThrow(() -> new UserNotFoundException("index number", index));
     }
 
-    public Optional<User> getUserById(Long id) {
-        return userRepository.findById(id);
+    public UserRO getUserById(Long id) throws UserNotFoundException {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("id", id.toString()));
+        return convertToUserRO(user);
     }
 
-    public Optional<User> getUserByIndexNumber(String indexNumber) {
-        return userRepository.findByIndexNumber(indexNumber);
+    public Page<UserRO> getStudentsByCriteria(Pageable pageable, String tag, String name, String lastName, String indexNumber, Integer semester, String status) {
+        Semester currentSemester = null;
+        if(tag != null){
+
+            // we are interested in students' enrollments for the new semester: e.g. winter 2021/2022 (and all tags related to this semester)
+            currentSemester = semesterRepository.findCurrentSemester().orElseThrow(() -> new IllegalStateException("No current semester found"));
+        }
+        Page<User> users = userRepository.findAll(UserSpecifications.byCriteria(tag, name, lastName, indexNumber, semester,status,currentSemester), pageable);
+        List<UserRO> userROs = users.getContent().stream()
+                .map(this::convertToUserRO)
+                .collect(Collectors.toList());
+        return new PageImpl<>(userROs, pageable, users.getTotalElements());
     }
 
 
-    public Page<User> getStudentsByCriteria(Pageable pageable, String tag, String name, String lastName, String indexNumber, Integer semester, String status) {
-        return userRepository.findAll(UserSpecifications.byCriteria(tag, name, lastName, indexNumber, semester, status), pageable);
+    private UserRO convertToUserRO(User user) {
+        return modelMapper.map(user, UserRO.class);
     }
+
 
 
 }

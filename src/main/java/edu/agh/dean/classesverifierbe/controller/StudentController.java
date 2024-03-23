@@ -1,10 +1,8 @@
 package edu.agh.dean.classesverifierbe.controller;
 
+import edu.agh.dean.classesverifierbe.RO.UserRO;
 import edu.agh.dean.classesverifierbe.dto.UserDTO;
-import edu.agh.dean.classesverifierbe.exceptions.UserAlreadyExistsException;
-import edu.agh.dean.classesverifierbe.exceptions.UserNotFoundException;
-import edu.agh.dean.classesverifierbe.exceptions.UserTagAlreadyExistsException;
-import edu.agh.dean.classesverifierbe.exceptions.UserTagNotFoundException;
+import edu.agh.dean.classesverifierbe.exceptions.*;
 import edu.agh.dean.classesverifierbe.model.User;
 import edu.agh.dean.classesverifierbe.service.StudentService;
 
@@ -29,37 +27,6 @@ public class StudentController {
     @Autowired
     private StudentService studentService;
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
-        });
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
-    }
-    @ExceptionHandler({UserAlreadyExistsException.class, UserNotFoundException.class, UserTagAlreadyExistsException.class, UserTagNotFoundException.class})
-    public ResponseEntity<?> handleCustomExceptions(Exception ex) {
-        if(ex instanceof MethodArgumentNotValidException){
-            return handleValidationExceptions((MethodArgumentNotValidException) ex);
-        }
-        else if (ex instanceof UserNotFoundException) {
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
-        }
-        else if(ex instanceof UserAlreadyExistsException){
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
-        }
-        else if(ex instanceof UserTagNotFoundException){
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
-        }
-        else if(ex instanceof UserTagAlreadyExistsException){
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
-        }
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-
 
     @PostMapping("/")
     public ResponseEntity<?> addUser(@Valid @RequestBody UserDTO userDto) {
@@ -73,37 +40,35 @@ public class StudentController {
         }
     }
 
-
-
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        Optional<User> user = studentService.getUserById(id);
-        return user
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<UserRO> getUserById(@PathVariable Long id) throws UserNotFoundException {
+        UserRO userRO = studentService.getUserById(id);
+        return ResponseEntity.ok(userRO);
     }
 
     @GetMapping("/index/{indexNumber}")
-    public ResponseEntity<User> getUserByIndexNumber(@PathVariable String indexNumber) {
-        Optional<User> user = studentService.getUserByIndexNumber(indexNumber);
-        return user
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<?> getUserByIndexNumber(@PathVariable String indexNumber) {
+        try{
+            User user = studentService.findUserByIndexNumber(indexNumber);
+            return ResponseEntity.ok(user);
+        } catch (UserNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
     }
 
+
+
     @GetMapping("/")
-    public ResponseEntity<Page<User>> getStudents(Pageable pageable,
-                                                  @RequestParam(required = false) String tag,
-                                                  @RequestParam(required = false) String name,
-                                                  @RequestParam(required = false) String lastName,
-                                                  @RequestParam(required = false) String indexNumber,
-                                                  @RequestParam(required = false) Integer semester,
-                                                  @RequestParam(required = false) String status) {
-        Page<User> users = studentService.getStudentsByCriteria(pageable, tag, name, lastName, indexNumber, semester,status);
-        if(users.isEmpty()){
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(users);
+    public ResponseEntity<Page<UserRO>> getStudents(Pageable pageable,
+                                                    @RequestParam(required = false) String tag,
+                                                    @RequestParam(required = false) String name,
+                                                    @RequestParam(required = false) String lastName,
+                                                    @RequestParam(required = false) String indexNumber,
+                                                    @RequestParam(required = false) Integer semester,
+                                                    @RequestParam(required = false) String status) {
+        Page<UserRO> usersRO = studentService.getStudentsByCriteria(pageable, tag, name, lastName, indexNumber, semester, status);
+        usersRO.getContent().forEach(UserRO::hidePassword);
+        return ResponseEntity.ok(usersRO);
     }
 
 
