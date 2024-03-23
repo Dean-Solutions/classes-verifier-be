@@ -27,4 +27,23 @@ public class GlobalExceptionHandler {
         });
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler({UserAlreadyExistsException.class, UserNotFoundException.class, UserTagAlreadyExistsException.class, UserTagNotFoundException.class})
+    @ResponseBody
+    public ResponseEntity<?> handleCustomExceptions(Exception ex) {
+        if (ex instanceof UserNotFoundException) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+        }
+        else if(ex instanceof UserAlreadyExistsException){
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+        }
+        else if(ex instanceof UserTagNotFoundException){
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+        }
+        else if(ex instanceof UserTagAlreadyExistsException){
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+        }
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
 }

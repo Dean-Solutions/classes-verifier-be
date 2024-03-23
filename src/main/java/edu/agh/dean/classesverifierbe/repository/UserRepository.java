@@ -20,8 +20,6 @@ public interface UserRepository extends CrudRepository<User, Long>, JpaSpecifica
 
     boolean existsByEmail(String email);
 
-    @Override
-    @EntityGraph(attributePaths = {"userTags"})
     Page<User> findAll(Specification<User> spec, Pageable pageable);
 
 }

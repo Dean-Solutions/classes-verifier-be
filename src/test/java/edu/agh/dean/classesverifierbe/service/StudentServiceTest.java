@@ -1,5 +1,6 @@
 package edu.agh.dean.classesverifierbe.service;
 
+import edu.agh.dean.classesverifierbe.RO.UserRO;
 import edu.agh.dean.classesverifierbe.dto.UserDTO;
 import edu.agh.dean.classesverifierbe.exceptions.UserAlreadyExistsException;
 import edu.agh.dean.classesverifierbe.model.*;
@@ -8,6 +9,7 @@ import edu.agh.dean.classesverifierbe.repository.SemesterRepository;
 import edu.agh.dean.classesverifierbe.repository.UserRepository;
 import org.junit.jupiter.api.*;
 import org.mockito.*;
+import org.modelmapper.ModelMapper;
 import org.springframework.boot.test.context.SpringBootTest;
 import edu.agh.dean.classesverifierbe.model.enums.Role;
 import edu.agh.dean.classesverifierbe.model.enums.UserStatus;
@@ -38,6 +40,9 @@ class StudentServiceTest {
 
     @Mock
     private SemesterRepository semesterRepository;
+
+    @Mock
+    private ModelMapper modelMapper;
 
 
     @InjectMocks
@@ -83,6 +88,7 @@ class StudentServiceTest {
     @Test
     void testFilteringByTags() {
 
+        // Setup test data
         Semester currentSemester = new Semester();
         currentSemester.setSemesterId(1L);
         currentSemester.setSemesterType(SemesterType.WINTER);
@@ -101,7 +107,6 @@ class StudentServiceTest {
         subject.setSubjectId(1L);
         subject.setName("Math");
         subject.setDescription("Mathematics");
-
         subject.setSubjectTags(new HashSet<>(Arrays.asList(tag1, tag2)));
 
         User user = new User();
@@ -116,20 +121,21 @@ class StudentServiceTest {
         enrollment.setSemester(currentSemester);
         enrollment.setEnrollSubject(subject);
         user.setEnrollments(new HashSet<>(Collections.singletonList(enrollment)));
-        ///System.out.println("============= USER=========\n"+user);
 
+        // Mocking repository calls
         when(semesterRepository.findCurrentSemester()).thenReturn(Optional.of(currentSemester));
         when(userRepository.findAll(any(Specification.class), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(Collections.singletonList(user)));
 
-
         Pageable pageable = PageRequest.of(0, 10);
-        Page<User> filteredUsers = studentService.getStudentsByCriteria(pageable, "tag1", "name", "lastName", "indexNumber", 1, "ACTIVE");
+
+        Page<UserRO> filteredUsers = studentService.getStudentsByCriteria(pageable, "algo", "name", "lastName", "indexNumber", 1, "ACTIVE");
+
 
         assertFalse(filteredUsers.isEmpty());
         assertEquals(1, filteredUsers.getContent().size());
-        assertEquals(user, filteredUsers.getContent().get(0));
     }
+
 
 
 

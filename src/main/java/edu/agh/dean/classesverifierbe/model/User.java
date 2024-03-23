@@ -1,13 +1,11 @@
 package edu.agh.dean.classesverifierbe.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import edu.agh.dean.classesverifierbe.model.enums.EduPath;
 import edu.agh.dean.classesverifierbe.model.enums.Role;
 import edu.agh.dean.classesverifierbe.model.enums.UserStatus;
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Set;
 
@@ -15,6 +13,8 @@ import java.util.Set;
 @Data
 @Table(name = "users")
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @EqualsAndHashCode(exclude = {"requests", "enrollments"})
 
 public class User {
@@ -62,6 +62,7 @@ public class User {
         if(semester == null){
             semester = 1;
         }
+
     }
 
 

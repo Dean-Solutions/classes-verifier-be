@@ -27,4 +27,6 @@ public class UserDTO {
     private UserStatus status;
 
     private Role role;
+
+
 }
