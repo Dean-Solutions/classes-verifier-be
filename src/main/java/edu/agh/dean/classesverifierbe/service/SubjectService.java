@@ -1,11 +1,12 @@
 package edu.agh.dean.classesverifierbe.service;
 
-import edu.agh.dean.classesverifierbe.exceptions.SubjectAlreadyExistsException;
-import edu.agh.dean.classesverifierbe.exceptions.SubjectNotFoundException;
-import edu.agh.dean.classesverifierbe.exceptions.SubjectTagAlreadyExistsException;
-import edu.agh.dean.classesverifierbe.exceptions.SubjectTagNotFoundException;
+import edu.agh.dean.classesverifierbe.RO.UserRO;
+import edu.agh.dean.classesverifierbe.dto.UserDTO;
+import edu.agh.dean.classesverifierbe.exceptions.*;
+import edu.agh.dean.classesverifierbe.model.Semester;
 import edu.agh.dean.classesverifierbe.model.Subject;
 import edu.agh.dean.classesverifierbe.model.SubjectTag;
+import edu.agh.dean.classesverifierbe.model.User;
 import edu.agh.dean.classesverifierbe.repository.SubjectRepository;
 import edu.agh.dean.classesverifierbe.repository.SubjectTagRepository;
 import edu.agh.dean.classesverifierbe.specifications.SubjectSpecifications;
@@ -17,6 +18,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 @Service
 @Transactional
 public class SubjectService {
@@ -24,10 +28,13 @@ public class SubjectService {
     private final SubjectRepository subjectRepository;
     private final SubjectTagRepository subjectTagRepository;
 
+    private final SemesterService semesterService;
+
     @Autowired
-    public SubjectService(SubjectRepository subjectRepository, SubjectTagRepository subjectTagRepository) {
+    public SubjectService(SubjectRepository subjectRepository, SubjectTagRepository subjectTagRepository, SemesterService semesterService) {
         this.subjectRepository = subjectRepository;
         this.subjectTagRepository = subjectTagRepository;
+        this.semesterService = semesterService;
     }
 
     public Subject createSubject(Subject subject) throws SubjectAlreadyExistsException {
@@ -70,6 +77,7 @@ public class SubjectService {
     }
 
 
+
     public Subject addTagToSubject(Long subjectId, Long tagId) throws SubjectNotFoundException, SubjectTagNotFoundException, SubjectTagAlreadyExistsException{
         Subject subject = subjectRepository.findById(subjectId)
                 .orElseThrow(() -> new SubjectNotFoundException("subjectId"));
@@ -102,5 +110,36 @@ public class SubjectService {
         return subjectRepository.findById(subjectId)
                 .orElseThrow(() -> new SubjectNotFoundException("subjectId"));
     }
+
+    public List<UserRO> getUsersEnrolledInSubjectForSemester(Long subjectId, Long semesterId) throws SubjectNotFoundException, SemesterNotFoundException {
+        if(semesterId == null){
+            semesterId = semesterService.getCurrentSemester().getSemesterId();
+        }
+        final Long  properSemesterId = semesterId;
+
+        Optional<Subject> subjectOpt = subjectRepository.findById(subjectId);
+        if (subjectOpt.isEmpty()) {
+            throw new SubjectNotFoundException();
+        }
+        Subject subject = subjectOpt.get();
+
+        return subject.getEnrollments().stream()
+                .filter(enrollment -> enrollment.getSemester().getSemesterId().equals(properSemesterId))
+                .map(enrollment -> {
+                    User user = enrollment.getEnrollStudent();
+                    UserRO userRO = UserRO.builder()
+                            .userId(user.getUserId())
+                            .firstName(user.getFirstName())
+                            .lastName(user.getLastName())
+                            .email(user.getEmail())
+                            .indexNumber(user.getIndexNumber())
+                            .eduPath(user.getEduPath())
+                            .role(user.getRole())
+                            .build();
+                    return userRO;
+                })
+                .collect(Collectors.toList());
+    }
+
 
 }

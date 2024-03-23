@@ -28,5 +28,7 @@ public class UserDTO {
 
     private Role role;
 
+    private Long userId;
+
 
 }
