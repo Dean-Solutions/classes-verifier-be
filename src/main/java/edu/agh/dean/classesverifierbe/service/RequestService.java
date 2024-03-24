@@ -3,6 +3,7 @@ package edu.agh.dean.classesverifierbe.service;
 import edu.agh.dean.classesverifierbe.dto.RequestDTO;
 import edu.agh.dean.classesverifierbe.exceptions.RequestNotFoundException;
 import edu.agh.dean.classesverifierbe.model.Request;
+import edu.agh.dean.classesverifierbe.model.enums.RequestStatus;
 import edu.agh.dean.classesverifierbe.repository.RequestRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,7 @@ public class RequestService {
     private Request toRequest(RequestDTO requestDTO) {
         Request request = new Request();
         request.setDescription(requestDTO.getDescription());
-        request.setRequestStatus(requestDTO.getRequestStatus());
+        request.setRequestStatus(RequestStatus.PENDING);
         request.setSubmissionDate(requestDTO.getSubmissionDate());
         request.setRequestType(requestDTO.getRequestType());
         return request;

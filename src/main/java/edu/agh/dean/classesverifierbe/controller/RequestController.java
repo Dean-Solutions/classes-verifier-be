@@ -25,7 +25,7 @@ public class RequestController {
     @Autowired
     private RequestService requestService;
     @PostMapping("/")
-    public ResponseEntity<?> addRequest(@Valid @RequestBody RequestDTO requestDTO) { // why ?
+    public ResponseEntity<?> addRequest(@Valid @RequestBody RequestDTO requestDTO) {
         try {
             Request newRequest = requestService.addRequest(requestDTO);
             return new ResponseEntity<>(newRequest, HttpStatus.CREATED);
@@ -35,6 +35,7 @@ public class RequestController {
         }
     }
 
+
     @GetMapping("/{id}")
     public ResponseEntity<Request> getRequestById(@PathVariable Long id) {
         Optional<Request> request = requestService.getRequestById(id);
@@ -43,18 +44,6 @@ public class RequestController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    //Strategia: tworze request potem dodaje do niego przedmioty które są problematyczne
-    //Jak to wgle dziala ze moge dodac czyjes przedmioty do requesta
-//    @PostMapping("/{id}")
-//    public ResponseEntity<?> addEnrollmentToRequest(@Valid @RequestBody RequestEnrollDTO){
-////        try {
-////            Request newRequest = requestService.addRequest(requestDTO);
-////            return new ResponseEntity<>(newRequest, HttpStatus.CREATED);
-////        }
-////        catch (Exception e) {
-////            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-////        }
-//    }
 
 //    @DeleteMapping("/{id}")
 //    public ResponseEntity<?> deleteRequestById(@PathVariable Long id) {
