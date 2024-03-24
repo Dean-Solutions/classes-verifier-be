@@ -12,8 +12,5 @@ import java.util.Set;
 
 @Repository
 public interface SubjectTagRepository extends CrudRepository<SubjectTag, Long> {
-    @Query("SELECT st FROM SubjectTag st JOIN st.subjects s WHERE s.subjectId = :subjectId")
-    Set<SubjectTag> findSubjectTagsBySubjectId(Long subjectId);
-
     Optional<SubjectTag> findByName(String name);
 }
