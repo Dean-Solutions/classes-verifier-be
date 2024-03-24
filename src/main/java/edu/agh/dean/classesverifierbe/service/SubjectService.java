@@ -54,8 +54,7 @@ public class SubjectService {
     }
 
     public Subject deleteSubject(Long subjectId) throws SubjectNotFoundException {
-        Subject subject = subjectRepository.findById(subjectId)
-                .orElseThrow(() -> new SubjectNotFoundException("subjectId"));
+        Subject subject = getSubjectById(subjectId);
 
         subject.getSubjectTags().clear();
         subjectRepository.delete(subject);
@@ -79,8 +78,7 @@ public class SubjectService {
 
 
     public Subject addTagToSubject(Long subjectId, Long tagId) throws SubjectNotFoundException, SubjectTagNotFoundException, SubjectTagAlreadyExistsException{
-        Subject subject = subjectRepository.findById(subjectId)
-                .orElseThrow(() -> new SubjectNotFoundException("subjectId"));
+        Subject subject = getSubjectById(subjectId);
         SubjectTag tag = subjectTagRepository.findById(tagId)
                 .orElseThrow(() -> new SubjectTagNotFoundException("tagId"));
 
@@ -94,8 +92,7 @@ public class SubjectService {
 
 
     public Subject removeTagFromSubject(Long subjectId, Long tagId) throws SubjectNotFoundException, SubjectTagNotFoundException{
-        Subject subject = subjectRepository.findById(subjectId)
-                .orElseThrow(() -> new SubjectNotFoundException("subjectId"));
+        Subject subject = getSubjectById(subjectId);
         SubjectTag tag = subjectTagRepository.findById(tagId)
                 .orElseThrow(() -> new SubjectTagNotFoundException("tagId"));
 
