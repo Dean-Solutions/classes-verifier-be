@@ -21,14 +21,14 @@ import java.util.*;
 
 
 @RestController
-@RequestMapping("/student")
+@RequestMapping("/students")
 public class StudentController {
 
     @Autowired
     private StudentService studentService;
 
 
-    @PostMapping("/")
+    @PostMapping
     public ResponseEntity<?> addUser(@Valid @RequestBody UserDTO userDto) {
         try {
             User newUser = studentService.addUser(userDto);
@@ -58,7 +58,7 @@ public class StudentController {
 
 
 
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<Page<UserRO>> getStudents(Pageable pageable,
                                                     @RequestParam(required = false) String tag,
                                                     @RequestParam(required = false) String name,

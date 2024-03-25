@@ -58,7 +58,7 @@ class SubjectControllerTest {
         when(subjectService.getAllSubjects(eq("Math"), eq("Algebra"), any(Pageable.class)))
                 .thenReturn(pageOfSubjects);
 
-        mockMvc.perform(get("/subjects/")
+        mockMvc.perform(get("/subjects")
                         .param("tags", "Math")
                         .param("name", "Algebra"))
                 .andExpect(status().isOk())

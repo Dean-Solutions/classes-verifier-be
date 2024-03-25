@@ -43,7 +43,7 @@ class SemesterControllerTest {
     void getAllSemestersShouldReturnListOfSemesters() throws Exception {
         given(semesterService.getAllSemesters()).willReturn(List.of(new Semester(1L, SemesterType.WINTER, 2022, LocalDateTime.now())));
 
-        mockMvc.perform(get("/semester/"))
+        mockMvc.perform(get("/semesters"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].semesterType").value("WINTER"))
                 .andExpect(jsonPath("$[0].year").value(2022));
@@ -59,7 +59,7 @@ class SemesterControllerTest {
 
         given(semesterService.getSemesterByYearAndType(year, SemesterType.valueOf(type))).willReturn(foundSemester);
 
-        mockMvc.perform(get("/semester/year/{year}/type/{type}", year, type))
+        mockMvc.perform(get("/semesters/year/{year}/type/{type}", year, type))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.semesterType").value("WINTER"))
                 .andExpect(jsonPath("$.year").value(2022));
@@ -77,7 +77,7 @@ class SemesterControllerTest {
 
         given(semesterService.updateCurrentSemester(any(SemesterDTO.class))).willThrow(new SemesterNotFoundException("id"));
 
-        mockMvc.perform(put("/semester/current")
+        mockMvc.perform(put("/semesters/current")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"semesterType\":\"SUMMER\",\"year\":2023,\"deadline\":\"" + LocalDateTime.now().plusMonths(6).toString() + "\"}"))
                 .andExpect(status().isNotFound());

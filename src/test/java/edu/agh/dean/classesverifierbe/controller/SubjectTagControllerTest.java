@@ -44,7 +44,7 @@ class SubjectTagControllerTest {
 
         given(tagService.createTag(any(SubjectTagDTO.class))).willReturn(createdTag);
 
-        mockMvc.perform(post("/tags/")
+        mockMvc.perform(post("/tags")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"Math\",\"description\":\"Mathematics Description\"}"))
                 .andExpect(status().isCreated())

@@ -24,13 +24,13 @@ public class SubjectTagController {
         this.tagService = tagService;
     }
 
-    @PostMapping("/")
+    @PostMapping
     public ResponseEntity<SubjectTagRO> createTag(@RequestBody @Valid SubjectTagDTO tagDto) throws SubjectTagAlreadyExistsException {
         SubjectTagRO createdTag = tagService.createTag(tagDto);
         return new ResponseEntity<>(createdTag, HttpStatus.CREATED);
     }
 
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<List<SubjectTagRO>> getAllTags() throws SubjectTagNotFoundException {
         List<SubjectTagRO> tags = tagService.getAllTags();
         return ResponseEntity.ok(tags);
