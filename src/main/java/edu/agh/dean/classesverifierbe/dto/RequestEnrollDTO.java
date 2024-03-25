@@ -1,8 +1,7 @@
 package edu.agh.dean.classesverifierbe.dto;
 
-import edu.agh.dean.classesverifierbe.model.Enrollment;
-import edu.agh.dean.classesverifierbe.model.Request;
-import jakarta.validation.constraints.NotBlank;
+
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 
@@ -10,6 +9,10 @@ import lombok.Data;
 @Builder
 public class RequestEnrollDTO {
 
-    @NotBlank(message = "EnrollId is required")
-    private Enrollment enrollmentId;
+    @NotNull(message = "EnrollId is required")
+    private Long enrollmentId;
+
+    //Id of User that wants to add Enrollment to the Request is required
+    @NotNull(message = "SenderId is required")
+    private Long senderId;
 }
