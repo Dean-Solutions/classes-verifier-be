@@ -43,7 +43,7 @@ class SemesterControllerTest {
     void getAllSemestersShouldReturnListOfSemesters() throws Exception {
         given(semesterService.getAllSemesters()).willReturn(List.of(new Semester(1L, SemesterType.WINTER, 2022, LocalDateTime.now())));
 
-        mockMvc.perform(get("/semester/"))
+        mockMvc.perform(get("/semester"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].semesterType").value("WINTER"))
                 .andExpect(jsonPath("$[0].year").value(2022));
