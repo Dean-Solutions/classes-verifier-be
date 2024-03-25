@@ -58,7 +58,7 @@ public class StudentControllerTest {
                 .role(Role.STUDENT)
                 .build();
 
-        mockMvc.perform(post("/student/")
+        mockMvc.perform(post("/students")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userDTO)))
                 .andExpect(status().isCreated());
@@ -68,7 +68,7 @@ public class StudentControllerTest {
     public void whenAddUserWithInvalidData_thenRespondWithBadRequest() throws Exception {
         String invalidUserJson = "{}";
 
-        mockMvc.perform(post("/student/")
+        mockMvc.perform(post("/students")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(invalidUserJson))
                 .andExpect(status().isBadRequest());

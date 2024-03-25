@@ -21,11 +21,14 @@ public class UserDTO {
     @Email(message = "Email must be valid")
     @NotBlank(message = "Email is required")
     private String email;
-    //password need to be generated and sent in response!
 
     private Integer semester;
 
     private UserStatus status;
 
     private Role role;
+
+    private Long userId;
+
+
 }

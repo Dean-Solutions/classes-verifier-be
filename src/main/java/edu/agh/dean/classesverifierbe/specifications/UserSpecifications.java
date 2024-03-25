@@ -1,9 +1,10 @@
 package edu.agh.dean.classesverifierbe.specifications;
 
-import edu.agh.dean.classesverifierbe.model.User;
+import edu.agh.dean.classesverifierbe.model.*;
 import edu.agh.dean.classesverifierbe.model.enums.Role;
 import edu.agh.dean.classesverifierbe.model.enums.UserStatus;
 import io.micrometer.common.util.StringUtils;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import org.springframework.data.jpa.domain.Specification;
@@ -14,6 +15,25 @@ import java.util.Optional;
 
 public class UserSpecifications {
 
+    public static Specification<User> withTags(String tags, Semester currentSemester) {
+        return (root, query, cb) -> {
+            if (tags == null || tags.trim().isEmpty()) return null;
+
+            Join<User, Enrollment> enrollments = root.join("enrollments");
+            Join<Enrollment, Subject> subjects = enrollments.join("enrollSubject");
+            Join<Subject, SubjectTag> subjectTags = subjects.join("subjectTags");
+
+            Predicate semesterPredicate = cb.equal(enrollments.get("semester"), currentSemester);
+
+            String[] tagsArray = tags.split(",");
+            CriteriaBuilder.In<String> inClause = cb.in(subjectTags.get("name"));
+            for (String tag : tagsArray) {
+                inClause.value(tag);
+            }
+
+            return cb.and(semesterPredicate, cb.and(inClause));
+        };
+    }
     public static Specification<User> withStatus(UserStatus status) {
         return (root, query, cb) -> {
             if (status == null) return null;
@@ -55,9 +75,10 @@ public class UserSpecifications {
         }
     }
 
-    public static Specification<User> byCriteria(String tags, String name, String lastName, String indexNumber, Integer semester, String status) {
+    public static Specification<User> byCriteria(String tags, String name, String lastName, String indexNumber, Integer semester, String status, Semester currentSemester) {
         UserStatus userStatus = convertStringToUserStatus(status).orElse(null);
         return Specification.where(hasRoleStudentOrStudentRep())
+                .and(withTags(tags, currentSemester))
                 .and(withName(name))
                 .and(withLastName(lastName))
                 .and(withIndex(indexNumber))

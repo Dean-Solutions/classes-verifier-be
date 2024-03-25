@@ -1,143 +1,144 @@
-//package edu.agh.dean.classesverifierbe.service;
-//
-//import edu.agh.dean.classesverifierbe.dto.UserDTO;
-//import edu.agh.dean.classesverifierbe.dto.UserTagDTO;
-//import edu.agh.dean.classesverifierbe.exceptions.UserAlreadyExistsException;
-//import edu.agh.dean.classesverifierbe.model.User;
-//import edu.agh.dean.classesverifierbe.repository.UserRepository;
-//import org.junit.jupiter.api.*;
-//import org.mockito.*;
-//import org.springframework.boot.test.context.SpringBootTest;
-//import edu.agh.dean.classesverifierbe.model.enums.Role;
-//import edu.agh.dean.classesverifierbe.model.enums.UserStatus;
-//import org.springframework.data.domain.Page;
-//import org.springframework.data.domain.PageImpl;
-//import org.springframework.data.domain.PageRequest;
-//import org.springframework.data.domain.Pageable;
-//import org.springframework.data.jpa.domain.Specification;
-//
-//import java.util.Collections;
-//import java.util.HashSet;
-//import java.util.Optional;
-//
-//
-//import static org.assertj.core.api.Assertions.assertThat;
-//import static org.mockito.ArgumentMatchers.any;
-//import static org.mockito.Mockito.*;
-//import static org.junit.jupiter.api.Assertions.*;
-//
-//
-//@SpringBootTest
-//class StudentServiceTest {
-//
-//    @Mock
-//    private UserRepository userRepository;
-//
-//    @Mock
-//    private UserTagRepository userTagRepository;
-//
-//    @InjectMocks
-//    private StudentService studentService;
-//
-//    @InjectMocks
-//    private UserTagService userTagService;
-//
-//    @BeforeEach
-//    void setUp() {
-//        MockitoAnnotations.openMocks(this);
-//    }
-//    @Test
-//    void whenAddUser_thenUserShouldBeSavedWithGeneratedPassword() throws Exception{
-//        UserDTO userDTO = UserDTO.builder()
-//                .firstName("John")
-//                .lastName("Doe")
-//                .indexNumber("123456")
-//                .email("john@example.com")
-//                .semester(1)
-//                .status(UserStatus.ACTIVE)
-//                .role(Role.STUDENT)
-//                .build();
-//
-//        when(userRepository.existsByIndexNumber(anyString())).thenReturn(false);
-//        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArguments()[0]);
-//            User result = studentService.addUser(userDTO);
-//            assertNotNull(result.getHashPassword(), "Password should be generated");
-//            verify(userRepository).save(any(User.class));
-//
-//    }
-//
-//    @Test
-//    void whenAddExistingUser_thenThrowException() {
-//        UserDTO userDTO = UserDTO.builder().indexNumber("123456").build();
-//
-//        when(userRepository.existsByIndexNumber("123456")).thenReturn(true);
-//
-//        Exception exception = assertThrows(UserAlreadyExistsException.class, () -> {
-//            studentService.addUser(userDTO);
-//        });
-//        //"User with "+ attribute + " : " + value + " already exists"
-//        assertEquals("User with index number : " + 123456 + " already exists", exception.getMessage());
-//    }
-//
-//
-//    @Test
-//    void whenAddTagToUser_thenTagShouldBeAdded() throws Exception{
-//        String index = "123456";
-//        UserDTO userDTO = UserDTO.builder()
-//                .firstName("John")
-//                .lastName("Doe")
-//                .indexNumber(index)
-//                .email("john@example.com")
-//                .semester(1)
-//                .status(UserStatus.ACTIVE)
-//                .role(Role.STUDENT)
-//                .build();
-//        User user = new User();
-//        user.setFirstName(userDTO.getFirstName());
-//        user.setLastName(userDTO.getLastName());
-//        user.setIndexNumber(userDTO.getIndexNumber());
-//        user.setEmail(userDTO.getEmail());
-//        user.setSemester(userDTO.getSemester());
-//        user.setStatus(userDTO.getStatus());
-//        user.setRole(userDTO.getRole());
-//        user.setUserTags(new HashSet<>());
-//
-//        when(userRepository.findByIndexNumber(any(String.class))).thenReturn(Optional.of(user));
-//        when(userRepository.save(any(User.class))).thenReturn(user);
-//
-//        String tagName = "Spring";
-//        UserTagDTO userTagDTO = UserTagDTO.builder()
-//                .name(tagName)
-//                .description("Spring description")
-//                .build();
-//        UserTag tag = new UserTag();
-//        tag.setName(userTagDTO.getName());
-//        tag.setDescription(userTagDTO.getDescription());
-//
-//        when(userTagRepository.findByName(any(String.class))).thenReturn(Optional.of(tag));
-//        when(userTagRepository.save(any(UserTag.class))).thenReturn(tag);
-//        User updatedUser = studentService.addTagToUserByIndexAndTagName(index, tagName);
-//        assertNotNull(updatedUser);
-//        assertTrue(updatedUser.getUserTags().contains(tag), "Tag should be added to the user");
-//    }
-//
-//
-//    @Test
-//    void getStudentsByCriteriaTest() {
-//        Pageable pageable = PageRequest.of(0, 10);
-//        User user = new User();
-//        Page<User> expectedPage = new PageImpl<>(Collections.singletonList(user));
-//
-//        when(userRepository.findAll(any(Specification.class), eq(pageable)))
-//                .thenReturn(expectedPage);
-//
-//        Page<User> resultPage = studentService.getStudentsByCriteria(pageable, "Spring", "John", "Doe", "123456", 1, "ACTIVE");
-//
-//        assertThat(resultPage.getContent()).hasSize(1);
-//        assertThat(resultPage.getContent().get(0)).isEqualToComparingFieldByField(user);
-//
-//        verify(userRepository, times(1)).findAll(any(Specification.class), eq(pageable));
-//    }
-//
-//
-//}
+package edu.agh.dean.classesverifierbe.service;
+
+import edu.agh.dean.classesverifierbe.RO.UserRO;
+import edu.agh.dean.classesverifierbe.dto.UserDTO;
+import edu.agh.dean.classesverifierbe.exceptions.UserAlreadyExistsException;
+import edu.agh.dean.classesverifierbe.model.*;
+import edu.agh.dean.classesverifierbe.model.enums.SemesterType;
+import edu.agh.dean.classesverifierbe.repository.SemesterRepository;
+import edu.agh.dean.classesverifierbe.repository.UserRepository;
+import org.junit.jupiter.api.*;
+import org.mockito.*;
+import org.modelmapper.ModelMapper;
+import org.springframework.boot.test.context.SpringBootTest;
+import edu.agh.dean.classesverifierbe.model.enums.Role;
+import edu.agh.dean.classesverifierbe.model.enums.UserStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Optional;
+
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+
+@SpringBootTest
+class StudentServiceTest {
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private SemesterRepository semesterRepository;
+
+    @Mock
+    private ModelMapper modelMapper;
+
+
+    @InjectMocks
+    private StudentService studentService;
+
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
+    @Test
+    void whenAddUser_thenUserShouldBeSavedWithGeneratedPassword() throws Exception{
+        UserDTO userDTO = UserDTO.builder()
+                .firstName("John")
+                .lastName("Doe")
+                .indexNumber("123456")
+                .email("john@example.com")
+                .semester(1)
+                .status(UserStatus.ACTIVE)
+                .role(Role.STUDENT)
+                .build();
+
+        when(userRepository.existsByIndexNumber(anyString())).thenReturn(false);
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArguments()[0]);
+            User result = studentService.addUser(userDTO);
+            assertNotNull(result.getHashPassword(), "Password should be generated");
+            verify(userRepository).save(any(User.class));
+
+    }
+
+    @Test
+    void whenAddExistingUser_thenThrowException() {
+        UserDTO userDTO = UserDTO.builder().indexNumber("123456").build();
+        when(userRepository.existsByIndexNumber("123456")).thenReturn(true);
+
+        Exception exception = assertThrows(UserAlreadyExistsException.class, () -> {
+            studentService.addUser(userDTO);
+        });
+        assertEquals("User with index number : " + 123456 + " already exists", exception.getMessage());
+    }
+
+
+    @Test
+    void testFilteringByTags() {
+
+        // Setup test data
+        Semester currentSemester = new Semester();
+        currentSemester.setSemesterId(1L);
+        currentSemester.setSemesterType(SemesterType.WINTER);
+        currentSemester.setYear(2023);
+        currentSemester.setDeadline(LocalDateTime.parse("2024-01-01T00:00:00"));
+
+        SubjectTag tag1 = new SubjectTag();
+        tag1.setSubjectTagId(1);
+        tag1.setName("algo");
+
+        SubjectTag tag2 = new SubjectTag();
+        tag2.setSubjectTagId(2);
+        tag2.setName("semester1");
+
+        Subject subject = new Subject();
+        subject.setSubjectId(1L);
+        subject.setName("Math");
+        subject.setDescription("Mathematics");
+        subject.setSubjectTags(new HashSet<>(Arrays.asList(tag1, tag2)));
+
+        User user = new User();
+        user.setUserId(1L);
+        user.setFirstName("John");
+        user.setLastName("Doe");
+        user.setIndexNumber("123456");
+        user.setEmail("john.doe@op.pl");
+
+        Enrollment enrollment = new Enrollment();
+        enrollment.setEnrollmentId(1L);
+        enrollment.setSemester(currentSemester);
+        enrollment.setEnrollSubject(subject);
+        user.setEnrollments(new HashSet<>(Collections.singletonList(enrollment)));
+
+        // Mocking repository calls
+        when(semesterRepository.findCurrentSemester()).thenReturn(Optional.of(currentSemester));
+        when(userRepository.findAll(any(Specification.class), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(Collections.singletonList(user)));
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        Page<UserRO> filteredUsers = studentService.getStudentsByCriteria(pageable, "algo", "name", "lastName", "indexNumber", 1, "ACTIVE");
+
+
+        assertFalse(filteredUsers.isEmpty());
+        assertEquals(1, filteredUsers.getContent().size());
+    }
+
+
+
+
+
+
+}
