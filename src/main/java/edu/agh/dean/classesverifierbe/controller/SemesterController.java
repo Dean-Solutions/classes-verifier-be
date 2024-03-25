@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/semester")
+@RequestMapping("/semesters")
 public class SemesterController {
 
     @Autowired

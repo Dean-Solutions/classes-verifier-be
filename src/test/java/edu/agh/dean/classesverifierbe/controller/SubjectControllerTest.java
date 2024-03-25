@@ -58,7 +58,7 @@ class SubjectControllerTest {
         when(subjectService.getAllSubjects(eq("Math"), eq("Algebra"), any(Pageable.class)))
                 .thenReturn(pageOfSubjects);
 
-        mockMvc.perform(get("/subject")
+        mockMvc.perform(get("/subjects")
                         .param("tags", "Math")
                         .param("name", "Algebra"))
                 .andExpect(status().isOk())
@@ -76,7 +76,7 @@ class SubjectControllerTest {
         Subject subject = new Subject();
         when(subjectService.addTagToSubject(anyLong(), anyLong())).thenReturn(subject);
 
-        mockMvc.perform(post("/subject/1/tags/1")
+        mockMvc.perform(post("/subjects/1/tags/1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
@@ -88,7 +88,7 @@ class SubjectControllerTest {
 
         when(subjectService.addTagToSubject(anyLong(), anyLong())).thenThrow(new SubjectNotFoundException("subjectId"));
 
-        mockMvc.perform(post("/subject/999/tags/1")
+        mockMvc.perform(post("/subjects/999/tags/1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
@@ -113,7 +113,7 @@ class SubjectControllerTest {
         when(subjectService.getUsersEnrolledInSubjectForSemester(subjectId, semesterId)).thenReturn(mockUsers);
 
 
-        mockMvc.perform(get("/subject/{subjectId}/users", subjectId)
+        mockMvc.perform(get("/subjects/{subjectId}/users", subjectId)
                         .param("semesterId", semesterId.toString())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -137,7 +137,7 @@ class SubjectControllerTest {
         when(subjectService.getUsersEnrolledInSubjectForSemester(subjectId, semesterId))
                 .thenThrow(new SubjectNotFoundException());
 
-        mockMvc.perform(get("/subject/{subjectId}/users", subjectId)
+        mockMvc.perform(get("/subjects/{subjectId}/users", subjectId)
                         .param("semesterId", semesterId.toString())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());

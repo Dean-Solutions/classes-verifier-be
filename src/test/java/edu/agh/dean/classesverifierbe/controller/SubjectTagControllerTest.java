@@ -44,7 +44,7 @@ class SubjectTagControllerTest {
 
         given(tagService.createTag(any(SubjectTagDTO.class))).willReturn(createdTag);
 
-        mockMvc.perform(post("/tag")
+        mockMvc.perform(post("/tags")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"Math\",\"description\":\"Mathematics Description\"}"))
                 .andExpect(status().isCreated())
@@ -58,7 +58,7 @@ class SubjectTagControllerTest {
         Long tagId = 999L;
         given(tagService.getTag(tagId)).willThrow(new SubjectTagNotFoundException());
 
-        mockMvc.perform(get("/tag/{tagId}", tagId))
+        mockMvc.perform(get("/tags/{tagId}", tagId))
                 .andExpect(status().isNotFound());
 
         verify(tagService).getTag(tagId);
@@ -77,7 +77,7 @@ class SubjectTagControllerTest {
         updatedTag.setSubjectTagId(tagIntId);
         given(tagService.updateTag(eq(tagId), any(SubjectTagDTO.class))).willReturn(updatedTag);
 
-        mockMvc.perform(put("/tag/{tagId}", tagId)
+        mockMvc.perform(put("/tags/{tagId}", tagId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"UpdatedName\",\"description\":\"Updated Description\"}"))
                 .andExpect(status().isOk())
