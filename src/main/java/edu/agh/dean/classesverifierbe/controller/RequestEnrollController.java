@@ -26,6 +26,7 @@ public class RequestEnrollController {
     public ResponseEntity<?> addRequestEnroll(@PathVariable Long requestId, @Valid @RequestBody RequestEnrollDTO requestEnrollDTO) {
         try {
             // Retrieve the request entity using the requestId
+            // TODO ? Retrive the enrollment entity using the enrollmentId (does it exist) (do i need to check)
             Optional<Request> requestOptional = requestService.getRequestById(requestId);
             if (requestOptional.isPresent()) {
                 Request request = requestOptional.get();
