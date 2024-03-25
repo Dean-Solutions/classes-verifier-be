@@ -66,9 +66,13 @@ public class StudentService {
     }
 
     public UserRO getUserById(Long id) throws UserNotFoundException {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("id", id.toString()));
+        User user = getRawUserById(id);
         return convertToUserRO(user);
+    }
+
+    public User getRawUserById(Long id) throws UserNotFoundException {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("id", id.toString()));
     }
 
     public Page<UserRO> getStudentsByCriteria(Pageable pageable, String tag, String name, String lastName, String indexNumber, Integer semester, String status) {
