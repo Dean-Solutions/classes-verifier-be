@@ -32,54 +32,69 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public ResponseEntity<?> handleCustomExceptions(Exception ex) {
         if (ex instanceof UserNotFoundException) {
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(mapToJson(ex), HttpStatus.NOT_FOUND);
         }
         else if(ex instanceof UserAlreadyExistsException){
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(mapToJson(ex), HttpStatus.CONFLICT);
         }
         else if(ex instanceof UserTagNotFoundException){
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(mapToJson(ex), HttpStatus.NOT_FOUND);
         }
         else if(ex instanceof UserTagAlreadyExistsException){
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(mapToJson(ex), HttpStatus.CONFLICT);
         }
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(mapToJson(ex), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler({SemesterNotFoundException.class, SemesterAlreadyExistsException.class})
     @ResponseBody
     public ResponseEntity<?> handleSemesterExceptions(Exception ex) {
         if (ex instanceof SemesterNotFoundException) {
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(mapToJson(ex), HttpStatus.NOT_FOUND);
         }
         else if(ex instanceof SemesterAlreadyExistsException){
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(mapToJson(ex), HttpStatus.CONFLICT);
         }
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(mapToJson(ex), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler({SubjectNotFoundException.class, SubjectAlreadyExistsException.class})
     @ResponseBody
     public ResponseEntity<?> handleSubjectExceptions(Exception ex) {
         if (ex instanceof SubjectNotFoundException) {
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(mapToJson(ex), HttpStatus.NOT_FOUND);
         }
         else if(ex instanceof SubjectAlreadyExistsException){
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(mapToJson(ex), HttpStatus.CONFLICT);
         }
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(mapToJson(ex), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler({SubjectTagNotFoundException.class, SubjectTagAlreadyExistsException.class})
     @ResponseBody
     public ResponseEntity<?> handleSubjectTagExceptions(Exception ex) {
         if (ex instanceof SubjectTagNotFoundException) {
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(mapToJson(ex), HttpStatus.NOT_FOUND);
         }
         else if(ex instanceof SubjectTagAlreadyExistsException){
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(mapToJson(ex), HttpStatus.CONFLICT);
         }
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(mapToJson(ex), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler({EnrollmentAlreadyExistException.class})
+    @ResponseBody
+    public ResponseEntity<?> handleEnrollmentExceptions(Exception ex) {
+        if (ex instanceof EnrollmentAlreadyExistException) {
+            return new ResponseEntity<>(mapToJson(ex), HttpStatus.CONFLICT);
+        }
+        return new ResponseEntity<>(mapToJson(ex), HttpStatus.BAD_REQUEST);
+    }
+
+    private Map<String, String> mapToJson(Exception ex) {
+        Map<String, String> body = new HashMap<>();
+        body.put("error", ex.getMessage());
+        return body;
     }
 
 
