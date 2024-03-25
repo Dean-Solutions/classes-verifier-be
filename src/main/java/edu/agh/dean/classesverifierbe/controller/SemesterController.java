@@ -35,7 +35,7 @@ public class SemesterController {
     public ResponseEntity<String> handleSemesterAlreadyExists(SemesterAlreadyExistsException exception) {
         return ResponseEntity.badRequest().body(exception.getMessage());
     }
-    @PostMapping("/")
+    @PostMapping
     @ResponseBody
     public ResponseEntity<?> createSemester(@Valid @RequestBody SemesterDTO semesterDTO) {
         try {
@@ -46,7 +46,7 @@ public class SemesterController {
         }
     }
 
-    @GetMapping("/")
+    @GetMapping
     @ResponseBody
     public ResponseEntity<?> getAllSemesters() {
         return ResponseEntity.ok(semesterService.getAllSemesters());

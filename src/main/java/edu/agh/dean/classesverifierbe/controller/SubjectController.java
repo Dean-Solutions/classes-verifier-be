@@ -31,7 +31,7 @@ public class SubjectController {
         this.modelMapper = modelMapper;
     }
 
-    @PostMapping("/")
+    @PostMapping
     public ResponseEntity<Subject> createSubject(@RequestBody @Valid SubjectDTO subjectDTO) throws SubjectAlreadyExistsException {
         Subject subject = modelMapper.map(subjectDTO, Subject.class);
         Subject createdSubject = subjectService.createSubject(subject);
@@ -45,7 +45,7 @@ public class SubjectController {
         return ResponseEntity.ok(updatedSubject);
     }
 
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<Page<Subject>> getAllSubjects(Pageable pageable,
                                                         @RequestParam(required = false) String tags,
                                                         @RequestParam(required = false) String name) throws SubjectNotFoundException {
