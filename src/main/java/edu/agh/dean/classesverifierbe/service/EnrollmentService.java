@@ -1,17 +1,12 @@
 package edu.agh.dean.classesverifierbe.service;
 
 import edu.agh.dean.classesverifierbe.dto.EnrollDTO;
-import edu.agh.dean.classesverifierbe.exceptions.EnrollmentAlreadyExistException;
-import edu.agh.dean.classesverifierbe.exceptions.SemesterNotFoundException;
-import edu.agh.dean.classesverifierbe.exceptions.SubjectNotFoundException;
-import edu.agh.dean.classesverifierbe.exceptions.UserNotFoundException;
+import edu.agh.dean.classesverifierbe.exceptions.*;
 import edu.agh.dean.classesverifierbe.model.Enrollment;
 import edu.agh.dean.classesverifierbe.model.Semester;
 import edu.agh.dean.classesverifierbe.model.Subject;
 import edu.agh.dean.classesverifierbe.model.User;
 import edu.agh.dean.classesverifierbe.repository.EnrollmentRepository;
-import edu.agh.dean.classesverifierbe.repository.SubjectRepository;
-import edu.agh.dean.classesverifierbe.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,29 +28,49 @@ public class EnrollmentService {
         this.subjectService = subjectService;
     }
 
+    public List<Enrollment> getAllEnrollments() {
+        return enrollmentRepository.findAll();
+    }
+
     public Enrollment assignEnrollmentForUser(EnrollDTO enrollDTO) throws UserNotFoundException, SubjectNotFoundException, EnrollmentAlreadyExistException, SemesterNotFoundException {
         User user = studentService.getRawUserById(enrollDTO.getUserId());
         Subject subject = subjectService.getSubjectById(enrollDTO.getSubjectId());
         Semester currentSemester = semesterService.getCurrentSemester();
         if (enrollmentRepository
-                .existsByEnrollStudent_UserIdAndEnrollSubject_SubjectIdAndSemester(
-                        enrollDTO.getUserId(), enrollDTO.getSubjectId(), currentSemester)) {
+                .existsByEnrollStudentAndEnrollSubjectAndSemester(
+                        user, subject, currentSemester)) {
             throw new EnrollmentAlreadyExistException();
         }
         return enrollmentRepository.save(convertToEnrollment(user, subject, currentSemester));
     }
 
-    public Enrollment convertToEnrollment(User user, Subject subject, Semester semester) {
+    public List<Enrollment> getEnrolledSubjectsByUserId(Long userId) throws UserNotFoundException {
+        studentService.getRawUserById(userId);
+        return enrollmentRepository.findAllByEnrollStudent_UserId(userId);
+    }
+
+    public List<Enrollment> getEnrolledSubjectsByUserIndex(String index) throws UserNotFoundException {
+        User user = studentService.findUserByIndexNumber(index);
+        return enrollmentRepository.findAllByEnrollStudent_UserId(user.getUserId());
+    }
+
+    public Enrollment updateEnrollmentForUser(EnrollDTO enrollDTO) throws UserNotFoundException, SubjectNotFoundException, SemesterNotFoundException, EnrollmentNotFoundException {
+        User user = studentService.getRawUserById(enrollDTO.getUserId());
+        Subject subject = subjectService.getSubjectById(enrollDTO.getSubjectId());
+        Semester currentSemester = semesterService.getCurrentSemester();
+        Enrollment currEnrollment = enrollmentRepository.findEnrollmentByEnrollStudentAndEnrollSubjectAndSemester(
+                user, subject, currentSemester).orElseThrow(EnrollmentNotFoundException::new);
+
+        currEnrollment.setEnrollStatus(enrollDTO.getEnrollStatus());
+        return enrollmentRepository.save(currEnrollment);
+    }
+
+    private Enrollment convertToEnrollment(User user, Subject subject, Semester semester) {
         Enrollment enrollment = new Enrollment();
         enrollment.setEnrollStudent(user);
         enrollment.setEnrollSubject(subject);
         enrollment.setSemester(semester);
         return enrollment;
-    }
-
-    public List<Enrollment> getAllEnrollmentForUser(EnrollDTO enrollDTO) throws UserNotFoundException {
-        studentService.getRawUserById(enrollDTO.getUserId());
-        return enrollmentRepository.findAllByEnrollStudent_UserId(enrollDTO.getUserId());
     }
 
 }
