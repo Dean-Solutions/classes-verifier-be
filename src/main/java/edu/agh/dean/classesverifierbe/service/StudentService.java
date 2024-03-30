@@ -2,6 +2,7 @@ package edu.agh.dean.classesverifierbe.service;
 
 import edu.agh.dean.classesverifierbe.RO.UserRO;
 import edu.agh.dean.classesverifierbe.dto.UserDTO;
+import edu.agh.dean.classesverifierbe.exceptions.SemesterNotFoundException;
 import edu.agh.dean.classesverifierbe.exceptions.UserAlreadyExistsException;
 import edu.agh.dean.classesverifierbe.exceptions.UserNotFoundException;
 import edu.agh.dean.classesverifierbe.model.Semester;
@@ -75,14 +76,16 @@ public class StudentService {
                 .orElseThrow(() -> new UserNotFoundException("id", id.toString()));
     }
 
-    public Page<UserRO> getStudentsByCriteria(Pageable pageable, String tag, String name, String lastName, String indexNumber, Integer semester, String status) {
-        Semester currentSemester = null;
-        if(tag != null){
-
-            // we are interested in students' enrollments for the new semester: e.g. winter 2021/2022 (and all tags related to this semester)
-            currentSemester = semesterRepository.findCurrentSemester().orElseThrow(() -> new IllegalStateException("No current semester found"));
+    public Page<UserRO> getStudentsByCriteria(Pageable pageable, String tag, String name, String lastName, String indexNumber, Integer semester, String status,Long semestrId) throws SemesterNotFoundException {
+        Semester givenSemester = null;
+        if(tag != null){ //we are looking for students from current semester that have given tag
+            givenSemester = semesterRepository.findCurrentSemester().orElseThrow(() -> new SemesterNotFoundException("current semester not found"));
         }
-        Page<User> users = userRepository.findAll(UserSpecifications.byCriteria(tag, name, lastName, indexNumber, semester,status,currentSemester), pageable);
+        if(semestrId != null) { // if we specify semester we are looking for students from this semester (tags above will be from THIS semester if specified)
+            givenSemester = semesterRepository.findById(semestrId).orElseThrow(() -> new SemesterNotFoundException("current semester not found"));
+        }
+
+        Page<User> users = userRepository.findAll(UserSpecifications.byCriteria(tag, name, lastName, indexNumber, semester,status,givenSemester), pageable);
         List<UserRO> userROs = users.getContent().stream()
                 .map(this::convertToUserRO)
                 .collect(Collectors.toList());

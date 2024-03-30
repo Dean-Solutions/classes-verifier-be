@@ -12,28 +12,37 @@ import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
+import java.util.Arrays;
 public class UserSpecifications {
 
-    public static Specification<User> withTags(String tags, Semester currentSemester) {
+    public static Specification<User> withTags(String tags) {
         return (root, query, cb) -> {
             if (tags == null || tags.trim().isEmpty()) return null;
 
-            Join<User, Enrollment> enrollments = root.join("enrollments");
-            Join<Enrollment, Subject> subjects = enrollments.join("enrollSubject");
-            Join<Subject, SubjectTag> subjectTags = subjects.join("subjectTags");
+            Join<User, Enrollment> enrollments = root.join("enrollments", JoinType.LEFT);
+            Join<Enrollment, Subject> subjects = enrollments.join("enrollSubject", JoinType.LEFT);
+            Join<Subject, SubjectTag> subjectTags = subjects.join("subjectTags", JoinType.LEFT);
 
-            Predicate semesterPredicate = cb.equal(enrollments.get("semester"), currentSemester);
-
-            String[] tagsArray = tags.split(",");
             CriteriaBuilder.In<String> inClause = cb.in(subjectTags.get("name"));
-            for (String tag : tagsArray) {
-                inClause.value(tag);
-            }
+            Arrays.stream(tags.split(",")).forEach(tag -> inClause.value(tag.trim()));
 
-            return cb.and(semesterPredicate, cb.and(inClause));
+            return inClause;
         };
     }
+
+    public static Specification<User> withSemester(Semester semester) {
+        return (root, query, cb) -> {
+            if (semester == null) return null;
+            Join<User, Enrollment> enrollments = root.join("enrollments", JoinType.LEFT);
+
+            return cb.equal(enrollments.get("semester"), semester);
+        };
+    }
+
+    public static Specification<User> withSemester(Integer semester) {
+        return (root, query, cb) -> semester == null ? null : cb.equal(root.get("semester"), semester);
+    }
+
     public static Specification<User> withStatus(UserStatus status) {
         return (root, query, cb) -> {
             if (status == null) return null;
@@ -53,9 +62,7 @@ public class UserSpecifications {
         return (root, query, cb) -> indexNumber == null || indexNumber.trim().isEmpty() ? null : cb.like(root.get("indexNumber"), "%" + indexNumber + "%");
     }
 
-    public static Specification<User> withSemester(Integer semester) {
-        return (root, query, cb) -> semester == null ? null : cb.equal(root.get("semester"), semester);
-    }
+
 
     public static Specification<User> hasRoleStudentOrStudentRep() {
         return (root, query, cb) -> cb.or(
@@ -75,10 +82,11 @@ public class UserSpecifications {
         }
     }
 
-    public static Specification<User> byCriteria(String tags, String name, String lastName, String indexNumber, Integer semester, String status, Semester currentSemester) {
+    public static Specification<User> byCriteria(String tags, String name, String lastName, String indexNumber, Integer semester, String status, Semester givenSemester) {
         UserStatus userStatus = convertStringToUserStatus(status).orElse(null);
         return Specification.where(hasRoleStudentOrStudentRep())
-                .and(withTags(tags, currentSemester))
+                .and(withTags(tags))
+                .and(withSemester(givenSemester))
                 .and(withName(name))
                 .and(withLastName(lastName))
                 .and(withIndex(indexNumber))

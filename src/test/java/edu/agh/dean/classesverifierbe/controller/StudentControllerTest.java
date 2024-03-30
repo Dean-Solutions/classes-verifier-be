@@ -90,7 +90,7 @@ public class StudentControllerTest {
     void getStudentsTest() throws Exception {
 
         Page<UserRO> page = new PageImpl<>(Arrays.asList(new UserRO()));
-        when(studentService.getStudentsByCriteria(any(Pageable.class), any(), any(), any(), any(), any(), any())).thenReturn(page);
+        when(studentService.getStudentsByCriteria(any(Pageable.class), any(), any(), any(), any(), any(), any(),any())).thenReturn(page);
 
 
         mockMvc.perform(MockMvcRequestBuilders.get("/students")
@@ -98,7 +98,7 @@ public class StudentControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").exists());
 
-        verify(studentService, times(1)).getStudentsByCriteria(any(Pageable.class), any(), any(), any(), any(), any(), any());
+        verify(studentService, times(1)).getStudentsByCriteria(any(Pageable.class), any(), any(), any(), any(), any(), any(),any());
     }
 
 
