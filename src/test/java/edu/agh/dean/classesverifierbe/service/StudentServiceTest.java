@@ -137,6 +137,29 @@ class StudentServiceTest {
     }
 
 
+    @Test
+    void getStudentsByCriteriaTest() {
+       User user1 = User.builder().userId(1L).firstName("John").lastName("Doe")
+               .indexNumber("123456").email("john.doe@op.pl").semester(1)
+               .status(UserStatus.ACTIVE).role(Role.STUDENT).build();
+
+       UserRO user1RO = UserRO.builder().userId(1L).firstName("John").lastName("Doe")
+               .indexNumber("123456").email("john.doe@op.pl").status(UserStatus.ACTIVE)
+                .role(Role.STUDENT).build();
+
+        Pageable pageable = Pageable.unpaged();
+        when(userRepository.findAll(any(), eq(pageable))).thenReturn(new PageImpl<>(Arrays.asList(user1)));
+
+        when(modelMapper.map(any(User.class), eq(UserRO.class))).thenReturn(user1RO);
+
+        studentService.getStudentsByCriteria(pageable, null, "john", null, null, null, "ACTIVE");
+
+
+        verify(userRepository).findAll(any(), eq(pageable));
+        verify(modelMapper, times(1)).map(any(User.class), eq(UserRO.class));
+    }
+
+
 
 
 
