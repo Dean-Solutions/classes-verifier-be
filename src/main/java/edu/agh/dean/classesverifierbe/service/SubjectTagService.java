@@ -35,11 +35,8 @@ public class SubjectTagService {
         return modelMapper.map(savedTag, SubjectTagRO.class);
     }
 
-    public List<SubjectTagRO> getAllTags() throws SubjectTagNotFoundException {
+    public List<SubjectTagRO> getAllTags() {
         List<SubjectTag> tags =(List<SubjectTag>) subjectTagRepository.findAll();
-        if(tags.isEmpty()){
-            throw new SubjectTagNotFoundException();
-        }
         return tags.stream()
                 .map(tag -> modelMapper.map(tag, SubjectTagRO.class))
                 .collect(Collectors.toList());

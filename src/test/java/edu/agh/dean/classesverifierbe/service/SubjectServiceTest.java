@@ -123,21 +123,6 @@ class SubjectServiceTest {
     }
 
     @Test
-    void shouldThrowSubjectNotFoundExceptionWhenNoSubjectsFound() {
-
-        PageRequest pageable = PageRequest.of(0, 10);
-        String tags = "Nonexistent";
-        String name = "Nonexistent";
-
-        when(subjectRepository.findAll(any(Specification.class), eq(pageable)))
-                .thenReturn(Page.empty());
-
-        assertThrows(SubjectNotFoundException.class, () -> {
-            subjectService.getAllSubjects(tags, name, pageable);
-        });
-    }
-
-    @Test
     void shouldAddTagToSubjectSuccessfully() throws Exception {
 
         Long subjectId = 1L;
