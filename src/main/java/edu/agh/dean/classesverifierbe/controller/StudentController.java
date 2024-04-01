@@ -12,11 +12,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
 
 
 
@@ -29,15 +26,10 @@ public class StudentController {
 
 
     @PostMapping
-    public ResponseEntity<?> addUser(@Valid @RequestBody UserDTO userDto) {
-        try {
-            User newUser = studentService.addUser(userDto);
-            return new ResponseEntity<>(newUser, HttpStatus.CREATED);
-        } catch (UserAlreadyExistsException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<?> addUser(@Valid @RequestBody UserDTO userDto) throws UserAlreadyExistsException {
+        User newUser = studentService.addUser(userDto);
+        return new ResponseEntity<>(newUser, HttpStatus.CREATED);
+
     }
 
     @GetMapping("/{id}")
@@ -47,13 +39,10 @@ public class StudentController {
     }
 
     @GetMapping("/index/{indexNumber}")
-    public ResponseEntity<?> getUserByIndexNumber(@PathVariable String indexNumber) {
-        try{
-            User user = studentService.findUserByIndexNumber(indexNumber);
-            return ResponseEntity.ok(user);
-        } catch (UserNotFoundException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<?> getUserByIndexNumber(@PathVariable String indexNumber) throws UserNotFoundException {
+        User user = studentService.findUserByIndexNumber(indexNumber);
+        return ResponseEntity.ok(user);
+
     }
 
 

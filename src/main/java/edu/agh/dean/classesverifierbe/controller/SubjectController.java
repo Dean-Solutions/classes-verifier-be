@@ -2,8 +2,6 @@ package edu.agh.dean.classesverifierbe.controller;
 
 import edu.agh.dean.classesverifierbe.RO.UserRO;
 import edu.agh.dean.classesverifierbe.dto.SubjectDTO;
-import edu.agh.dean.classesverifierbe.RO.SubjectRO; // Make sure to import the RO class
-import edu.agh.dean.classesverifierbe.dto.UserDTO;
 import edu.agh.dean.classesverifierbe.exceptions.*;
 import edu.agh.dean.classesverifierbe.model.Subject;
 import edu.agh.dean.classesverifierbe.service.SubjectService;
@@ -12,7 +10,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,7 +45,7 @@ public class SubjectController {
     @GetMapping
     public ResponseEntity<Page<Subject>> getAllSubjects(Pageable pageable,
                                                         @RequestParam(required = false) String tags,
-                                                        @RequestParam(required = false) String name) throws SubjectNotFoundException {
+                                                        @RequestParam(required = false) String name) {
         Page<Subject> subjects = subjectService.getAllSubjects(tags, name, pageable);
         return ResponseEntity.ok(subjects);
     }

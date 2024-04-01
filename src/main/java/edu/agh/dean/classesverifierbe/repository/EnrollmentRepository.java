@@ -11,7 +11,11 @@ import java.util.List;
 
 @Repository
 public interface EnrollmentRepository extends CrudRepository<Enrollment, Long> {
-    boolean existsByEnrollStudentAndEnrollSubjectAndSemester(User user, Subject subject, Semester currentSemester);
 
     List<Enrollment> findByEnrollStudentAndSemester(User user, Semester semester);
+
+    boolean existsByEnrollStudent_UserIdAndEnrollSubject_SubjectIdAndSemester(Long userId, Long SubjectId, Semester semester);
+
+    List<Enrollment> findAllByEnrollStudent_UserId(Long userId);
+
 }
