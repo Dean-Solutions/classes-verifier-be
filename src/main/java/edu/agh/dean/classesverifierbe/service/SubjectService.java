@@ -61,16 +61,12 @@ public class SubjectService {
         return subject;
     }
 
-    public Page<Subject> getAllSubjects(String tags, String name, Pageable pageable) throws SubjectNotFoundException {
+    public Page<Subject> getAllSubjects(String tags, String name, Pageable pageable) {
         Specification<Subject> spec = Specification
                 .where(SubjectSpecifications.withTags(tags))
                 .and(SubjectSpecifications.withNameLike(name));
 
         Page<Subject> subjects = subjectRepository.findAll(spec, pageable);
-
-        if (subjects.isEmpty()) {
-            throw new SubjectNotFoundException();
-        }
 
         return subjects;
     }
