@@ -26,7 +26,7 @@ public class StudentController {
 
 
     @PostMapping
-    public ResponseEntity<?> addUser(@Valid @RequestBody UserDTO userDto) throws UserAlreadyExistsException {
+    public ResponseEntity<User> addUser(@Valid @RequestBody UserDTO userDto) throws UserAlreadyExistsException {
         User newUser = studentService.addUser(userDto);
         return new ResponseEntity<>(newUser, HttpStatus.CREATED);
 
@@ -38,8 +38,15 @@ public class StudentController {
         return ResponseEntity.ok(userRO);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<UserRO> deleteUserById(@PathVariable Long id) throws UserNotFoundException {
+        UserRO userRO = studentService.removeUserById(id);
+        return ResponseEntity.ok(userRO);
+    }
+
+
     @GetMapping("/index/{indexNumber}")
-    public ResponseEntity<?> getUserByIndexNumber(@PathVariable String indexNumber) throws UserNotFoundException {
+    public ResponseEntity<User> getUserByIndexNumber(@PathVariable String indexNumber) throws UserNotFoundException {
         User user = studentService.findUserByIndexNumber(indexNumber);
         return ResponseEntity.ok(user);
 

@@ -95,5 +95,9 @@ public class StudentService {
     }
 
 
-
+    public UserRO removeUserById(Long id) throws UserNotFoundException {
+        User user = getRawUserById(id);
+        userRepository.delete(user);
+        return convertToUserRO(user);
+    }
 }
