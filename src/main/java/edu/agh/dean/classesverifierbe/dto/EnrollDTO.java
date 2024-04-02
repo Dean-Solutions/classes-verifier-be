@@ -13,7 +13,7 @@ public class EnrollDTO {
     @NotNull(message = "userId is required")
     private Long userId;
 
-    @NotNull(message = "messageId is required")
+    @NotNull(message = "subjectId is required")
     private Long subjectId;
 
     private EnrollStatus enrollStatus;
