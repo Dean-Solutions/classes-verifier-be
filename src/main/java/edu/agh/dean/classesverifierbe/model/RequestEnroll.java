@@ -31,6 +31,4 @@ public class RequestEnroll {
     @JoinColumn(name = "enrollmentId")
     private Enrollment enrollment;
 
-
-
 }

@@ -24,6 +24,17 @@ public class EnrollmentController {
         this.enrollmentService = enrollmentService;
     }
 
+
+    @PutMapping("/accept/{enrollmentId}")
+    public ResponseEntity<Enrollment> confirmEnrollment(@PathVariable Long enrollmentId) throws EnrollmentNotFoundException{
+        return ResponseEntity.ok(enrollmentService.acceptEnrollment(enrollmentId));
+    }
+
+    @PutMapping("/accept")
+    public ResponseEntity<List<Enrollment>> confirmEnrollment(@RequestBody List<Long> enrollmentIds) throws EnrollmentNotFoundException{
+        return ResponseEntity.ok(enrollmentService.acceptEnrollments(enrollmentIds));
+    }
+
     @GetMapping
     public ResponseEntity<List<Enrollment>> getAllEnrollments() {
         return ResponseEntity.ok(enrollmentService.getAllEnrollments());

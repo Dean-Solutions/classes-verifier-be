@@ -6,11 +6,13 @@ import edu.agh.dean.classesverifierbe.model.Enrollment;
 import edu.agh.dean.classesverifierbe.model.Semester;
 import edu.agh.dean.classesverifierbe.model.Subject;
 import edu.agh.dean.classesverifierbe.model.User;
+import edu.agh.dean.classesverifierbe.model.enums.EnrollStatus;
 import edu.agh.dean.classesverifierbe.repository.EnrollmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class EnrollmentService {
@@ -71,6 +73,39 @@ public class EnrollmentService {
         enrollment.setEnrollSubject(subject);
         enrollment.setSemester(semester);
         return enrollment;
+    }
+
+    public Optional<Enrollment> getEnrollmentById(Long enrollmentId){
+        return enrollmentRepository.findById(enrollmentId);
+    }
+
+    public List<Enrollment> getEnrollmentsById(List<Long> enrollmentIds){
+        return enrollmentRepository.findAllById(enrollmentIds);
+    }
+
+    public Enrollment acceptEnrollment(Long enrollmentId) throws EnrollmentNotFoundException{
+        Optional<Enrollment> enrollment = getEnrollmentById(enrollmentId);
+
+        if (enrollment.isPresent()){
+            Enrollment enroll = enrollment.get();
+            enroll.setEnrollStatus(EnrollStatus.ACCEPTED);
+            return enrollmentRepository.save(enroll);
+        }
+        else {
+            throw new EnrollmentNotFoundException();
+        }
+    }
+
+    public List<Enrollment> acceptEnrollments(List<Long> enrollmentIds) throws EnrollmentNotFoundException{
+        List<Enrollment> enrollments = getEnrollmentsById(enrollmentIds);
+        if (enrollmentIds.size() != enrollments.size()){
+            throw new EnrollmentNotFoundException();
+        }
+        for (Enrollment enrollment: enrollments){
+            enrollment.setEnrollStatus(EnrollStatus.ACCEPTED);
+        }
+        enrollmentRepository.saveAll(enrollments);
+        return enrollments;
     }
 
 }
