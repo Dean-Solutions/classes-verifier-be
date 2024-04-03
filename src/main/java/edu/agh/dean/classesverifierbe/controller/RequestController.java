@@ -1,8 +1,10 @@
 package edu.agh.dean.classesverifierbe.controller;
 
+import edu.agh.dean.classesverifierbe.RO.RequestRO;
 import edu.agh.dean.classesverifierbe.dto.RequestDTO;
 
 
+import edu.agh.dean.classesverifierbe.exceptions.RequestNotFoundException;
 import edu.agh.dean.classesverifierbe.exceptions.UserNotFoundException;
 import edu.agh.dean.classesverifierbe.model.Request;
 import edu.agh.dean.classesverifierbe.service.RequestService;
@@ -24,28 +26,25 @@ public class RequestController {
     @Autowired
     private RequestService requestService;
     @PostMapping
-    public ResponseEntity<?> addRequest(@Valid @RequestBody RequestDTO requestDTO) throws UserNotFoundException {
+    public ResponseEntity<Request> addRequest(@Valid @RequestBody RequestDTO requestDTO) throws UserNotFoundException {
             Request newRequest = requestService.addRequest(requestDTO);
             return new ResponseEntity<>(newRequest, HttpStatus.CREATED);
     }
 
 
     @GetMapping("/{id}")
-    public ResponseEntity<Request> getRequestById(@PathVariable Long id) {
-        Optional<Request> request = requestService.getRequestById(id);
-        return request
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<RequestRO> getRequestById(@PathVariable Long id) throws RequestNotFoundException {
+        RequestRO requestRO = requestService.getRequestById(id);
+        return ResponseEntity.ok(requestRO);
     }
 
-// TODO possibly we want to delete requests
-//    @DeleteMapping("/{id}")
-//    public ResponseEntity<?> deleteRequestById(@PathVariable Long id) {
-//        try{
-//            requestService.deleteRequestById(id);
-//        }
-//        catch  {
-//
-//        }
-//    }
+    //TODO get all requests with status
+    //TODO wszystkie requesty usera
+    //TODO ogólny get
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<RequestRO> deleteRequestById(@PathVariable Long id) throws RequestNotFoundException {
+        RequestRO requestRO = requestService.deleteRequestById(id);
+        return ResponseEntity.ok(requestRO);
+    }
 }

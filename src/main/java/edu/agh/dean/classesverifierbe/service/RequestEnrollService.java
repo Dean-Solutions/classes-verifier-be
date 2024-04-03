@@ -35,31 +35,37 @@ public class RequestEnrollService {
     public RequestEnroll addRequestEnroll(Long requestId, RequestEnrollDTO requestEnrollDTO) throws UserNotFoundException {
         RequestEnroll requestEnroll = new RequestEnroll();
         Request request = requestRepository.findById(requestId).orElse(null);
+//  TODO  add Exception when Request not Created
 //        if (request == null) {
 //            throw new RequestNotFoundException("Current r not found");
 //        }
 
         User user = userRepository.findById(requestEnrollDTO.getSenderId()).orElse(null);
+//  TODO Check if user that sent the request is the same user^
         if (user == null)
             throw new UserNotFoundException(requestEnrollDTO.getSenderId().toString());
 
-//      TODO  add Permission Exceptions
-//        if(user.getRole() == STUDENT && !request.getRequestType() == GROUP)
+//  TODO  add Permission Exceptions
+//        if(user.getRole() == STUDENT && request.getRequestType() != SINGLE)
 //            throw new UserInsufficientPermissionException();
 
-//      TODO  add Exeption when request already created
-//        if(request.getRequestEnrollment() > 0 && request.getRequestType() == SINGLE)
+//  TODO  add Exeption when request already created
+//        if(request.getRequestEnrollment().size() > 0 && request.getRequestType() == SINGLE)
 //            throw new RequestEnrollSingleRequestAlreadyExists();
 
+
         Enrollment enrollment = enrollmentRepository.findById(requestEnrollDTO.getEnrollmentId()).orElse(null);
+//  TODO if RequestEnroll Type DELETE it should exist first else it shouldn't
 //        if (enrollment == null) {
 //            throw new RequestNotFoundException("Current r not found");
 //        }
+
 
         requestEnroll.setEnrollment(enrollment);
         requestEnroll.setRequest(request);
         requestEnroll.setRequestStatus(RequestEnrollStatus.PENDING);
 
+//  TODO Here add sth with ReqEnroll type?
         return requestEnrollRepository.save(requestEnroll);
     }
 

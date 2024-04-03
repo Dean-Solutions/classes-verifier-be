@@ -1,6 +1,8 @@
 package edu.agh.dean.classesverifierbe.service;
 
+import edu.agh.dean.classesverifierbe.RO.RequestRO;
 import edu.agh.dean.classesverifierbe.dto.RequestDTO;
+import edu.agh.dean.classesverifierbe.exceptions.RequestNotFoundException;
 import edu.agh.dean.classesverifierbe.exceptions.UserNotFoundException;
 import edu.agh.dean.classesverifierbe.model.Request;
 import edu.agh.dean.classesverifierbe.model.User;
@@ -10,6 +12,7 @@ import edu.agh.dean.classesverifierbe.model.enums.Role;
 import edu.agh.dean.classesverifierbe.repository.RequestRepository;
 
 import edu.agh.dean.classesverifierbe.repository.UserRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,17 +24,19 @@ public class RequestService {
     private RequestRepository requestRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private ModelMapper modelMapper;
 
     public Request addRequest(RequestDTO requestDTO) throws UserNotFoundException {
         // TODO Czy tutaj powinna nastąpić weryfikacja że on to on?
-        // Może stworzyć jakiś verify service?
+        //  Może stworzyć jakiś verify service?
         User user = userRepository.findById(requestDTO.getSenderId()).orElse(null);
         if (user == null)
             throw new UserNotFoundException(requestDTO.getSenderId().toString());
         //Student shouldn't be able to create GROUP request
-        if (user.getRole() == Role.STUDENT && requestDTO.getRequestType() == RequestType.GROUP){
+        if (user.getRole() == Role.STUDENT && requestDTO.getRequestType() != RequestType.SINGLE){
             //TODO
-            //            throw new uprawnieniaERROR;
+            //            throw new UserInsufficientPermissionException();
         }
 
         Request request = toRequest(requestDTO);
@@ -47,16 +52,23 @@ public class RequestService {
         return request;
     }
 
-    public Optional<Request> getRequestById(Long id) {
-        return requestRepository.findById(id);
+    public RequestRO getRequestById(Long id) throws RequestNotFoundException{
+        Request request = getRawRequestById(id);
+        return convertToRequestRO(request);
     }
 
-    // TODO deleting requests
-//    public void deleteRequestById(Long id) throws RequestNotFoundException {
-//        try {
-//            requestRepository.deleteById(id);
-//        } catch (EmptyResultDataAccessException e) {
-//            throw new RequestNotFoundException("ID", id.toString());
-//        }
-//    }
+    private RequestRO convertToRequestRO(Request request) {
+        return modelMapper.map(request, RequestRO.class);
+    }
+
+    public Request getRawRequestById(Long id) throws RequestNotFoundException {
+        return requestRepository.findById(id)
+                .orElseThrow(() -> new RequestNotFoundException("id", id.toString()));
+    }
+
+    public RequestRO deleteRequestById(Long id) throws RequestNotFoundException {
+        RequestRO request = getRequestById(id);
+        requestRepository.deleteById(id);
+        return request;
+    }
 }

@@ -1,6 +1,7 @@
 package edu.agh.dean.classesverifierbe.controller;
 
 import edu.agh.dean.classesverifierbe.dto.RequestEnrollDTO;
+import edu.agh.dean.classesverifierbe.exceptions.UserNotFoundException;
 import edu.agh.dean.classesverifierbe.model.RequestEnroll;
 import edu.agh.dean.classesverifierbe.service.RequestEnrollService;
 import jakarta.validation.Valid;
@@ -17,22 +18,25 @@ import java.util.Optional;
 public class RequestEnrollController {
     @Autowired
     private RequestEnrollService requestEnrollService;
+
     @PostMapping()
-    public ResponseEntity<?> addRequestEnroll(@PathVariable Long requestId, @Valid @RequestBody RequestEnrollDTO requestEnrollDTO) {
-        try {
+    public ResponseEntity<RequestEnroll> addRequestEnroll(@PathVariable Long requestId,
+                                                          @Valid @RequestBody RequestEnrollDTO requestEnrollDTO)
+            throws UserNotFoundException {
             RequestEnroll newRequestEnroll = requestEnrollService.addRequestEnroll(requestId, requestEnrollDTO);
             return new ResponseEntity<>(newRequestEnroll, HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
     }
-    //TODO V czy taki endpoint potrzebny?
 
-    @GetMapping("/{id}")
-    public ResponseEntity<RequestEnroll> getRequestEnrollById(@PathVariable Long id) {
-        Optional<RequestEnroll> request = requestEnrollService.getRequestEnrollById(id);
-        return request
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
-    }
+    //TODO taki zwykły get sie przyda raczej
+    //TODO delete dodać (np starosta sie walnie przy group add albo ktos zmieni zdanie)
+
+    //
+    //
+//    @GetMapping("/{id}")
+//    public ResponseEntity<RequestEnroll> getRequestEnrollById(@PathVariable Long id, @PathVariable String requestId) {
+//        Optional<RequestEnroll> request = requestEnrollService.getRequestEnrollById(id);
+//        return request
+//                .map(ResponseEntity::ok)
+//                .orElseGet(() -> ResponseEntity.notFound().build());
+//    }
 }
