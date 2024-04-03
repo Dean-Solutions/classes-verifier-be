@@ -16,6 +16,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+import static edu.agh.dean.classesverifierbe.model.enums.RequestType.GROUP;
+import static edu.agh.dean.classesverifierbe.model.enums.RequestType.SINGLE;
+import static edu.agh.dean.classesverifierbe.model.enums.Role.STUDENT;
+
 @Service
 public class RequestEnrollService {
     @Autowired
@@ -39,18 +43,19 @@ public class RequestEnrollService {
         if (user == null)
             throw new UserNotFoundException(requestEnrollDTO.getSenderId().toString());
 
-//        if (user != request.getUser())
-//            //TODO
-//            //            throw new uprawnieniaERROR;
+//      TODO  add Permission Exceptions
+//        if(user.getRole() == STUDENT && !request.getRequestType() == GROUP)
+//            throw new UserInsufficientPermissionException();
 
-
-        //tutaj patrzymy czy request stworzony single czy group
-        //jak single i jest juz jakis podpiety pod ten request to error
+//      TODO  add Exeption when request already created
+//        if(request.getRequestEnrollment() > 0 && request.getRequestType() == SINGLE)
+//            throw new RequestEnrollSingleRequestAlreadyExists();
 
         Enrollment enrollment = enrollmentRepository.findById(requestEnrollDTO.getEnrollmentId()).orElse(null);
 //        if (enrollment == null) {
 //            throw new RequestNotFoundException("Current r not found");
 //        }
+
         requestEnroll.setEnrollment(enrollment);
         requestEnroll.setRequest(request);
         requestEnroll.setRequestStatus(RequestEnrollStatus.PENDING);
