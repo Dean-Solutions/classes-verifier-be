@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     boolean existsByEnrollStudentAndEnrollSubjectAndSemester(User user, Subject subject, Semester currentSemester);
 
-    List<Enrollment> findAllByEnrollStudent_UserId(Long userId);
+    List<Enrollment> findAllByEnrollStudentAndSemester(User user, Semester semester);
 
     Optional<Enrollment> findEnrollmentByEnrollStudentAndEnrollSubjectAndSemester(User user, Subject subject, Semester semester);
 }
