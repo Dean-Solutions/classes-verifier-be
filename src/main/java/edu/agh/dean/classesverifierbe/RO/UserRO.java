@@ -21,6 +21,7 @@ public class UserRO {
     private String indexNumber;
     private String email;
     private String hashPassword;
+    private Integer semester;
     private EduPath eduPath;
     private UserStatus status;
     private Role role;

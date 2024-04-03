@@ -9,12 +9,14 @@ import edu.agh.dean.classesverifierbe.service.StudentService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
+import java.util.Arrays;
+import java.util.List;
 
 
 @RestController
@@ -26,7 +28,7 @@ public class StudentController {
 
 
     @PostMapping
-    public ResponseEntity<?> addUser(@Valid @RequestBody UserDTO userDto) throws UserAlreadyExistsException {
+    public ResponseEntity<User> addUser(@Valid @RequestBody UserDTO userDto) throws UserAlreadyExistsException {
         User newUser = studentService.addUser(userDto);
         return new ResponseEntity<>(newUser, HttpStatus.CREATED);
 
@@ -38,8 +40,15 @@ public class StudentController {
         return ResponseEntity.ok(userRO);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<UserRO> deleteUserById(@PathVariable Long id) throws UserNotFoundException {
+        UserRO userRO = studentService.removeUserById(id);
+        return ResponseEntity.ok(userRO);
+    }
+
+
     @GetMapping("/index/{indexNumber}")
-    public ResponseEntity<?> getUserByIndexNumber(@PathVariable String indexNumber) throws UserNotFoundException {
+    public ResponseEntity<User> getUserByIndexNumber(@PathVariable String indexNumber) throws UserNotFoundException {
         User user = studentService.findUserByIndexNumber(indexNumber);
         return ResponseEntity.ok(user);
 
@@ -53,11 +62,18 @@ public class StudentController {
                                                     @RequestParam(required = false) String name,
                                                     @RequestParam(required = false) String lastName,
                                                     @RequestParam(required = false) String indexNumber,
-                                                    @RequestParam(required = false) Integer semester,
-                                                    @RequestParam(required = false) String status) {
-        Page<UserRO> usersRO = studentService.getStudentsByCriteria(pageable, tag, name, lastName, indexNumber, semester, status);
-        usersRO.getContent().forEach(UserRO::hidePassword);
-        return ResponseEntity.ok(usersRO);
+                                                    @RequestParam(required = false) Integer userSemester,
+                                                    @RequestParam(required = false) String status,
+                                                    @RequestParam(required = false) Long actualSemesterId){
+        Page<UserRO> usersRO;
+        try {
+            usersRO = studentService.getStudentsByCriteria(pageable, tag, name, lastName, indexNumber, userSemester, status, actualSemesterId);
+            usersRO.getContent().forEach(UserRO::hidePassword);
+            return ResponseEntity.ok(usersRO);
+        } catch(SemesterNotFoundException e){
+            usersRO = new PageImpl<>(List.of(), pageable, 0);
+            return ResponseEntity.ok(usersRO);
+        }
     }
 
 

@@ -30,4 +30,7 @@ public class RequestEnroll {
     @ManyToOne
     @JoinColumn(name = "enrollmentId")
     private Enrollment enrollment;
+<<<<<<< HEAD
+=======
+>>>>>>> origin/development
 }

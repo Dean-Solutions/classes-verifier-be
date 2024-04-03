@@ -2,6 +2,7 @@ package edu.agh.dean.classesverifierbe.service;
 
 import edu.agh.dean.classesverifierbe.RO.UserRO;
 import edu.agh.dean.classesverifierbe.dto.UserDTO;
+import edu.agh.dean.classesverifierbe.exceptions.SemesterNotFoundException;
 import edu.agh.dean.classesverifierbe.exceptions.UserAlreadyExistsException;
 import edu.agh.dean.classesverifierbe.model.*;
 import edu.agh.dean.classesverifierbe.model.enums.SemesterType;
@@ -86,7 +87,7 @@ class StudentServiceTest {
 
 
     @Test
-    void testFilteringByTags() {
+    void testFilteringByTags() throws SemesterNotFoundException {
 
         // Setup test data
         Semester currentSemester = new Semester();
@@ -129,11 +130,33 @@ class StudentServiceTest {
 
         Pageable pageable = PageRequest.of(0, 10);
 
-        Page<UserRO> filteredUsers = studentService.getStudentsByCriteria(pageable, "algo", "name", "lastName", "indexNumber", 1, "ACTIVE");
+        Page<UserRO> filteredUsers = studentService.getStudentsByCriteria(pageable, "algo", "name", "lastName", "indexNumber", 1, "ACTIVE",null);
 
 
         assertFalse(filteredUsers.isEmpty());
         assertEquals(1, filteredUsers.getContent().size());
+    }
+
+
+    @Test
+    void getStudentsByCriteriaTest() throws SemesterNotFoundException {
+       User user1 = User.builder().userId(1L).firstName("John").lastName("Doe")
+               .indexNumber("123456").email("john.doe@op.pl").semester(1)
+               .status(UserStatus.ACTIVE).role(Role.STUDENT).build();
+
+       UserRO user1RO = UserRO.builder().userId(1L).firstName("John").lastName("Doe")
+               .indexNumber("123456").email("john.doe@op.pl").status(UserStatus.ACTIVE)
+                .role(Role.STUDENT).build();
+
+        Pageable pageable = Pageable.unpaged();
+        when(userRepository.findAll(any(), eq(pageable))).thenReturn(new PageImpl<>(Arrays.asList(user1)));
+        when(modelMapper.map(any(User.class), eq(UserRO.class))).thenReturn(user1RO);
+        when(semesterRepository.findCurrentSemester()).thenReturn(Optional.of(new Semester()));
+        studentService.getStudentsByCriteria(pageable, null, "john", null, null, null, "ACTIVE",null);
+
+
+        verify(userRepository).findAll(any(), eq(pageable));
+        verify(modelMapper, times(1)).map(any(User.class), eq(UserRO.class));
     }
 
 

@@ -31,7 +31,7 @@ public class SubjectTagController {
     }
 
     @GetMapping
-    public ResponseEntity<List<SubjectTagRO>> getAllTags() throws SubjectTagNotFoundException {
+    public ResponseEntity<List<SubjectTagRO>> getAllTags(){
         List<SubjectTagRO> tags = tagService.getAllTags();
         return ResponseEntity.ok(tags);
     }

@@ -45,7 +45,7 @@ public class SubjectController {
     @GetMapping
     public ResponseEntity<Page<Subject>> getAllSubjects(Pageable pageable,
                                                         @RequestParam(required = false) String tags,
-                                                        @RequestParam(required = false) String name) throws SubjectNotFoundException {
+                                                        @RequestParam(required = false) String name) {
         Page<Subject> subjects = subjectService.getAllSubjects(tags, name, pageable);
         return ResponseEntity.ok(subjects);
     }
