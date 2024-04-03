@@ -46,14 +46,20 @@ public class EnrollmentService {
         return enrollmentRepository.save(convertToEnrollment(user, subject, currentSemester));
     }
 
-    public List<Enrollment> getEnrolledSubjectsByUserId(Long userId) throws UserNotFoundException {
-        studentService.getRawUserById(userId);
-        return enrollmentRepository.findAllByEnrollStudent_UserId(userId);
+    public List<Enrollment> getEnrolledSubjectsByUserId(Long userId, Long semesterId) throws UserNotFoundException, SemesterNotFoundException {
+        User user = studentService.getRawUserById(userId);
+        Semester semester = getSemesterForEnrollment(semesterId);
+        return enrollmentRepository.findAllByEnrollStudentAndSemester(user, semester);
     }
 
-    public List<Enrollment> getEnrolledSubjectsByUserIndex(String index) throws UserNotFoundException {
+    public List<Enrollment> getEnrolledSubjectsByUserIndex(String index, Long semesterId) throws UserNotFoundException, SemesterNotFoundException {
         User user = studentService.findUserByIndexNumber(index);
-        return enrollmentRepository.findAllByEnrollStudent_UserId(user.getUserId());
+        Semester semester = getSemesterForEnrollment(semesterId);
+        return enrollmentRepository.findAllByEnrollStudentAndSemester(user, semester);
+    }
+
+    private Semester getSemesterForEnrollment(Long semesterId) throws SemesterNotFoundException {
+        return semesterId == null ? semesterService.getCurrentSemester() : semesterService.getSemesterById(semesterId);
     }
 
     public Enrollment updateEnrollmentForUser(EnrollDTO enrollDTO) throws UserNotFoundException, SubjectNotFoundException, SemesterNotFoundException, EnrollmentNotFoundException {
