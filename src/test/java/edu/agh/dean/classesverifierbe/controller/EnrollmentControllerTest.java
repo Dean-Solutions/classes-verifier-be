@@ -46,41 +46,44 @@ class EnrollmentControllerTest {
         this.objectMapper = new ObjectMapper();
     }
     @Test
-    void whenGetEnrolledSubjectsByUserId_thenReturnEmptyList() throws Exception {
-
+    void whenGetEnrolledSubjectsByUserIdAndSemester_thenReturnEmptyList() throws Exception {
         Long userId = 1L;
-        given(enrollmentService.getEnrolledSubjectsByUserId(userId)).willReturn(Collections.emptyList());
+        Long semesterId = 1L;
+        given(enrollmentService.getEnrolledSubjectsByUserId(userId, semesterId)).willReturn(Collections.emptyList());
 
-
-        mockMvc.perform(get("/enrollment/user/{userId}", userId)
+        mockMvc.perform(get("/enrollment/user")
+                        .param("userId", userId.toString())
+                        .param("semesterId", semesterId.toString())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json("[]"));
 
-        verify(enrollmentService, times(1)).getEnrolledSubjectsByUserId(userId);
+        verify(enrollmentService, times(1)).getEnrolledSubjectsByUserId(userId, semesterId);
     }
 
     @Test
-    void whenGetEnrolledSubjectsByUserId_thenReturnNonEmptyList() throws Exception {
-
+    void whenGetEnrolledSubjectsByUserIdAndSemester_thenReturnNonEmptyList() throws Exception {
         Long userId = 1L;
+        Long semesterId = 1L;
         Enrollment enrollment = new Enrollment();
         enrollment.setEnrollmentId(1L);
 
-
         List<Enrollment> expectedEnrollments = Collections.singletonList(enrollment);
-        given(enrollmentService.getEnrolledSubjectsByUserId(userId)).willReturn(expectedEnrollments);
+        given(enrollmentService.getEnrolledSubjectsByUserId(userId, semesterId)).willReturn(expectedEnrollments);
 
-
-        mockMvc.perform(get("/enrollment/user/{userId}", userId)
+        mockMvc.perform(get("/enrollment/user")
+                        .param("userId", userId.toString())
+                        .param("semesterId", semesterId.toString())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$[0].enrollmentId").value(expectedEnrollments.get(0).getEnrollmentId()));
 
-        verify(enrollmentService, times(1)).getEnrolledSubjectsByUserId(userId);
+        verify(enrollmentService, times(1)).getEnrolledSubjectsByUserId(userId, semesterId);
     }
+
+
 
 
     @Test

@@ -2,6 +2,7 @@ package edu.agh.dean.classesverifierbe.service;
 
 import edu.agh.dean.classesverifierbe.dto.EnrollDTO;
 import edu.agh.dean.classesverifierbe.exceptions.EnrollmentNotFoundException;
+import edu.agh.dean.classesverifierbe.exceptions.SemesterNotFoundException;
 import edu.agh.dean.classesverifierbe.exceptions.UserNotFoundException;
 import edu.agh.dean.classesverifierbe.model.Enrollment;
 import edu.agh.dean.classesverifierbe.model.Semester;
@@ -49,41 +50,43 @@ class EnrollmentServiceTest {
     }
 
     @Test
-    void whenGetEnrolledSubjectsByUserId_thenReturnsEmptyList() throws UserNotFoundException {
-
+    void whenGetEnrolledSubjectsByUserIdAndSemester_thenReturnsEmptyList() throws UserNotFoundException, SemesterNotFoundException {
         Long userId = 1L;
+        Long semesterId = 1L;
         when(studentService.getRawUserById(userId)).thenReturn(new User());
-        when(enrollmentRepository.findAllByEnrollStudent_UserId(userId)).thenReturn(Collections.emptyList());
+        when(semesterService.getSemesterById(semesterId)).thenReturn(new Semester());
+        when(enrollmentRepository.findAllByEnrollStudentAndSemester(any(User.class), any(Semester.class))).thenReturn(Collections.emptyList());
 
-        List<Enrollment> result = enrollmentService.getEnrolledSubjectsByUserId(userId);
+        List<Enrollment> result = enrollmentService.getEnrolledSubjectsByUserId(userId, semesterId);
 
         verify(studentService, times(1)).getRawUserById(userId);
-        verify(enrollmentRepository, times(1)).findAllByEnrollStudent_UserId(userId);
+        verify(semesterService, times(1)).getSemesterById(semesterId);
         assertTrue(result.isEmpty(), "The result should be an empty list");
     }
 
     @Test
-    void whenGetEnrolledSubjectsByUserId_thenReturnsNonEmptyList() throws UserNotFoundException {
-
+    void whenGetEnrolledSubjectsByUserIdAndSemester_thenReturnsNonEmptyList() throws UserNotFoundException, SemesterNotFoundException {
         Long userId = 1L;
+        Long semesterId = 1L;
         User user = new User();
         user.setUserId(userId);
+        Semester semester = new Semester();
+        semester.setSemesterId(semesterId);
 
         Enrollment enrollment = new Enrollment();
         enrollment.setEnrollmentId(1L);
         enrollment.setEnrollStudent(user);
-
+        enrollment.setSemester(semester);
 
         List<Enrollment> expectedEnrollments = Collections.singletonList(enrollment);
         when(studentService.getRawUserById(userId)).thenReturn(user);
-        when(enrollmentRepository.findAllByEnrollStudent_UserId(userId)).thenReturn(expectedEnrollments);
+        when(semesterService.getSemesterById(semesterId)).thenReturn(semester);
+        when(enrollmentRepository.findAllByEnrollStudentAndSemester(user, semester)).thenReturn(expectedEnrollments);
 
-
-        List<Enrollment> actualEnrollments = enrollmentService.getEnrolledSubjectsByUserId(userId);
-
+        List<Enrollment> actualEnrollments = enrollmentService.getEnrolledSubjectsByUserId(userId, semesterId);
 
         verify(studentService, times(1)).getRawUserById(userId);
-        verify(enrollmentRepository, times(1)).findAllByEnrollStudent_UserId(userId);
+        verify(semesterService, times(1)).getSemesterById(semesterId);
         assertFalse(actualEnrollments.isEmpty(), "The result should not be an empty list");
         assertEquals(expectedEnrollments.size(), actualEnrollments.size(), "The size of returned enrollments should match");
         assertEquals(expectedEnrollments.get(0).getEnrollmentId(), actualEnrollments.get(0).getEnrollmentId(), "The enrollment IDs should match");
