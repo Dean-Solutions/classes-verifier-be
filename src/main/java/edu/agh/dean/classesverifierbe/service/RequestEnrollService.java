@@ -36,7 +36,8 @@ public class RequestEnrollService {
             throws UserNotFoundException,
             RequestNotFoundException,
             UserInsufficientPermissionException,
-            RequestEnrollSingleRequestAlreadyExistsException, EnrollmentNotFoundException {
+            RequestEnrollSingleRequestAlreadyExistsException,
+            EnrollmentNotFoundException {
         RequestEnroll requestEnroll = new RequestEnroll();
         Request request = requestRepository.findById(requestId).orElse(null);
         if (request == null) {
@@ -57,8 +58,13 @@ public class RequestEnrollService {
         Enrollment enrollment = enrollmentRepository.findById(requestEnrollDTO.getEnrollmentId()).orElse(null);
 
         //TODO do zmiany/zapytac
-        if (enrollment == null && Objects.equals(requestEnrollDTO.getRequestEnrollType(), "DELETE")) {
-            throw new EnrollmentNotFoundException();
+        if (enrollment == null) {
+            if(requestEnrollDTO.getToDelete()){
+                throw new EnrollmentNotFoundException();
+            }
+            else{
+                //throw RequestEnrollTypeNotFound
+            }
         }
 
 

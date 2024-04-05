@@ -17,5 +17,5 @@ public class RequestEnrollDTO {
     private Long senderId;
 
     @NotNull(message = "requestEnrollType is required")
-    private String requestEnrollType;  //Add/Delete
+    private Boolean toDelete;  //Add/Delete
 }
