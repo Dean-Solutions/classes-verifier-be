@@ -43,29 +43,38 @@ public class SubjectService {
         if(subjectRepository.findByName(subject.getName()) != null){
             throw new SubjectAlreadyExistsException("name", subject.getName(), "subjects");
         }
-
-        Set<SubjectTag> tags = tagNames.stream()
-                .map(name -> subjectTagRepository.findByName(name)
-                        .orElseGet(() -> {
-                            SubjectTag newTag = new SubjectTag();
-                            newTag.setName(name);
-                            newTag.setDescription("Domyślny opis");
-                            return subjectTagRepository.save(newTag);
-                        }))
-                .collect(Collectors.toSet());
-
+        Set<SubjectTag> tags = getTags(tagNames);
         subject.setSubjectTags(tags);
         return subjectRepository.save(subject);
     }
 
-
-    public Subject updateSubject(Long subjectId,Subject subject) throws SubjectNotFoundException {
+    public Subject updateSubject(Long subjectId, Subject subject, Set<String> tagNames) throws SubjectNotFoundException {
         Subject foundSubject = subjectRepository.findById(subjectId)
                 .orElseThrow(() -> new SubjectNotFoundException("subjectId"));
+
         foundSubject.setName(subject.getName());
         foundSubject.setDescription(subject.getDescription());
+
+        Set<SubjectTag> newTags = getTags(tagNames);
+
+        foundSubject.setSubjectTags(newTags);
+
         return subjectRepository.save(foundSubject);
     }
+
+    private Set<SubjectTag> getTags(Set<String> tagNames) {
+        return tagNames.stream()
+                .map(name -> subjectTagRepository.findByName(name)
+                        .orElseGet(() -> {
+                            SubjectTag newTag = SubjectTag.builder()
+                                    .name(name)
+                                    .description("")
+                                    .build();
+                            return subjectTagRepository.save(newTag);
+                        }))
+                .collect(Collectors.toSet());
+    }
+
 
     public Subject deleteSubject(Long subjectId) throws SubjectNotFoundException {
         Subject subject = getSubjectById(subjectId);
@@ -83,34 +92,6 @@ public class SubjectService {
         Page<Subject> subjects = subjectRepository.findAll(spec, pageable);
 
         return subjects;
-    }
-
-
-
-    public Subject addTagToSubject(Long subjectId, Long tagId) throws SubjectNotFoundException, SubjectTagNotFoundException, SubjectTagAlreadyExistsException{
-        Subject subject = getSubjectById(subjectId);
-        SubjectTag tag = subjectTagRepository.findById(tagId)
-                .orElseThrow(() -> new SubjectTagNotFoundException("tagId"));
-
-        if(subject.getSubjectTags().contains(tag)){
-            throw new SubjectTagAlreadyExistsException("tag",tag.toString(),"subjectTags");
-        }
-        subject.getSubjectTags().add(tag);
-        return subjectRepository.save(subject);
-    }
-
-
-
-    public Subject removeTagFromSubject(Long subjectId, Long tagId) throws SubjectNotFoundException, SubjectTagNotFoundException{
-        Subject subject = getSubjectById(subjectId);
-        SubjectTag tag = subjectTagRepository.findById(tagId)
-                .orElseThrow(() -> new SubjectTagNotFoundException("tagId"));
-
-        if(!subject.getSubjectTags().contains(tag)){
-            throw new SubjectTagNotFoundException("tag",tag.toString(),"subjectTags");
-        }
-        subject.getSubjectTags().remove(tag);
-        return subjectRepository.save(subject);
     }
 
     public Subject getSubjectById(Long subjectId) throws SubjectNotFoundException {

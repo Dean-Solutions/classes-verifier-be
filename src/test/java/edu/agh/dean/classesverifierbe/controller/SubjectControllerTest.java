@@ -70,29 +70,6 @@ class SubjectControllerTest {
     }
 
 
-    @Test
-    void addTagToSubjectShouldReturnOkWhenSuccess() throws Exception {
-
-        Subject subject = new Subject();
-        when(subjectService.addTagToSubject(anyLong(), anyLong())).thenReturn(subject);
-
-        mockMvc.perform(post("/subjects/1/tags/1")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-
-        verify(subjectService).addTagToSubject(1L, 1L);
-    }
-
-    @Test
-    void addTagToSubjectShouldReturnNotFoundWhenSubjectNotFound() throws Exception {
-
-        when(subjectService.addTagToSubject(anyLong(), anyLong())).thenThrow(new SubjectNotFoundException("subjectId"));
-
-        mockMvc.perform(post("/subjects/999/tags/1")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
-    }
-
 
     @Test
     void getUsersEnrolledInSubjectForSemesterShouldReturnListOfUsers() throws Exception {

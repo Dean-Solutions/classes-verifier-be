@@ -122,54 +122,7 @@ class SubjectServiceTest {
         assertEquals("Algebra 101", result.getContent().get(0).getName());
     }
 
-    @Test
-    void shouldAddTagToSubjectSuccessfully() throws Exception {
 
-        Long subjectId = 1L;
-        Long tagId = 1L;
-
-        Subject subject = Subject.builder()
-                .subjectId(subjectId)
-                .name("Math")
-                .subjectTags(new HashSet<>())
-                .build();
-
-        SubjectTag tag = new SubjectTag(1, "Calculus", "Calculus description", new HashSet<>());
-
-        when(subjectRepository.findById(subjectId)).thenReturn(Optional.of(subject));
-        when(subjectTagRepository.findById(tagId)).thenReturn(Optional.of(tag));
-
-
-        subjectService.addTagToSubject(subjectId, tagId);
-
-
-        assertTrue(subject.getSubjectTags().contains(tag));
-        verify(subjectRepository).save(subject);
-    }
-
-    @Test
-    void shouldThrowSubjectTagAlreadyExistsExceptionIfTagAlreadyAssigned() {
-        Long subjectId = 1L;
-        Long tagId = 1L;
-
-        SubjectTag tag = new SubjectTag(1, "Calculus", "Calculus description", new HashSet<>());
-        Set<SubjectTag> tags = new HashSet<>();
-        tags.add(tag);
-
-        Subject subject = Subject.builder()
-                .subjectId(subjectId)
-                .name("Math")
-                .subjectTags(tags)
-                .build();
-
-        when(subjectRepository.findById(subjectId)).thenReturn(Optional.of(subject));
-        when(subjectTagRepository.findById(tagId)).thenReturn(Optional.of(tag));
-
-
-        assertThrows(SubjectTagAlreadyExistsException.class, () -> {
-            subjectService.addTagToSubject(subjectId, tagId);
-        });
-    }
 }
 
 
