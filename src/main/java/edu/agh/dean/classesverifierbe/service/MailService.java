@@ -1,8 +1,10 @@
 package edu.agh.dean.classesverifierbe.service;
 
+import edu.agh.dean.classesverifierbe.dto.MailDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -11,12 +13,13 @@ public class MailService {
     @Autowired
     private JavaMailSender emailSender;
 
+    @Async
     public void sendSimpleMessage(
-            String to, String subject, String text) {
+            MailDTO mailDTO) {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
-        message.setSubject(subject);
-        message.setText(text);
+        message.setTo(mailDTO.getTo());
+        message.setSubject(mailDTO.getSubject());
+        message.setText(mailDTO.getText());
         emailSender.send(message);
     }
 }
