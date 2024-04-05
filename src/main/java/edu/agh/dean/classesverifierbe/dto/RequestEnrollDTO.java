@@ -15,4 +15,7 @@ public class RequestEnrollDTO {
     //Id of User that wants to add Enrollment to the Request is required
     @NotNull(message = "SenderId is required")
     private Long senderId;
+
+    @NotNull(message = "requestEnrollType is required")
+    private String requestEnrollType;  //Add/Delete
 }

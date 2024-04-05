@@ -1,8 +1,10 @@
 package edu.agh.dean.classesverifierbe.service;
 
 import edu.agh.dean.classesverifierbe.RO.RequestRO;
+import edu.agh.dean.classesverifierbe.RO.UserRO;
 import edu.agh.dean.classesverifierbe.dto.RequestDTO;
 import edu.agh.dean.classesverifierbe.exceptions.RequestNotFoundException;
+import edu.agh.dean.classesverifierbe.exceptions.UserInsufficientPermissionException;
 import edu.agh.dean.classesverifierbe.exceptions.UserNotFoundException;
 import edu.agh.dean.classesverifierbe.model.Request;
 import edu.agh.dean.classesverifierbe.model.User;
@@ -12,11 +14,18 @@ import edu.agh.dean.classesverifierbe.model.enums.Role;
 import edu.agh.dean.classesverifierbe.repository.RequestRepository;
 
 import edu.agh.dean.classesverifierbe.repository.UserRepository;
+import edu.agh.dean.classesverifierbe.specifications.RequestSpecifications;
+import edu.agh.dean.classesverifierbe.specifications.UserSpecifications;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class RequestService {
@@ -27,16 +36,15 @@ public class RequestService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public Request addRequest(RequestDTO requestDTO) throws UserNotFoundException {
+    public Request addRequest(RequestDTO requestDTO) throws UserNotFoundException, UserInsufficientPermissionException {
         // TODO Czy tutaj powinna nastąpić weryfikacja że on to on?
         //  Może stworzyć jakiś verify service?
         User user = userRepository.findById(requestDTO.getSenderId()).orElse(null);
         if (user == null)
             throw new UserNotFoundException(requestDTO.getSenderId().toString());
-        //Student shouldn't be able to create GROUP request
+
         if (user.getRole() == Role.STUDENT && requestDTO.getRequestType() != RequestType.SINGLE){
-            //TODO
-            //            throw new UserInsufficientPermissionException();
+            throw new UserInsufficientPermissionException(user.getRole(), requestDTO.getRequestType());
         }
 
         Request request = toRequest(requestDTO);
@@ -70,5 +78,13 @@ public class RequestService {
         RequestRO request = getRequestById(id);
         requestRepository.deleteById(id);
         return request;
+    }
+
+    public Page<RequestRO> getRequestByCriteria(Pageable pageable, String requestType, String senderId) {
+        Page<Request> requests = requestRepository.findAll(RequestSpecifications.byCriteria(requestType, senderId), pageable);
+        List<RequestRO> RequestROs = requests.getContent().stream()
+                .map(this::convertToRequestRO)
+                .collect(Collectors.toList());
+        return new PageImpl<>(RequestROs, pageable, requests.getTotalElements());
     }
 }

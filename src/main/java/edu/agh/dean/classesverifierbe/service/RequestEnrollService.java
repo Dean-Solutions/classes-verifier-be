@@ -1,7 +1,7 @@
 package edu.agh.dean.classesverifierbe.service;
 
 import edu.agh.dean.classesverifierbe.dto.RequestEnrollDTO;
-import edu.agh.dean.classesverifierbe.exceptions.UserNotFoundException;
+import edu.agh.dean.classesverifierbe.exceptions.*;
 import edu.agh.dean.classesverifierbe.model.Enrollment;
 import edu.agh.dean.classesverifierbe.model.Request;
 import edu.agh.dean.classesverifierbe.model.RequestEnroll;
@@ -14,9 +14,9 @@ import edu.agh.dean.classesverifierbe.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.Optional;
 
-import static edu.agh.dean.classesverifierbe.model.enums.RequestType.GROUP;
 import static edu.agh.dean.classesverifierbe.model.enums.RequestType.SINGLE;
 import static edu.agh.dean.classesverifierbe.model.enums.Role.STUDENT;
 
@@ -32,40 +32,40 @@ public class RequestEnrollService {
     private UserRepository userRepository;
 
 
-    public RequestEnroll addRequestEnroll(Long requestId, RequestEnrollDTO requestEnrollDTO) throws UserNotFoundException {
+    public RequestEnroll addRequestEnroll(Long requestId, RequestEnrollDTO requestEnrollDTO)
+            throws UserNotFoundException,
+            RequestNotFoundException,
+            UserInsufficientPermissionException,
+            RequestEnrollSingleRequestAlreadyExistsException, EnrollmentNotFoundException {
         RequestEnroll requestEnroll = new RequestEnroll();
         Request request = requestRepository.findById(requestId).orElse(null);
-//  TODO  add Exception when Request not Created
-//        if (request == null) {
-//            throw new RequestNotFoundException("Current r not found");
-//        }
+        if (request == null) {
+            throw new RequestNotFoundException(requestId);
+        }
 
         User user = userRepository.findById(requestEnrollDTO.getSenderId()).orElse(null);
-//  TODO Check if user that sent the request is the same user^
         if (user == null)
             throw new UserNotFoundException(requestEnrollDTO.getSenderId().toString());
 
-//  TODO  add Permission Exceptions
-//        if(user.getRole() == STUDENT && request.getRequestType() != SINGLE)
-//            throw new UserInsufficientPermissionException();
+        if(user.getRole() == STUDENT && request.getRequestType() != SINGLE)
+            throw new UserInsufficientPermissionException(user.getRole(),  request.getRequestType());
 
-//  TODO  add Exeption when request already created
-//        if(request.getRequestEnrollment().size() > 0 && request.getRequestType() == SINGLE)
-//            throw new RequestEnrollSingleRequestAlreadyExists();
+        if(!request.getRequestEnrollment().isEmpty() && request.getRequestType() == SINGLE)
+            throw new RequestEnrollSingleRequestAlreadyExistsException(requestId);
 
 
         Enrollment enrollment = enrollmentRepository.findById(requestEnrollDTO.getEnrollmentId()).orElse(null);
-//  TODO if RequestEnroll Type DELETE it should exist first else it shouldn't
-//        if (enrollment == null) {
-//            throw new RequestNotFoundException("Current r not found");
-//        }
+
+        //TODO do zmiany/zapytac
+        if (enrollment == null && Objects.equals(requestEnrollDTO.getRequestEnrollType(), "DELETE")) {
+            throw new EnrollmentNotFoundException();
+        }
 
 
         requestEnroll.setEnrollment(enrollment);
         requestEnroll.setRequest(request);
         requestEnroll.setRequestStatus(RequestEnrollStatus.PENDING);
 
-//  TODO Here add sth with ReqEnroll type?
         return requestEnrollRepository.save(requestEnroll);
     }
 

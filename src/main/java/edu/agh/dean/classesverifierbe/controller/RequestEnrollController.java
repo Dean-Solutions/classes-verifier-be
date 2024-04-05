@@ -1,7 +1,7 @@
 package edu.agh.dean.classesverifierbe.controller;
 
 import edu.agh.dean.classesverifierbe.dto.RequestEnrollDTO;
-import edu.agh.dean.classesverifierbe.exceptions.UserNotFoundException;
+import edu.agh.dean.classesverifierbe.exceptions.*;
 import edu.agh.dean.classesverifierbe.model.RequestEnroll;
 import edu.agh.dean.classesverifierbe.service.RequestEnrollService;
 import jakarta.validation.Valid;
@@ -22,7 +22,11 @@ public class RequestEnrollController {
     @PostMapping()
     public ResponseEntity<RequestEnroll> addRequestEnroll(@PathVariable Long requestId,
                                                           @Valid @RequestBody RequestEnrollDTO requestEnrollDTO)
-            throws UserNotFoundException {
+            throws UserNotFoundException,
+            RequestNotFoundException,
+            UserInsufficientPermissionException,
+            RequestEnrollSingleRequestAlreadyExistsException,
+            EnrollmentNotFoundException {
             RequestEnroll newRequestEnroll = requestEnrollService.addRequestEnroll(requestId, requestEnrollDTO);
             return new ResponseEntity<>(newRequestEnroll, HttpStatus.CREATED);
     }
