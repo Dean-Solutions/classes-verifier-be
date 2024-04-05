@@ -12,11 +12,11 @@ To build Docker image of this project you need to build it first using gradle:
 
 Then build Docker image:
 ```console
-docker build -t deanSolutions/dean-be 
+docker build -t dean-be  .
 ```
 
 Then to run container:
 ```console
-docker run -p 8080:8080 deanDolutions/dean-be
+docker run -p 8080:8080 --name dean-be dean-be
 
 ```
