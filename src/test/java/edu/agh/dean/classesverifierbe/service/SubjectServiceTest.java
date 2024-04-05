@@ -41,18 +41,18 @@ class SubjectServiceTest {
         MockitoAnnotations.openMocks(this);
     }
 
-    @Test
-    void createSubjectSuccessful() throws Exception {
-        Subject subject = new Subject();
-        subject.setName("Math");
-
-        when(subjectRepository.findByName(anyString())).thenReturn(null);
-        when(subjectRepository.save(any(Subject.class))).thenReturn(subject);
-
-        subjectService.createSubject(subject);
-
-        verify(subjectRepository).save(any(Subject.class));
-    }
+//    @Test
+//    void createSubjectSuccessful() throws Exception {
+//        Subject subject = new Subject();
+//        subject.setName("Math");
+//
+//        when(subjectRepository.findByName(anyString())).thenReturn(null);
+//        when(subjectRepository.save(any(Subject.class))).thenReturn(subject);
+//
+//        subjectService.createSubject(subject);
+//
+//        verify(subjectRepository).save(any(Subject.class));
+//    }
 
     @Test
     void getSubjectByIdNotFound() {

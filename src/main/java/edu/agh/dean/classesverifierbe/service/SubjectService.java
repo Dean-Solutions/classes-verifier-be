@@ -1,6 +1,7 @@
 package edu.agh.dean.classesverifierbe.service;
 
 import edu.agh.dean.classesverifierbe.RO.UserRO;
+import edu.agh.dean.classesverifierbe.dto.SubjectDTO;
 import edu.agh.dean.classesverifierbe.dto.UserDTO;
 import edu.agh.dean.classesverifierbe.exceptions.*;
 import edu.agh.dean.classesverifierbe.model.Semester;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,13 +39,25 @@ public class SubjectService {
         this.semesterService = semesterService;
     }
 
-    public Subject createSubject(Subject subject) throws SubjectAlreadyExistsException {
-        Subject foundSubject = subjectRepository.findByName(subject.getName());
-        if(foundSubject != null){
-            throw new SubjectAlreadyExistsException("name",subject.getName(),"subjects");
+    public Subject createSubject(Subject subject, Set<String> tagNames) throws SubjectAlreadyExistsException {
+        if(subjectRepository.findByName(subject.getName()) != null){
+            throw new SubjectAlreadyExistsException("name", subject.getName(), "subjects");
         }
+
+        Set<SubjectTag> tags = tagNames.stream()
+                .map(name -> subjectTagRepository.findByName(name)
+                        .orElseGet(() -> {
+                            SubjectTag newTag = new SubjectTag();
+                            newTag.setName(name);
+                            newTag.setDescription("Domyślny opis");
+                            return subjectTagRepository.save(newTag);
+                        }))
+                .collect(Collectors.toSet());
+
+        subject.setSubjectTags(tags);
         return subjectRepository.save(subject);
     }
+
 
     public Subject updateSubject(Long subjectId,Subject subject) throws SubjectNotFoundException {
         Subject foundSubject = subjectRepository.findById(subjectId)

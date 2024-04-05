@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/subjects")
@@ -30,11 +31,11 @@ public class SubjectController {
 
     @PostMapping
     public ResponseEntity<Subject> createSubject(@RequestBody @Valid SubjectDTO subjectDTO) throws SubjectAlreadyExistsException {
+        Set<String> tagNames = subjectDTO.getTagNames();
         Subject subject = modelMapper.map(subjectDTO, Subject.class);
-        Subject createdSubject = subjectService.createSubject(subject);
+        Subject createdSubject = subjectService.createSubject(subject, tagNames);
         return ResponseEntity.ok(createdSubject);
     }
-
     @PutMapping("/{subjectId}")
     public ResponseEntity<Subject> updateSubject(@PathVariable Long subjectId,@RequestBody @Valid SubjectDTO subjectDTO) throws SubjectNotFoundException {
         Subject subject = modelMapper.map(subjectDTO, Subject.class);
