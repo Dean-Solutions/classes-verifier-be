@@ -11,36 +11,48 @@ import org.springframework.http.ResponseEntity;
 
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/request/{requestId}/request-enroll")
 public class RequestEnrollController {
-    @Autowired
-    private RequestEnrollService requestEnrollService;
+    private final RequestEnrollService requestEnrollService;
 
-    @PostMapping()
+    @Autowired
+    public RequestEnrollController(RequestEnrollService requestEnrollService){
+        this.requestEnrollService = requestEnrollService;
+    }
+
+    @PostMapping
     public ResponseEntity<RequestEnroll> addRequestEnroll(@PathVariable Long requestId,
                                                           @Valid @RequestBody RequestEnrollDTO requestEnrollDTO)
             throws UserNotFoundException,
             RequestNotFoundException,
-            UserInsufficientPermissionException,
             RequestEnrollSingleRequestAlreadyExistsException,
-            EnrollmentNotFoundException {
+            EnrollmentNotFoundException, SubjectNotFoundException,
+            SemesterNotFoundException,
+            EnrollmentAlreadyExistException {
             RequestEnroll newRequestEnroll = requestEnrollService.addRequestEnroll(requestId, requestEnrollDTO);
             return new ResponseEntity<>(newRequestEnroll, HttpStatus.CREATED);
     }
 
-    //TODO taki zwykły get sie przyda raczej
-    //TODO delete dodać (np starosta sie walnie przy group add albo ktos zmieni zdanie)
 
-    //
-    //
-//    @GetMapping("/{id}")
-//    public ResponseEntity<RequestEnroll> getRequestEnrollById(@PathVariable Long id, @PathVariable String requestId) {
-//        Optional<RequestEnroll> request = requestEnrollService.getRequestEnrollById(id);
-//        return request
-//                .map(ResponseEntity::ok)
-//                .orElseGet(() -> ResponseEntity.notFound().build());
-//    }
+    @GetMapping
+    public ResponseEntity<List<RequestEnroll>> getRequestEnroll(@PathVariable Long requestId) throws RequestNotFoundException {
+        List<RequestEnroll> newRequestEnroll = requestEnrollService.getAllRequestsEnroll(requestId);
+        return new ResponseEntity<>(newRequestEnroll, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    //napisac
+
+    //TODO w sumie to nie wiem czy chcemy taki endpoint wgle v (i czy to git zapisane)
+    @GetMapping("/{id}")
+    public ResponseEntity<RequestEnroll> getRequestEnrollById(@PathVariable Long requestId, @PathVariable Long id) throws RequestNotFoundException {
+        Optional<RequestEnroll> request = requestEnrollService.getRequestEnrollById(requestId, id);
+        return request
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
 }

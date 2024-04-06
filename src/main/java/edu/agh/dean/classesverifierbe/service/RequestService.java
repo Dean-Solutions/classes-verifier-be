@@ -1,7 +1,6 @@
 package edu.agh.dean.classesverifierbe.service;
 
 import edu.agh.dean.classesverifierbe.RO.RequestRO;
-import edu.agh.dean.classesverifierbe.RO.UserRO;
 import edu.agh.dean.classesverifierbe.dto.RequestDTO;
 import edu.agh.dean.classesverifierbe.exceptions.RequestNotFoundException;
 import edu.agh.dean.classesverifierbe.exceptions.UserInsufficientPermissionException;
@@ -15,7 +14,6 @@ import edu.agh.dean.classesverifierbe.repository.RequestRepository;
 
 import edu.agh.dean.classesverifierbe.repository.UserRepository;
 import edu.agh.dean.classesverifierbe.specifications.RequestSpecifications;
-import edu.agh.dean.classesverifierbe.specifications.UserSpecifications;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -42,10 +40,6 @@ public class RequestService {
         User user = userRepository.findById(requestDTO.getSenderId()).orElse(null);
         if (user == null)
             throw new UserNotFoundException(requestDTO.getSenderId().toString());
-
-        if (user.getRole() == Role.STUDENT && requestDTO.getRequestType() != RequestType.SINGLE){
-            throw new UserInsufficientPermissionException(user.getRole(), requestDTO.getRequestType());
-        }
 
         Request request = toRequest(requestDTO);
         return requestRepository.save(request);

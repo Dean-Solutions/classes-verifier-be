@@ -9,13 +9,13 @@ import lombok.Data;
 @Builder
 public class RequestEnrollDTO {
 
-    @NotNull(message = "EnrollId is required")
-    private Long enrollmentId;
+    @NotNull(message = "UserId is required")
+    private Long userId;
 
-    //Id of User that wants to add Enrollment to the Request is required
+    @NotNull(message = "SubjectId is required")
+    private Long subjectId;
+
+    //Id of User that wants to add RequestEnroll to request is required// must be? ask
     @NotNull(message = "SenderId is required")
     private Long senderId;
-
-    @NotNull(message = "requestEnrollType is required")
-    private Boolean toDelete;  //Add/Delete
 }
