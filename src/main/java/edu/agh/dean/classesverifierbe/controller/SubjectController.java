@@ -73,7 +73,7 @@ public class SubjectController {
             return ResponseEntity.ok(enrolledUsers);
     }
 
-    @GetMapping("/{semester}")
+    @GetMapping("/semester/{semester}")
     public ResponseEntity<List<Subject>> getSubjectsBySemester(@PathVariable Integer semester) {
         List<Subject> subjects = subjectService.getAllSubjectsBySemester(semester);
         return ResponseEntity.ok(subjects);

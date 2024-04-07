@@ -100,27 +100,21 @@ class SubjectServiceTest {
 
 
     @Test
-    void shouldFilterSubjectsByTagsAndName() throws SubjectNotFoundException {
+    void getAllSubjectsBySemesterShouldReturnSubjects() {
+        int semester = 1;
+        List<Subject> expectedSubjects = List.of(new Subject(1L, "Algebra", "Description", 1, null, null));
+        when(subjectRepository.findBySemester(semester)).thenReturn(expectedSubjects);
 
-        PageRequest pageable = PageRequest.of(0, 10);
-        String tags = "Math,Science";
-        String name = "Algebra";
+        List<Subject> actualSubjects = subjectService.getAllSubjectsBySemester(semester);
 
-        Subject subject = new Subject();
-        subject.setName("Algebra 101");
+        assertNotNull(actualSubjects);
+        assertFalse(actualSubjects.isEmpty());
+        assertEquals(expectedSubjects.size(), actualSubjects.size());
+        assertEquals(expectedSubjects.get(0).getName(), actualSubjects.get(0).getName());
 
-
-        when(subjectRepository.findAll(any(Specification.class), eq(pageable)))
-                .thenReturn(new PageImpl<>(Collections.singletonList(subject)));
-
-
-        Page<Subject> result = subjectService.getAllSubjects(tags, name, pageable);
-
-        verify(subjectRepository).findAll(any(Specification.class), eq(pageable));
-        assertFalse(result.isEmpty());
-        assertEquals(1, result.getContent().size());
-        assertEquals("Algebra 101", result.getContent().get(0).getName());
+        verify(subjectRepository).findBySemester(semester);
     }
+
 
 
 }
