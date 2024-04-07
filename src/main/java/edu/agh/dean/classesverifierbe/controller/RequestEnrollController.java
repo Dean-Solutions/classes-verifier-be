@@ -38,20 +38,20 @@ public class RequestEnrollController {
     }
 
 
-    @GetMapping
+    @GetMapping//jakiś młyn sie robi
     public ResponseEntity<List<RequestEnroll>> getRequestEnroll(@PathVariable Long requestId) throws RequestNotFoundException {
         List<RequestEnroll> newRequestEnroll = requestEnrollService.getAllRequestsEnroll(requestId);
         return new ResponseEntity<>(newRequestEnroll, HttpStatus.OK);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id}") // TODO możliwe że przy usunieciu powinno sie czyścić jeśli np sie dodało PENDING enrollment komuś!
     public ResponseEntity<RequestEnroll> deleteRequestEnroll(@PathVariable Long requestId, @PathVariable Long id)
             throws RequestEnrollNotFoundException, RequestNotFoundException {
         RequestEnroll deletedRequestEnroll = requestEnrollService.deleteRequestEnrollById(requestId, id);
         return new ResponseEntity<>(deletedRequestEnroll, HttpStatus.OK);
     }
 
-    //TODO w sumie to nie wiem czy chcemy taki endpoint wgle v (i czy to git zapisane)
+    //TODO w sumie to nie wiem czy chcemy taki endpoint wgle v (i czy to git zapisane)(nie działa)
     @GetMapping("/{id}")
     public ResponseEntity<RequestEnroll> getRequestEnrollById(@PathVariable Long requestId, @PathVariable Long id)
             throws RequestNotFoundException, RequestEnrollNotFoundException {

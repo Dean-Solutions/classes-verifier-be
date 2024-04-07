@@ -5,7 +5,6 @@ import edu.agh.dean.classesverifierbe.dto.RequestDTO;
 
 
 import edu.agh.dean.classesverifierbe.exceptions.RequestNotFoundException;
-import edu.agh.dean.classesverifierbe.exceptions.UserInsufficientPermissionException;
 import edu.agh.dean.classesverifierbe.exceptions.UserNotFoundException;
 import edu.agh.dean.classesverifierbe.model.Request;
 import edu.agh.dean.classesverifierbe.service.RequestService;
@@ -26,7 +25,7 @@ public class RequestController {
     @Autowired
     private RequestService requestService;
     @PostMapping
-    public ResponseEntity<Request> addRequest(@Valid @RequestBody RequestDTO requestDTO) throws UserNotFoundException, UserInsufficientPermissionException {
+    public ResponseEntity<Request> addRequest(@Valid @RequestBody RequestDTO requestDTO) throws UserNotFoundException {
             Request newRequest = requestService.addRequest(requestDTO);
             return new ResponseEntity<>(newRequest, HttpStatus.CREATED);
     }
