@@ -15,8 +15,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static edu.agh.dean.classesverifierbe.model.enums.Role.STUDENT;
 
@@ -104,13 +102,26 @@ public class RequestEnrollService {
         return requestEnrollRepository.save(requestEnroll);
     }
 
-    public Optional<RequestEnroll> getRequestEnrollById(Long requestId, Long id) throws RequestNotFoundException {
-        Request request = requestService.getRawRequestById(requestId);
-        return requestEnrollRepository.findById(id);
+    public RequestEnroll getRequestEnrollById(Long requestId, Long id)
+            throws RequestNotFoundException,
+            RequestEnrollNotFoundException {
+        Request request = requestService.getRawRequestById(requestId); //to idk czy nie powinienem jakos sprawdzic czy on jest w tym requescie XD
+        RequestEnroll requestEnroll = requestEnrollRepository.findById(id).orElse(null);
+        if(requestEnroll == null){
+            throw  new RequestEnrollNotFoundException(id);
+        }
+        return requestEnroll;
     }
 
     public List<RequestEnroll> getAllRequestsEnroll(Long requestId) throws RequestNotFoundException {
         Request request = requestService.getRawRequestById(requestId);
         return new ArrayList<>(request.getRequestEnrollment());
+    }
+
+    public RequestEnroll deleteRequestEnrollById(Long requestId, Long id)
+            throws RequestNotFoundException, RequestEnrollNotFoundException {
+        RequestEnroll deletedRequestEnroll = getRequestEnrollById(requestId, id);
+        requestEnrollRepository.delete(deletedRequestEnroll);
+        return deletedRequestEnroll;
     }
 }

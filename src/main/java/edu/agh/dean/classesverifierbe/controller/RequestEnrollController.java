@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/request/{requestId}/request-enroll")
+@RequestMapping("/request/{requestId}/request-enroll") //TODO zapytać czy to dobry pomysl z tym pathem XD
 public class RequestEnrollController {
     private final RequestEnrollService requestEnrollService;
 
@@ -45,14 +45,17 @@ public class RequestEnrollController {
     }
 
     @DeleteMapping("/{id}")
-    //napisac
+    public ResponseEntity<RequestEnroll> deleteRequestEnroll(@PathVariable Long requestId, @PathVariable Long id)
+            throws RequestEnrollNotFoundException, RequestNotFoundException {
+        RequestEnroll deletedRequestEnroll = requestEnrollService.deleteRequestEnrollById(requestId, id);
+        return new ResponseEntity<>(deletedRequestEnroll, HttpStatus.OK);
+    }
 
     //TODO w sumie to nie wiem czy chcemy taki endpoint wgle v (i czy to git zapisane)
     @GetMapping("/{id}")
-    public ResponseEntity<RequestEnroll> getRequestEnrollById(@PathVariable Long requestId, @PathVariable Long id) throws RequestNotFoundException {
-        Optional<RequestEnroll> request = requestEnrollService.getRequestEnrollById(requestId, id);
-        return request
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<RequestEnroll> getRequestEnrollById(@PathVariable Long requestId, @PathVariable Long id)
+            throws RequestNotFoundException, RequestEnrollNotFoundException {
+        RequestEnroll request = requestEnrollService.getRequestEnrollById(requestId, id);
+        return new ResponseEntity<>(request, HttpStatus.OK);
     }
 }
