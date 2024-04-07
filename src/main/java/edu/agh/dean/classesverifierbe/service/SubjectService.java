@@ -1,6 +1,7 @@
 package edu.agh.dean.classesverifierbe.service;
 
 import edu.agh.dean.classesverifierbe.RO.UserRO;
+import edu.agh.dean.classesverifierbe.dto.SubjectDTO;
 import edu.agh.dean.classesverifierbe.dto.UserDTO;
 import edu.agh.dean.classesverifierbe.exceptions.*;
 import edu.agh.dean.classesverifierbe.model.Semester;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,21 +39,42 @@ public class SubjectService {
         this.semesterService = semesterService;
     }
 
-    public Subject createSubject(Subject subject) throws SubjectAlreadyExistsException {
-        Subject foundSubject = subjectRepository.findByName(subject.getName());
-        if(foundSubject != null){
-            throw new SubjectAlreadyExistsException("name",subject.getName(),"subjects");
+    public Subject createSubject(Subject subject, Set<String> tagNames) throws SubjectAlreadyExistsException {
+        if(subjectRepository.findByName(subject.getName()) != null){
+            throw new SubjectAlreadyExistsException("name", subject.getName(), "subjects");
         }
+        Set<SubjectTag> tags = getTags(tagNames);
+        subject.setSubjectTags(tags);
         return subjectRepository.save(subject);
     }
 
-    public Subject updateSubject(Long subjectId,Subject subject) throws SubjectNotFoundException {
+    public Subject updateSubject(Long subjectId, Subject subject, Set<String> tagNames) throws SubjectNotFoundException {
         Subject foundSubject = subjectRepository.findById(subjectId)
                 .orElseThrow(() -> new SubjectNotFoundException("subjectId"));
+
         foundSubject.setName(subject.getName());
         foundSubject.setDescription(subject.getDescription());
+
+        Set<SubjectTag> newTags = getTags(tagNames);
+
+        foundSubject.setSubjectTags(newTags);
+
         return subjectRepository.save(foundSubject);
     }
+
+    private Set<SubjectTag> getTags(Set<String> tagNames) {
+        return tagNames.stream()
+                .map(name -> subjectTagRepository.findByName(name)
+                        .orElseGet(() -> {
+                            SubjectTag newTag = SubjectTag.builder()
+                                    .name(name)
+                                    .description("")
+                                    .build();
+                            return subjectTagRepository.save(newTag);
+                        }))
+                .collect(Collectors.toSet());
+    }
+
 
     public Subject deleteSubject(Long subjectId) throws SubjectNotFoundException {
         Subject subject = getSubjectById(subjectId);
@@ -69,34 +92,6 @@ public class SubjectService {
         Page<Subject> subjects = subjectRepository.findAll(spec, pageable);
 
         return subjects;
-    }
-
-
-
-    public Subject addTagToSubject(Long subjectId, Long tagId) throws SubjectNotFoundException, SubjectTagNotFoundException, SubjectTagAlreadyExistsException{
-        Subject subject = getSubjectById(subjectId);
-        SubjectTag tag = subjectTagRepository.findById(tagId)
-                .orElseThrow(() -> new SubjectTagNotFoundException("tagId"));
-
-        if(subject.getSubjectTags().contains(tag)){
-            throw new SubjectTagAlreadyExistsException("tag",tag.toString(),"subjectTags");
-        }
-        subject.getSubjectTags().add(tag);
-        return subjectRepository.save(subject);
-    }
-
-
-
-    public Subject removeTagFromSubject(Long subjectId, Long tagId) throws SubjectNotFoundException, SubjectTagNotFoundException{
-        Subject subject = getSubjectById(subjectId);
-        SubjectTag tag = subjectTagRepository.findById(tagId)
-                .orElseThrow(() -> new SubjectTagNotFoundException("tagId"));
-
-        if(!subject.getSubjectTags().contains(tag)){
-            throw new SubjectTagNotFoundException("tag",tag.toString(),"subjectTags");
-        }
-        subject.getSubjectTags().remove(tag);
-        return subjectRepository.save(subject);
     }
 
     public Subject getSubjectById(Long subjectId) throws SubjectNotFoundException {

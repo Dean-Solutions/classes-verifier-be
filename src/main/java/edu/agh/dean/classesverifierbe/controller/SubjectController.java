@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/subjects")
@@ -30,15 +31,16 @@ public class SubjectController {
 
     @PostMapping
     public ResponseEntity<Subject> createSubject(@RequestBody @Valid SubjectDTO subjectDTO) throws SubjectAlreadyExistsException {
+        Set<String> tagNames = subjectDTO.getTagNames();
         Subject subject = modelMapper.map(subjectDTO, Subject.class);
-        Subject createdSubject = subjectService.createSubject(subject);
+        Subject createdSubject = subjectService.createSubject(subject, tagNames);
         return ResponseEntity.ok(createdSubject);
     }
-
     @PutMapping("/{subjectId}")
-    public ResponseEntity<Subject> updateSubject(@PathVariable Long subjectId,@RequestBody @Valid SubjectDTO subjectDTO) throws SubjectNotFoundException {
+    public ResponseEntity<Subject> updateSubject(@PathVariable Long subjectId, @RequestBody @Valid SubjectDTO subjectDTO) throws SubjectNotFoundException {
         Subject subject = modelMapper.map(subjectDTO, Subject.class);
-        Subject updatedSubject = subjectService.updateSubject(subjectId,subject);
+        Set<String> tagNames = subjectDTO.getTagNames();
+        Subject updatedSubject = subjectService.updateSubject(subjectId, subject, tagNames);
         return ResponseEntity.ok(updatedSubject);
     }
 
@@ -62,17 +64,6 @@ public class SubjectController {
         return ResponseEntity.ok(subject);
     }
 
-    @PostMapping("/{subjectId}/tags/{tagId}")
-    public ResponseEntity<Subject> addTagToSubject(@PathVariable Long subjectId, @PathVariable Long tagId) throws SubjectNotFoundException, SubjectTagNotFoundException, SubjectTagAlreadyExistsException {
-        Subject updatedSubject = subjectService.addTagToSubject(subjectId, tagId);
-        return ResponseEntity.ok(updatedSubject);
-    }
-
-    @DeleteMapping("/{subjectId}/tags/{tagId}")
-    public ResponseEntity<Subject> removeTagFromSubject(@PathVariable Long subjectId, @PathVariable Long tagId) throws SubjectNotFoundException, SubjectTagNotFoundException{
-        Subject updatedSubject = subjectService.removeTagFromSubject(subjectId, tagId);
-        return ResponseEntity.ok(updatedSubject);
-    }
 
     @GetMapping("/{subjectId}/users")
     public ResponseEntity<List<UserRO>> getUsersEnrolledInSubjectForSemester(@PathVariable Long subjectId,
