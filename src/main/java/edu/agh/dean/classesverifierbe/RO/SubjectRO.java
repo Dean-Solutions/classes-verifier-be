@@ -16,5 +16,6 @@ public class SubjectRO {
     private Long subjectId;
     private String name;
     private String description;
+    private Integer semester;
     private Set<SubjectTagRO> subjectTags;
 }

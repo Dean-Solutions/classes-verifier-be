@@ -24,6 +24,16 @@ public class Subject {
 
     private String description;
 
+    private Integer semester;
+
+    @PrePersist
+    @PreUpdate
+    private void prepareData(){
+        if(this.semester == null){
+            this.semester = 1;
+        }
+    }
+
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(
             name = "subTagAssigns",
