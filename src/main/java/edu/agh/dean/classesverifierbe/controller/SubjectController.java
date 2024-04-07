@@ -47,8 +47,9 @@ public class SubjectController {
     @GetMapping
     public ResponseEntity<Page<Subject>> getAllSubjects(Pageable pageable,
                                                         @RequestParam(required = false) String tags,
-                                                        @RequestParam(required = false) String name) {
-        Page<Subject> subjects = subjectService.getAllSubjects(tags, name, pageable);
+                                                        @RequestParam(required = false) String name,
+                                                        @RequestParam(required = false) Integer semester){
+        Page<Subject> subjects = subjectService.getAllSubjects(tags, name, semester,pageable);
         return ResponseEntity.ok(subjects);
     }
 
@@ -70,5 +71,11 @@ public class SubjectController {
                                                                               @RequestParam(required = false) Long semesterId) throws SubjectNotFoundException, SemesterNotFoundException {
             List<UserRO> enrolledUsers = subjectService.getUsersEnrolledInSubjectForSemester(subjectId, semesterId);
             return ResponseEntity.ok(enrolledUsers);
+    }
+
+    @GetMapping("/semester/{semester}")
+    public ResponseEntity<List<Subject>> getSubjectsBySemester(@PathVariable Integer semester) {
+        List<Subject> subjects = subjectService.getAllSubjectsBySemester(semester);
+        return ResponseEntity.ok(subjects);
     }
 }
