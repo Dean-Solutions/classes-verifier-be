@@ -54,6 +54,7 @@ public class SubjectService {
 
         foundSubject.setName(subject.getName());
         foundSubject.setDescription(subject.getDescription());
+        foundSubject.setSemester(subject.getSemester());
 
         Set<SubjectTag> newTags = getTags(tagNames);
 
@@ -84,10 +85,11 @@ public class SubjectService {
         return subject;
     }
 
-    public Page<Subject> getAllSubjects(String tags, String name, Pageable pageable) {
+    public Page<Subject> getAllSubjects(String tags, String name, Integer semester,Pageable pageable) {
         Specification<Subject> spec = Specification
                 .where(SubjectSpecifications.withTags(tags))
-                .and(SubjectSpecifications.withNameLike(name));
+                .and(SubjectSpecifications.withNameLike(name))
+                .and(SubjectSpecifications.withSemester(semester));
 
         Page<Subject> subjects = subjectRepository.findAll(spec, pageable);
 
@@ -127,6 +129,11 @@ public class SubjectService {
                     return userRO;
                 })
                 .collect(Collectors.toList());
+    }
+
+
+    public List<Subject> getAllSubjectsBySemester(Integer semester) {
+        return subjectRepository.findBySemester(semester);
     }
 
 
