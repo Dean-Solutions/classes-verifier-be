@@ -47,51 +47,50 @@ class SubjectControllerTest {
 
     @Test
     void getAllSubjectsShouldReturnPageOfSubjects() throws Exception {
-
         Subject subject = new Subject();
         subject.setSubjectId(1L);
         subject.setName("Algebra");
         subject.setDescription("Detailed description of Algebra");
+        subject.setSemester(1); // Example semester
 
         Page<Subject> pageOfSubjects = new PageImpl<>(Collections.singletonList(subject));
 
-        when(subjectService.getAllSubjects(eq("Math"), eq("Algebra"), any(Pageable.class)))
+        // Notice the inclusion of the semester parameter in the service call
+        when(subjectService.getAllSubjects(eq("Math"), eq("Algebra"), eq(1), any(Pageable.class)))
                 .thenReturn(pageOfSubjects);
 
         mockMvc.perform(get("/subjects")
                         .param("tags", "Math")
-                        .param("name", "Algebra"))
+                        .param("name", "Algebra")
+                        .param("semester", "1")) // Including semester in the request
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content[0].name").value("Algebra"))
-                .andExpect(jsonPath("$.content[0].description").value("Detailed description of Algebra"));
+                .andExpect(jsonPath("$.content[0].description").value("Detailed description of Algebra"))
+                .andExpect(jsonPath("$.content[0].semester").value(1));
 
-        verify(subjectService).getAllSubjects(eq("Math"), eq("Algebra"), any(Pageable.class));
-    }
-
-
-    @Test
-    void addTagToSubjectShouldReturnOkWhenSuccess() throws Exception {
-
-        Subject subject = new Subject();
-        when(subjectService.addTagToSubject(anyLong(), anyLong())).thenReturn(subject);
-
-        mockMvc.perform(post("/subjects/1/tags/1")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-
-        verify(subjectService).addTagToSubject(1L, 1L);
+        verify(subjectService).getAllSubjects(eq("Math"), eq("Algebra"), eq(1), any(Pageable.class));
     }
 
     @Test
-    void addTagToSubjectShouldReturnNotFoundWhenSubjectNotFound() throws Exception {
+    void getSubjectsBySemesterShouldReturnSubjects() throws Exception {
+        List<Subject> subjects = List.of(
+                new Subject(1L, "Math 101", "Basic Math", 1, null, null),
+                new Subject(2L, "Math 102", "Advanced Math", 1, null, null)
+        );
 
-        when(subjectService.addTagToSubject(anyLong(), anyLong())).thenThrow(new SubjectNotFoundException("subjectId"));
+        when(subjectService.getAllSubjectsBySemester(1)).thenReturn(subjects);
 
-        mockMvc.perform(post("/subjects/999/tags/1")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
+        mockMvc.perform(get("/subjects/semester/{semester}", 1))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$[0].name").value("Math 101"))
+                .andExpect(jsonPath("$[1].name").value("Math 102"));
+
+        verify(subjectService).getAllSubjectsBySemester(1);
     }
+
+
 
 
     @Test

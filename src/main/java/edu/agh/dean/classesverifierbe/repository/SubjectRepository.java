@@ -16,4 +16,6 @@ public interface SubjectRepository extends CrudRepository<Subject, Long> {
     Subject findByName(String name);
 
     Page<Subject> findAll(Specification<Subject> spec, Pageable pageable);
+
+    List<Subject> findBySemester(Integer semester);
 }

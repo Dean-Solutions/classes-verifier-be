@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Set;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,4 +17,8 @@ public class SubjectDTO {
     @NotBlank(message = "Name is required")
     private String name;
     private String description;
+    private Integer semester;
+    private Set<String> tagNames;
+
+
 }
