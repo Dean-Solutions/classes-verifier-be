@@ -41,9 +41,13 @@ public class RequestService {
 
     @Autowired
     private EnrollmentService enrollmentService;
-
     @Autowired
     private SemesterService semesterService;
+
+    @Autowired
+    private SubjectService subjectService;
+    @Autowired
+    private StudentService studentService;
     public RequestRO getRequestById(Long id) throws RequestNotFoundException{
         Request request = getRawRequestById(id);
         return convertToRequestRO(request);
@@ -67,7 +71,7 @@ public class RequestService {
     }
 
 
-    @Transactional
+
     public Request createRequest(RequestDTO requestDTO) throws UserNotFoundException, SemesterNotFoundException, SubjectNotFoundException, EnrollmentAlreadyExistException {
         User sender = userRepository.findById(requestDTO.getSenderId())
                 .orElseThrow(() -> new UserNotFoundException(requestDTO.getSenderId().toString()));
@@ -81,15 +85,14 @@ public class RequestService {
         request.setRequestEnrollment(new HashSet<>());
         for (RequestEnrollDTO reDTO : requestDTO.getRequestEnrolls()) {
             Semester semester = reDTO.getSemesterId() != null ? semesterService.getSemesterById(reDTO.getSemesterId()) : semesterService.getCurrentSemester();
-            Enrollment enrollment = enrollmentService.getEnrollmentByUserIdAndSubjectIdAndSemesterId(sender.getUserId(), reDTO.getSubjectId(), semester.getSemesterId());
-//          (****)  if(enrollment == null){
-//                    enrollmentService.assignEnrollmentForUser(EnrollDTO.builder()
-//                            .userId(reDTO.getUserId())
-//                            .subjectId(reDTO.getSubjectId())
-//                            .enrollStatus(EnrollStatus.PROPOSED)
-//                            .build());
-//
-//            } --> maybe it is not needed at all? depends on that, if user will ever use request from enroll. Dean only see requestEnroll directly from requests objects
+            Enrollment enrollment = enrollmentService.getEnrollmentByUserIdAndSubjectIdAndSemesterId(reDTO.getUserId(), reDTO.getSubjectId(), semester.getSemesterId());
+             if(enrollment == null){
+                    enrollment = enrollmentService.assignEnrollmentForUser(EnrollDTO.builder()
+                            .userId(reDTO.getUserId())
+                            .subjectId(reDTO.getSubjectId())
+                            .enrollStatus(EnrollStatus.PROPOSED)
+                            .build());
+            }
             RequestEnroll requestEnroll = RequestEnroll.builder()
                     .request(request)
                     .enrollment(enrollment)
@@ -126,8 +129,8 @@ public class RequestService {
             case ACCEPT://dean change enrollment status to ACCEPTED from PENDING when user cant do it
                 enrollmentService.updateEnrollmentForUser(enrollDTOBuilder(reDTO, EnrollStatus.ACCEPTED));
                 break;
-            case ADD: //dean add new enrollment for user when user demands it - (****) see line 50
-                enrollmentService.assignEnrollmentForUser(enrollDTOBuilder(reDTO, EnrollStatus.PENDING));
+            case ADD: //dean update  enrollment for user when user demands it - from status PROPOSED to PENDING
+                enrollmentService.updateEnrollmentForUser(enrollDTOBuilder(reDTO, EnrollStatus.PENDING));
                 break;
             case DELETE: //dean update enrollment status to rejected  for user when user demands it (simply discards enrollment)
                 enrollmentService.updateEnrollmentForUser(enrollDTOBuilder(reDTO, EnrollStatus.REJECTED));
