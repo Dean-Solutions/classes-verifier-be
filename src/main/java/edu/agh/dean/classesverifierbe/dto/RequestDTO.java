@@ -6,10 +6,13 @@ import lombok.Data;
 import jakarta.validation.constraints.*;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Data
 @Builder
 public class RequestDTO {
+
+    private Long requestId;
     @NotBlank(message = "Description is required")
     private String description;
 
@@ -21,4 +24,6 @@ public class RequestDTO {
 
     @NotNull(message = "SenderId is required")
     private Long senderId;
+
+    private Set<RequestEnrollDTO> requestEnrolls;
 }

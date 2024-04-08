@@ -43,7 +43,7 @@ public class EnrollmentService {
                         user, subject, currentSemester)) {
             throw new EnrollmentAlreadyExistException();
         }
-        return enrollmentRepository.save(convertToEnrollment(user, subject, currentSemester));
+        return enrollmentRepository.save(convertToEnrollment(user, subject, currentSemester, enrollDTO.getEnrollStatus()));
     }
 
     public List<Enrollment> getEnrolledSubjectsByUserId(Long userId) throws UserNotFoundException {
@@ -67,11 +67,14 @@ public class EnrollmentService {
         return enrollmentRepository.save(currEnrollment);
     }
 
-    private Enrollment convertToEnrollment(User user, Subject subject, Semester semester) {
+    private Enrollment convertToEnrollment(User user, Subject subject, Semester semester, EnrollStatus enrollStatus) {
         Enrollment enrollment = new Enrollment();
         enrollment.setEnrollStudent(user);
         enrollment.setEnrollSubject(subject);
         enrollment.setSemester(semester);
+        if(enrollStatus != null){
+            enrollment.setEnrollStatus(enrollStatus);
+        }
         return enrollment;
     }
 
@@ -106,6 +109,13 @@ public class EnrollmentService {
         }
         enrollmentRepository.saveAll(enrollments);
         return enrollments;
+    }
+
+    public Enrollment getEnrollmentByUserIdAndSubjectIdAndSemesterId(Long userId, Long subjectId,Long semesterId) throws UserNotFoundException, SubjectNotFoundException,SemesterNotFoundException{
+        User user = studentService.getRawUserById(userId);
+        Subject subject = subjectService.getSubjectById(subjectId);
+        Semester semester = semesterService.getSemesterById(semesterId);
+        return enrollmentRepository.findEnrollmentByEnrollStudentAndEnrollSubjectAndSemester(user, subject, semester).orElse(null);
     }
 
 }

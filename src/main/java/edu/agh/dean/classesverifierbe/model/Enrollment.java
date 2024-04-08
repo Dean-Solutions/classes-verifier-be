@@ -41,6 +41,7 @@ public class Enrollment {
     private Semester semester; // the semester in which we will complete or retake the subject
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "enrollment")
+    @JsonBackReference
     private Set<RequestEnroll> requestEnrollment;
 
     @PrePersist

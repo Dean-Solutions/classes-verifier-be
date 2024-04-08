@@ -45,6 +45,7 @@ public class User {
     private Role role = Role.STUDENT;;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "user")
+    @JsonManagedReference
     private Set<Request> requests;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "enrollStudent")

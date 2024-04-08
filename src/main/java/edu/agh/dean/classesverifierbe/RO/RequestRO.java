@@ -16,11 +16,9 @@ import java.util.Set;
 @AllArgsConstructor
 public class RequestRO {
     private Long requestId;
-    private Long userId;
+    private Long senderId;
     private String description;
-    private RequestStatus requestStatus;
     private String submissionDate;
     private RequestType requestType;
-    private String hashPassword;
-    Set<RequestEnroll> requestEnrollment;
+    Set<RequestEnroll> requestEnrollments;
 }
