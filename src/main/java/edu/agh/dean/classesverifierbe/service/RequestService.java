@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -59,11 +60,16 @@ public class RequestService {
     }
 
     public Page<RequestRO> getRequestByCriteria(Pageable pageable, String requestType, String senderId) {
-        Page<Request> requests = requestRepository.findAll(RequestSpecifications.byCriteria(requestType, senderId), pageable);
-        List<RequestRO> RequestROs = requests.getContent().stream()
+        Specification<Request> spec = Specification
+                .where(RequestSpecifications.withRequestType(requestType))
+                .and(RequestSpecifications.withSenderId(senderId));
+
+        Page<Request> requests = requestRepository.findAll(spec, pageable);
+        List<RequestRO> requestROs = requests.getContent().stream()
                 .map(this::convertToRequestRO)
                 .collect(Collectors.toList());
-        return new PageImpl<>(RequestROs, pageable, requests.getTotalElements());
+
+        return new PageImpl<>(requestROs, pageable, requests.getTotalElements());
     }
 
 

@@ -37,7 +37,9 @@ public class RequestController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<RequestRO>> getRequests(Pageable pageable, @RequestParam(required = false) String requestType, @RequestParam(required = false) String senderId)  {
+    public ResponseEntity<Page<RequestRO>> getRequests(Pageable pageable,
+                                                       @RequestParam(required = false) String requestType,
+                                                       @RequestParam(required = false) String senderId) {
         Page<RequestRO> requests = requestService.getRequestByCriteria(pageable, requestType, senderId);
         return ResponseEntity.ok(requests);
     }
