@@ -55,7 +55,6 @@ public class StudentControllerTest {
 
             return user;
         });
-
     }
 
     @Test

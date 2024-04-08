@@ -1,5 +1,5 @@
 package edu.agh.dean.classesverifierbe.model.enums;
 
 public enum RequestType {
-    GROUP, SINGLE
+    ADD, DELETE,ACCEPT
 }

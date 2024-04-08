@@ -78,7 +78,9 @@ public class EnrollmentService {
         enrollment.setEnrollStudent(user);
         enrollment.setEnrollSubject(subject);
         enrollment.setSemester(semester);
-        enrollment.setEnrollStatus(enrollStatus);
+        if(enrollStatus != null){
+            enrollment.setEnrollStatus(enrollStatus);
+        }
         return enrollment;
     }
 
@@ -113,6 +115,13 @@ public class EnrollmentService {
         }
         enrollmentRepository.saveAll(enrollments);
         return enrollments;
+    }
+
+    public Enrollment getEnrollmentByUserIdAndSubjectIdAndSemesterId(Long userId, Long subjectId,Long semesterId) throws UserNotFoundException, SubjectNotFoundException,SemesterNotFoundException{
+        User user = studentService.getRawUserById(userId);
+        Subject subject = subjectService.getSubjectById(subjectId);
+        Semester semester = semesterService.getSemesterById(semesterId);
+        return enrollmentRepository.findEnrollmentByEnrollStudentAndEnrollSubjectAndSemester(user, subject, semester).orElse(null);
     }
 
 }

@@ -91,11 +91,29 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(mapToJson(ex), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler({RequestNotFoundException.class})
+    @ResponseBody
+    public ResponseEntity<?> handleRequestExceptions(Exception ex) {
+        if (ex instanceof RequestNotFoundException) {
+            return new ResponseEntity<>(mapToJson(ex), HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(mapToJson(ex), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler({RequestEnrollNotFoundException.class, RequestEnrollSingleRequestAlreadyExistsException.class})
+    @ResponseBody
+    public ResponseEntity<?> handleRequestEnrollException(Exception ex) {
+        if (ex instanceof RequestEnrollNotFoundException) {
+            return new ResponseEntity<>(mapToJson(ex), HttpStatus.NOT_FOUND);
+        }
+        else if(ex instanceof  RequestEnrollSingleRequestAlreadyExistsException){
+            return new ResponseEntity<>(mapToJson(ex), HttpStatus.FORBIDDEN);
+        }
+        return new ResponseEntity<>(mapToJson(ex), HttpStatus.BAD_REQUEST);
+    }
     private Map<String, String> mapToJson(Exception ex) {
         Map<String, String> body = new HashMap<>();
         body.put("error", ex.getMessage());
         return body;
     }
-
-
 }
