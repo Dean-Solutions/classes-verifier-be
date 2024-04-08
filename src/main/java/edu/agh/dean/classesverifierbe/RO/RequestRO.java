@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 
 import java.util.Set;
 
-
 @Data
 @Builder
 @NoArgsConstructor
@@ -20,5 +19,6 @@ public class RequestRO {
     private String description;
     private String submissionDate;
     private RequestType requestType;
-    Set<RequestEnroll> requestEnrollments;
+    private Set<RequestEnrollRO> requestEnrollments;
 }
+

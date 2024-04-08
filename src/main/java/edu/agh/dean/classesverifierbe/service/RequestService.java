@@ -1,9 +1,8 @@
 package edu.agh.dean.classesverifierbe.service;
 
+import edu.agh.dean.classesverifierbe.RO.RequestEnrollRO;
 import edu.agh.dean.classesverifierbe.RO.RequestRO;
-import edu.agh.dean.classesverifierbe.dto.EnrollDTO;
-import edu.agh.dean.classesverifierbe.dto.RequestDTO;
-import edu.agh.dean.classesverifierbe.dto.RequestEnrollDTO;
+import edu.agh.dean.classesverifierbe.dto.*;
 import edu.agh.dean.classesverifierbe.exceptions.*;
 import edu.agh.dean.classesverifierbe.model.*;
 import edu.agh.dean.classesverifierbe.model.enums.EnrollStatus;
@@ -22,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static edu.agh.dean.classesverifierbe.model.enums.RequestEnrollStatus.ACCEPTED;
@@ -53,10 +53,6 @@ public class RequestService {
         return convertToRequestRO(request);
     }
 
-    private RequestRO convertToRequestRO(Request request) {
-        return modelMapper.map(request, RequestRO.class);
-    }
-
     public Request getRawRequestById(Long id) throws RequestNotFoundException {
         return requestRepository.findById(id)
                 .orElseThrow(() -> new RequestNotFoundException("id", id.toString()));
@@ -72,7 +68,7 @@ public class RequestService {
 
 
 
-    public Request createRequest(RequestDTO requestDTO) throws UserNotFoundException, SemesterNotFoundException, SubjectNotFoundException, EnrollmentAlreadyExistException {
+    public RequestRO createRequest(RequestDTO requestDTO) throws UserNotFoundException, SemesterNotFoundException, SubjectNotFoundException, EnrollmentAlreadyExistException {
         User sender = userRepository.findById(requestDTO.getSenderId())
                 .orElseThrow(() -> new UserNotFoundException(requestDTO.getSenderId().toString()));
 
@@ -100,10 +96,11 @@ public class RequestService {
                     .build();
             request.getRequestEnrollment().add(requestEnroll);
         }
-        return requestRepository.save(request);
+        Request savedRequest = requestRepository.save(request);
+        return convertToRequestRO(savedRequest);
     }
     @Transactional
-    public Request updateRequest(RequestDTO requestDTO) throws RequestEnrollNotFoundException, UserNotFoundException, SubjectNotFoundException, SemesterNotFoundException, EnrollmentNotFoundException, EnrollmentAlreadyExistException{
+    public RequestRO updateRequest(RequestDTO requestDTO) throws RequestEnrollNotFoundException, UserNotFoundException, SubjectNotFoundException, SemesterNotFoundException, EnrollmentNotFoundException, EnrollmentAlreadyExistException{
         Request request = requestRepository.findById(requestDTO.getRequestId())
                 .orElseThrow(() -> new IllegalArgumentException("Request not found"));
 
@@ -120,8 +117,8 @@ public class RequestService {
             }
             requestEnrollRepository.save(requestEnroll);
         }
-
-        return requestRepository.save(request);
+        Request savedRequest = requestRepository.save(request);
+        return convertToRequestRO(savedRequest);
     }
 
     private void processEnrollmentChange(RequestDTO requestDTO, RequestEnrollDTO reDTO) throws UserNotFoundException, SubjectNotFoundException, SemesterNotFoundException, EnrollmentNotFoundException, EnrollmentAlreadyExistException {
@@ -145,6 +142,33 @@ public class RequestService {
                 .userId(reDTO.getUserId())
                 .subjectId(reDTO.getSubjectId())
                 .enrollStatus(status)
+                .build();
+    }
+
+
+    private RequestEnrollRO convertToRequestEnrollRO(RequestEnroll requestEnroll) {
+        UserDTO userDTO = modelMapper.map(requestEnroll.getEnrollment().getEnrollStudent(), UserDTO.class);
+        SubjectDTO subjectDTO = modelMapper.map(requestEnroll.getEnrollment().getEnrollSubject(), SubjectDTO.class);
+
+        return RequestEnrollRO.builder()
+                .requestEnrollId(requestEnroll.getRequestEnrollId())
+                .requestStatus(requestEnroll.getRequestStatus())
+                .user(userDTO)
+                .subject(subjectDTO)
+                .build();
+    }
+
+    private RequestRO convertToRequestRO(Request request) {
+        Set<RequestEnrollRO> requestEnrollROs = request.getRequestEnrollment().stream()
+                .map(this::convertToRequestEnrollRO)
+                .collect(Collectors.toSet());
+        return RequestRO.builder()
+                .requestId(request.getRequestId())
+                .senderId(request.getUser().getUserId())
+                .description(request.getDescription())
+                .submissionDate(request.getSubmissionDate().toString())
+                .requestType(request.getRequestType())
+                .requestEnrollments(requestEnrollROs)
                 .build();
     }
 }

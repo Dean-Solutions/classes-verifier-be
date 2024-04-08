@@ -16,7 +16,6 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(exclude = {"requests", "enrollments"})
-
 public class User {
 
     @Id

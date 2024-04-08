@@ -25,14 +25,14 @@ public class RequestController {
     }
 
     @PostMapping
-    public ResponseEntity<Request> createRequest(@Valid @RequestBody RequestDTO requestDTO) throws UserNotFoundException, SemesterNotFoundException, SubjectNotFoundException, EnrollmentAlreadyExistException {
-        Request newRequest = requestService.createRequest(requestDTO);
+    public ResponseEntity<RequestRO> createRequest(@Valid @RequestBody RequestDTO requestDTO) throws UserNotFoundException, SemesterNotFoundException, SubjectNotFoundException, EnrollmentAlreadyExistException {
+        RequestRO newRequest = requestService.createRequest(requestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(newRequest);
     }
 
     @PutMapping
-    public ResponseEntity<Request> updateRequest(@Valid @RequestBody RequestDTO requestDTO) throws RequestEnrollNotFoundException, UserNotFoundException, SubjectNotFoundException, SemesterNotFoundException, EnrollmentNotFoundException, EnrollmentAlreadyExistException {
-        Request updatedRequest = requestService.updateRequest(requestDTO);
+    public ResponseEntity<RequestRO> updateRequest(@Valid @RequestBody RequestDTO requestDTO) throws RequestEnrollNotFoundException, UserNotFoundException, SubjectNotFoundException, SemesterNotFoundException, EnrollmentNotFoundException, EnrollmentAlreadyExistException {
+        RequestRO updatedRequest = requestService.updateRequest(requestDTO);
         return ResponseEntity.ok(updatedRequest);
     }
 
