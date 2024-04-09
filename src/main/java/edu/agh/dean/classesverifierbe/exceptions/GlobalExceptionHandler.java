@@ -28,7 +28,8 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler({UserAlreadyExistsException.class, UserNotFoundException.class, UserTagAlreadyExistsException.class, UserTagNotFoundException.class})
+    @ExceptionHandler({UserAlreadyExistsException.class, UserNotFoundException.class, UserTagAlreadyExistsException.class,
+            UserTagNotFoundException.class, InvalidIndexException.class, InvalidEmailException.class})
     @ResponseBody
     public ResponseEntity<?> handleCustomExceptions(Exception ex) {
         if (ex instanceof UserNotFoundException) {
