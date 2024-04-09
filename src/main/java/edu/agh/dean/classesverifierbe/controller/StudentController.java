@@ -28,8 +28,7 @@ public class StudentController {
 
     @PostMapping
     public ResponseEntity<User> addUser(@Valid @RequestBody UserDTO userDto) throws UserAlreadyExistsException,
-            InvalidIndexException,
-            InvalidEmailException {
+            InvalidIndexException {
         User newUser = studentService.addUser(userDto);
         return new ResponseEntity<>(newUser, HttpStatus.CREATED);
 
