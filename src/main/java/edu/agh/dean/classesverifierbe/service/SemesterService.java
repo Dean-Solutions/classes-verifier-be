@@ -9,12 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import edu.agh.dean.classesverifierbe.model.enums.SemesterType;
 
+import java.time.Instant;
 import java.util.List;
 
 @Service
 public class SemesterService {
     @Autowired
     private SemesterRepository semesterRepository;
+    private DeadlineReminderService deadlineReminderService;
 
     public Semester getSemesterById(Long id) throws SemesterNotFoundException  {
         return semesterRepository.findById(id)
@@ -41,6 +43,7 @@ public class SemesterService {
             throw new SemesterAlreadyExistsException("Semester already exists with year: " + semesterDTO.getYear() + " and type: " + semesterDTO.getSemesterType());
         }
         semester.setDeadline(semesterDTO.getDeadline());
+        deadlineReminderService.scheduleReminder(Instant.from(semesterDTO.getDeadline()));
         return semesterRepository.save(semester);
     }
 
