@@ -33,7 +33,7 @@ public class StudentService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public User addUser(UserDTO userDTO) throws UserAlreadyExistsException, InvalidIndexException, InvalidEmailException {
+    public User addUser(UserDTO userDTO) throws UserAlreadyExistsException, InvalidIndexException {
 
         validateStudentIndex(userDTO.getIndexNumber());
 
