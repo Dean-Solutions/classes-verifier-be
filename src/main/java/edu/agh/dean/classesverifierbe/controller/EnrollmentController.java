@@ -57,15 +57,17 @@ public class EnrollmentController {
         return ResponseEntity.ok(updatedEnroll);
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Enrollment>> getEnrolledSubjectsByUserId(@PathVariable Long userId) throws UserNotFoundException {
-        return ResponseEntity.ok(enrollmentService.getEnrolledSubjectsByUserId(userId));
+    @GetMapping("/user")
+    public ResponseEntity<List<Enrollment>> getEnrolledSubjectsByUserId(@RequestParam Long userId,
+                                                                        @RequestParam(required = false) Long semesterId) throws UserNotFoundException, SemesterNotFoundException {
+        return ResponseEntity.ok(enrollmentService.getEnrolledSubjectsByUserId(userId, semesterId));
     }
 
 
-    @GetMapping("/index/{index}")
-    public ResponseEntity<List<Enrollment>> getEnrolledSubjectsByUserIndex(@PathVariable String index) throws UserNotFoundException {
-        return ResponseEntity.ok(enrollmentService.getEnrolledSubjectsByUserIndex(index));
+    @GetMapping("/index")
+    public ResponseEntity<List<Enrollment>> getEnrolledSubjectsByUserIndex(@RequestParam String index,
+                                                                           @RequestParam(required = false) Long semesterId) throws UserNotFoundException, SemesterNotFoundException {
+        return ResponseEntity.ok(enrollmentService.getEnrolledSubjectsByUserIndex(index, semesterId));
     }
 
 

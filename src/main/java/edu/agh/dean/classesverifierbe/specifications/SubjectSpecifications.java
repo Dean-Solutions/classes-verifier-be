@@ -33,5 +33,13 @@ public class SubjectSpecifications {
             return cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%");
         };
     }
+
+    public static Specification<Subject> withSemester(Integer semester) {
+        return (root, query, cb) -> {
+            if (semester == null) return null;
+
+            return cb.equal(root.get("semester"), semester);
+        };
+    }
 }
 

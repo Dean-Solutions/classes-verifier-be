@@ -16,6 +16,8 @@ public class EnrollDTO {
     @NotNull(message = "subjectId is required")
     private Long subjectId;
 
+    private Long semesterId;
+
     private EnrollStatus enrollStatus;
 
 }

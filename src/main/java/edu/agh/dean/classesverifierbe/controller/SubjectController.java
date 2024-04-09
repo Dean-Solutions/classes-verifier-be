@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/subjects")
@@ -30,23 +31,25 @@ public class SubjectController {
 
     @PostMapping
     public ResponseEntity<Subject> createSubject(@RequestBody @Valid SubjectDTO subjectDTO) throws SubjectAlreadyExistsException {
+        Set<String> tagNames = subjectDTO.getTagNames();
         Subject subject = modelMapper.map(subjectDTO, Subject.class);
-        Subject createdSubject = subjectService.createSubject(subject);
+        Subject createdSubject = subjectService.createSubject(subject, tagNames);
         return ResponseEntity.ok(createdSubject);
     }
-
     @PutMapping("/{subjectId}")
-    public ResponseEntity<Subject> updateSubject(@PathVariable Long subjectId,@RequestBody @Valid SubjectDTO subjectDTO) throws SubjectNotFoundException {
+    public ResponseEntity<Subject> updateSubject(@PathVariable Long subjectId, @RequestBody @Valid SubjectDTO subjectDTO) throws SubjectNotFoundException {
         Subject subject = modelMapper.map(subjectDTO, Subject.class);
-        Subject updatedSubject = subjectService.updateSubject(subjectId,subject);
+        Set<String> tagNames = subjectDTO.getTagNames();
+        Subject updatedSubject = subjectService.updateSubject(subjectId, subject, tagNames);
         return ResponseEntity.ok(updatedSubject);
     }
 
     @GetMapping
     public ResponseEntity<Page<Subject>> getAllSubjects(Pageable pageable,
                                                         @RequestParam(required = false) String tags,
-                                                        @RequestParam(required = false) String name) {
-        Page<Subject> subjects = subjectService.getAllSubjects(tags, name, pageable);
+                                                        @RequestParam(required = false) String name,
+                                                        @RequestParam(required = false) Integer semester){
+        Page<Subject> subjects = subjectService.getAllSubjects(tags, name, semester,pageable);
         return ResponseEntity.ok(subjects);
     }
 
@@ -62,22 +65,17 @@ public class SubjectController {
         return ResponseEntity.ok(subject);
     }
 
-    @PostMapping("/{subjectId}/tags/{tagId}")
-    public ResponseEntity<Subject> addTagToSubject(@PathVariable Long subjectId, @PathVariable Long tagId) throws SubjectNotFoundException, SubjectTagNotFoundException, SubjectTagAlreadyExistsException {
-        Subject updatedSubject = subjectService.addTagToSubject(subjectId, tagId);
-        return ResponseEntity.ok(updatedSubject);
-    }
-
-    @DeleteMapping("/{subjectId}/tags/{tagId}")
-    public ResponseEntity<Subject> removeTagFromSubject(@PathVariable Long subjectId, @PathVariable Long tagId) throws SubjectNotFoundException, SubjectTagNotFoundException{
-        Subject updatedSubject = subjectService.removeTagFromSubject(subjectId, tagId);
-        return ResponseEntity.ok(updatedSubject);
-    }
 
     @GetMapping("/{subjectId}/users")
     public ResponseEntity<List<UserRO>> getUsersEnrolledInSubjectForSemester(@PathVariable Long subjectId,
                                                                               @RequestParam(required = false) Long semesterId) throws SubjectNotFoundException, SemesterNotFoundException {
             List<UserRO> enrolledUsers = subjectService.getUsersEnrolledInSubjectForSemester(subjectId, semesterId);
             return ResponseEntity.ok(enrolledUsers);
+    }
+
+    @GetMapping("/semester/{semester}")
+    public ResponseEntity<List<Subject>> getSubjectsBySemester(@PathVariable Integer semester) {
+        List<Subject> subjects = subjectService.getAllSubjectsBySemester(semester);
+        return ResponseEntity.ok(subjects);
     }
 }
