@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 public class StudentService {
 
     public static final int INDEX_LEN = 6;
-    public static final String EMAIL_REG_PATTERN = "^(.+)@(\\S+)$";
 
     @Autowired
     private UserRepository userRepository;
@@ -37,7 +36,6 @@ public class StudentService {
     public User addUser(UserDTO userDTO) throws UserAlreadyExistsException, InvalidIndexException, InvalidEmailException {
 
         validateStudentIndex(userDTO.getIndexNumber());
-        validateEmail(userDTO.getEmail());
 
         if (userRepository.existsByIndexNumber(userDTO.getIndexNumber())) {
             throw new UserAlreadyExistsException("index number", userDTO.getIndexNumber());
@@ -115,9 +113,5 @@ public class StudentService {
         }
     }
 
-    private void validateEmail(String email) throws InvalidEmailException {
-        if (email == null || !Pattern.compile(EMAIL_REG_PATTERN).matcher(email).matches()) {
-            throw new InvalidEmailException(email);
-        }
-    }
+
 }
