@@ -42,6 +42,10 @@ public class GlobalExceptionHandler {
         }
         else if(ex instanceof UserTagAlreadyExistsException){
             return new ResponseEntity<>(mapToJson(ex), HttpStatus.CONFLICT);
+        } else if (ex instanceof InvalidIndexException) {
+            return new ResponseEntity<>(mapToJson(ex), HttpStatus.FORBIDDEN);
+        } else if (ex instanceof InvalidEmailException) {
+            return new ResponseEntity<>(mapToJson(ex), HttpStatus.FORBIDDEN);
         }
         return new ResponseEntity<>(mapToJson(ex), HttpStatus.BAD_REQUEST);
     }
