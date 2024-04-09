@@ -1,6 +1,8 @@
 package edu.agh.dean.classesverifierbe.service;
 
 import edu.agh.dean.classesverifierbe.dto.EnrollDTO;
+import edu.agh.dean.classesverifierbe.dto.MultiEnrollDTO;
+import edu.agh.dean.classesverifierbe.dto.EnrollForUserDTO;
 import edu.agh.dean.classesverifierbe.exceptions.*;
 import edu.agh.dean.classesverifierbe.model.Enrollment;
 import edu.agh.dean.classesverifierbe.model.Semester;
@@ -11,8 +13,7 @@ import edu.agh.dean.classesverifierbe.repository.EnrollmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class EnrollmentService {
@@ -38,31 +39,30 @@ public class EnrollmentService {
         User user = studentService.getRawUserById(enrollDTO.getUserId());
         Subject subject = subjectService.getSubjectById(enrollDTO.getSubjectId());
         Semester currentSemester = getSemesterForEnrollment(enrollDTO.getSemesterId());
-        if (enrollmentRepository
-                .existsByEnrollStudentAndEnrollSubjectAndSemester(
-                        user, subject, currentSemester)) {
-            throw new EnrollmentAlreadyExistException();
-        }
+        checkIfEnrollmentExists(user, subject, currentSemester);
         return enrollmentRepository.save(convertToEnrollment(user, subject, currentSemester, enrollDTO.getEnrollStatus()));
     }
 
-    public List<Enrollment> getEnrolledSubjectsByUserId(Long userId, Long semesterId) throws UserNotFoundException, SemesterNotFoundException {
-        User user = studentService.getRawUserById(userId);
-        Semester semester = getSemesterForEnrollment(semesterId);
-        return enrollmentRepository.findAllByEnrollStudentAndSemester(user, semester);
+    public List<Enrollment> getEnrolledSubjectsByUserId(EnrollForUserDTO enrollForUserDTO) throws UserNotFoundException, SemesterNotFoundException {
+        User user = studentService.getRawUserById(enrollForUserDTO.getUserId());
+        Semester semester = getSemesterForEnrollment(enrollForUserDTO.getSemesterId());
+        return enrollmentRepository.findAllByEnrollStudentAndSemesterAndEnrollStatusIsIn(user, semester, enrollForUserDTO.getEnrollStatuses());
     }
 
-    public List<Enrollment> getEnrolledSubjectsByUserIndex(String index, Long semesterId) throws UserNotFoundException, SemesterNotFoundException {
-        User user = studentService.findUserByIndexNumber(index);
-        Semester semester = getSemesterForEnrollment(semesterId);
-        return enrollmentRepository.findAllByEnrollStudentAndSemester(user, semester);
+    public List<Enrollment> getEnrolledSubjectsByUserIndex(EnrollForUserDTO enrollForUserDTO) throws UserNotFoundException, SemesterNotFoundException {
+        User user = studentService.findUserByIndexNumber(enrollForUserDTO.getIndex());
+        Semester semester = getSemesterForEnrollment(enrollForUserDTO.getSemesterId());
+        return enrollmentRepository.findAllByEnrollStudentAndSemesterAndEnrollStatusIsIn(user, semester, enrollForUserDTO.getEnrollStatuses());
     }
 
     private Semester getSemesterForEnrollment(Long semesterId) throws SemesterNotFoundException {
         return semesterId == null ? semesterService.getCurrentSemester() : semesterService.getSemesterById(semesterId);
     }
 
-    public Enrollment updateEnrollmentForUser(EnrollDTO enrollDTO) throws UserNotFoundException, SubjectNotFoundException, SemesterNotFoundException, EnrollmentNotFoundException {
+    public Enrollment updateEnrollmentForUser(EnrollDTO enrollDTO) throws UserNotFoundException,
+            SubjectNotFoundException,
+            SemesterNotFoundException,
+            EnrollmentNotFoundException {
         User user = studentService.getRawUserById(enrollDTO.getUserId());
         Subject subject = subjectService.getSubjectById(enrollDTO.getSubjectId());
         Semester currentSemester = semesterService.getCurrentSemester();
@@ -71,17 +71,6 @@ public class EnrollmentService {
 
         currEnrollment.setEnrollStatus(enrollDTO.getEnrollStatus());
         return enrollmentRepository.save(currEnrollment);
-    }
-
-    private Enrollment convertToEnrollment(User user, Subject subject, Semester semester, EnrollStatus enrollStatus) {
-        Enrollment enrollment = new Enrollment();
-        enrollment.setEnrollStudent(user);
-        enrollment.setEnrollSubject(subject);
-        enrollment.setSemester(semester);
-        if(enrollStatus != null){
-            enrollment.setEnrollStatus(enrollStatus);
-        }
-        return enrollment;
     }
 
     public Optional<Enrollment> getEnrollmentById(Long enrollmentId){
@@ -124,4 +113,45 @@ public class EnrollmentService {
         return enrollmentRepository.findEnrollmentByEnrollStudentAndEnrollSubjectAndSemester(user, subject, semester).orElse(null);
     }
 
+    public List<Enrollment> assignEnrollmentsForMultipleUsers(MultiEnrollDTO multiEnrollDTO) throws UserNotFoundException,
+            SubjectNotFoundException,
+            SemesterNotFoundException,
+            EnrollmentAlreadyExistException {
+
+        List<Enrollment> createdEnrollments = new ArrayList<>();
+        Semester currentSemester = getSemesterForEnrollment(multiEnrollDTO.getSemesterId());
+        for (Map.Entry<Long, Set<Long>> entry : multiEnrollDTO.getSubjectsToStudents().entrySet()) {
+            Subject subject = subjectService.getSubjectById(entry.getKey());
+            for (Long userId : entry.getValue()) {
+                User user = studentService.getRawUserById(userId);
+                checkIfEnrollmentExists(user, subject, currentSemester);
+                Enrollment enrollment = new Enrollment();
+                enrollment.setEnrollStudent(user);
+                enrollment.setEnrollSubject(subject);
+                enrollment.setSemester(currentSemester);
+                enrollment.setEnrollStatus(multiEnrollDTO.getEnrollStatus());
+                createdEnrollments.add(enrollment);
+            }
+        }
+        return enrollmentRepository.saveAll(createdEnrollments);
+    }
+
+    private void checkIfEnrollmentExists(User user, Subject subject, Semester currentSemester) throws EnrollmentAlreadyExistException {
+        if (enrollmentRepository
+                .existsByEnrollStudentAndEnrollSubjectAndSemester(
+                        user, subject, currentSemester)) {
+            throw new EnrollmentAlreadyExistException();
+        }
+    }
+
+    private Enrollment convertToEnrollment(User user, Subject subject, Semester semester, EnrollStatus enrollStatus) {
+        Enrollment enrollment = new Enrollment();
+        enrollment.setEnrollStudent(user);
+        enrollment.setEnrollSubject(subject);
+        enrollment.setSemester(semester);
+        if(enrollStatus != null){
+            enrollment.setEnrollStatus(enrollStatus);
+        }
+        return enrollment;
+    }
 }
