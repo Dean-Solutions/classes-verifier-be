@@ -28,7 +28,8 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler({UserAlreadyExistsException.class, UserNotFoundException.class, UserTagAlreadyExistsException.class, UserTagNotFoundException.class})
+    @ExceptionHandler({UserAlreadyExistsException.class, UserNotFoundException.class, UserTagAlreadyExistsException.class,
+            UserTagNotFoundException.class, InvalidIndexException.class})
     @ResponseBody
     public ResponseEntity<?> handleCustomExceptions(Exception ex) {
         if (ex instanceof UserNotFoundException) {
@@ -42,6 +43,8 @@ public class GlobalExceptionHandler {
         }
         else if(ex instanceof UserTagAlreadyExistsException){
             return new ResponseEntity<>(mapToJson(ex), HttpStatus.CONFLICT);
+        } else if (ex instanceof InvalidIndexException) {
+            return new ResponseEntity<>(mapToJson(ex), HttpStatus.FORBIDDEN);
         }
         return new ResponseEntity<>(mapToJson(ex), HttpStatus.BAD_REQUEST);
     }
