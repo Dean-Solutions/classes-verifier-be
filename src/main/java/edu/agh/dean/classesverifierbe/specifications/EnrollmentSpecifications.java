@@ -21,7 +21,7 @@ public class EnrollmentSpecifications {
         return (root, query, cb)  -> {
             if (subjectName == null || subjectName.trim().isEmpty()) return null;
             Join<Enrollment, Subject> subjectJoin = root.join("enrollSubject");
-            return cb.equal(subjectJoin.get("subjectName"), subjectName);
+            return cb.equal(subjectJoin.get("name"), subjectName);
         };
     }
     public static Specification<Enrollment> withSemesterId(Long semesterId){
