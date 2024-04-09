@@ -1,6 +1,9 @@
 package edu.agh.dean.classesverifierbe.service;
 
+import edu.agh.dean.classesverifierbe.RO.EnrollmentRO;
 import edu.agh.dean.classesverifierbe.dto.EnrollDTO;
+import edu.agh.dean.classesverifierbe.dto.SubjectDTO;
+import edu.agh.dean.classesverifierbe.dto.UserDTO;
 import edu.agh.dean.classesverifierbe.exceptions.*;
 import edu.agh.dean.classesverifierbe.model.Enrollment;
 import edu.agh.dean.classesverifierbe.model.Semester;
@@ -8,11 +11,19 @@ import edu.agh.dean.classesverifierbe.model.Subject;
 import edu.agh.dean.classesverifierbe.model.User;
 import edu.agh.dean.classesverifierbe.model.enums.EnrollStatus;
 import edu.agh.dean.classesverifierbe.repository.EnrollmentRepository;
+import edu.agh.dean.classesverifierbe.specifications.EnrollmentSpecifications;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class EnrollmentService {
@@ -23,6 +34,9 @@ public class EnrollmentService {
     private final SubjectService subjectService;
 
     @Autowired
+    private ModelMapper modelMapper;
+
+    @Autowired
     public EnrollmentService(EnrollmentRepository enrollmentRepository, StudentService studentService, SemesterService semesterService, SubjectService subjectService) {
         this.enrollmentRepository = enrollmentRepository;
         this.studentService = studentService;
@@ -30,8 +44,39 @@ public class EnrollmentService {
         this.subjectService = subjectService;
     }
 
-    public List<Enrollment> getAllEnrollments() {
-        return enrollmentRepository.findAll();
+//    public List<Enrollment> getAllEnrollments() {
+//        return enrollmentRepository.findAll();
+//    }
+
+    public Page<EnrollmentRO> getAllEnrollments(Pageable pageable, String indexNumber, String subjectName, Long semesterId, String status)
+            throws SemesterNotFoundException {
+        if(semesterId == null){
+            semesterId = semesterService.getCurrentSemester().getSemesterId();
+        }
+        Specification<Enrollment> spec = Specification
+                .where(EnrollmentSpecifications.withIndexNumber(indexNumber))
+                .and(EnrollmentSpecifications.withSubjectName(subjectName))
+                .and(EnrollmentSpecifications.withSemesterId(semesterId))
+                .and(EnrollmentSpecifications.withStatus(status));
+        Page<Enrollment> enrollments = enrollmentRepository.findAll(spec, pageable);
+        List<EnrollmentRO> enrollmentROS = enrollments.getContent().stream()
+                .map(this::convertToEnrollmentRO)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(enrollmentROS, pageable, enrollments.getTotalElements());
+    }
+
+    private EnrollmentRO convertToEnrollmentRO(Enrollment enrollment) {
+        UserDTO userDTO = modelMapper.map(enrollment.getEnrollStudent(), UserDTO.class);
+        SubjectDTO subjectDTO = modelMapper.map(enrollment.getEnrollSubject(), SubjectDTO.class);
+
+        return EnrollmentRO.builder()
+                .enrollmentId(enrollment.getEnrollmentId())
+                .enrollStatus(enrollment.getEnrollStatus())
+                .user(userDTO)
+                .subject(subjectDTO)
+                .semester(enrollment.getSemester())
+                .build();
     }
 
     public Enrollment assignEnrollmentForUser(EnrollDTO enrollDTO) throws UserNotFoundException, SubjectNotFoundException, EnrollmentAlreadyExistException, SemesterNotFoundException {
@@ -123,5 +168,4 @@ public class EnrollmentService {
         Semester semester = semesterService.getSemesterById(semesterId);
         return enrollmentRepository.findEnrollmentByEnrollStudentAndEnrollSubjectAndSemester(user, subject, semester).orElse(null);
     }
-
 }
