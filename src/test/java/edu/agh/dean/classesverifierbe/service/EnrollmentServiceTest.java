@@ -1,6 +1,7 @@
 package edu.agh.dean.classesverifierbe.service;
 
 import edu.agh.dean.classesverifierbe.dto.EnrollDTO;
+import edu.agh.dean.classesverifierbe.dto.EnrollForUserDTO;
 import edu.agh.dean.classesverifierbe.exceptions.EnrollmentNotFoundException;
 import edu.agh.dean.classesverifierbe.exceptions.SemesterNotFoundException;
 import edu.agh.dean.classesverifierbe.exceptions.UserNotFoundException;
@@ -15,14 +16,11 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import static org.mockito.ArgumentMatchers.anyLong;
+
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 class EnrollmentServiceTest {
@@ -53,11 +51,19 @@ class EnrollmentServiceTest {
     void whenGetEnrolledSubjectsByUserIdAndSemester_thenReturnsEmptyList() throws UserNotFoundException, SemesterNotFoundException {
         Long userId = 1L;
         Long semesterId = 1L;
+        Set<EnrollStatus> enrollStatuses = new HashSet<>();
+        enrollStatuses.add(EnrollStatus.ACCEPTED);
+        EnrollForUserDTO enrollForUserDTO = EnrollForUserDTO.builder()
+                .userId(1L)
+                .semesterId(1L)
+                .enrollStatuses(enrollStatuses)
+                .build();
+
         when(studentService.getRawUserById(userId)).thenReturn(new User());
         when(semesterService.getSemesterById(semesterId)).thenReturn(new Semester());
-        when(enrollmentRepository.findAllByEnrollStudentAndSemester(any(User.class), any(Semester.class))).thenReturn(Collections.emptyList());
+        when(enrollmentRepository.findAllByEnrollStudentAndSemesterAndEnrollStatusIsIn(any(User.class), any(Semester.class), anySet())).thenReturn(Collections.emptyList());
 
-        List<Enrollment> result = enrollmentService.getEnrolledSubjectsByUserId(userId, semesterId);
+        List<Enrollment> result = enrollmentService.getEnrolledSubjectsByUserId(enrollForUserDTO);
 
         verify(studentService, times(1)).getRawUserById(userId);
         verify(semesterService, times(1)).getSemesterById(semesterId);
@@ -72,6 +78,14 @@ class EnrollmentServiceTest {
         user.setUserId(userId);
         Semester semester = new Semester();
         semester.setSemesterId(semesterId);
+        Set<EnrollStatus> enrollStatuses = new HashSet<>();
+        enrollStatuses.add(EnrollStatus.ACCEPTED);
+
+        EnrollForUserDTO enrollForUserDTO = EnrollForUserDTO.builder()
+                .userId(1L)
+                .semesterId(1L)
+                .enrollStatuses(enrollStatuses)
+                .build();
 
         Enrollment enrollment = new Enrollment();
         enrollment.setEnrollmentId(1L);
@@ -81,9 +95,9 @@ class EnrollmentServiceTest {
         List<Enrollment> expectedEnrollments = Collections.singletonList(enrollment);
         when(studentService.getRawUserById(userId)).thenReturn(user);
         when(semesterService.getSemesterById(semesterId)).thenReturn(semester);
-        when(enrollmentRepository.findAllByEnrollStudentAndSemester(user, semester)).thenReturn(expectedEnrollments);
+        when(enrollmentRepository.findAllByEnrollStudentAndSemesterAndEnrollStatusIsIn(user, semester, enrollStatuses)).thenReturn(expectedEnrollments);
 
-        List<Enrollment> actualEnrollments = enrollmentService.getEnrolledSubjectsByUserId(userId, semesterId);
+        List<Enrollment> actualEnrollments = enrollmentService.getEnrolledSubjectsByUserId(enrollForUserDTO);
 
         verify(studentService, times(1)).getRawUserById(userId);
         verify(semesterService, times(1)).getSemesterById(semesterId);

@@ -41,7 +41,7 @@ public class User {
     private UserStatus status = UserStatus.ACTIVE;
 
     @Enumerated(EnumType.STRING)
-    private Role role = Role.STUDENT;;
+    private Role role = Role.STUDENT;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "user")
     @JsonManagedReference
