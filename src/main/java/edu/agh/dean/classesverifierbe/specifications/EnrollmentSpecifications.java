@@ -6,7 +6,11 @@ import edu.agh.dean.classesverifierbe.model.Subject;
 import edu.agh.dean.classesverifierbe.model.User;
 import edu.agh.dean.classesverifierbe.model.enums.EnrollStatus;
 import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class EnrollmentSpecifications {
     public static Specification<Enrollment> withIndexNumber(String indexNumber){
@@ -14,6 +18,20 @@ public class EnrollmentSpecifications {
           if (indexNumber == null || indexNumber.trim().isEmpty()) return null;
           Join<Enrollment, User> userJoin = root.join("enrollStudent");
           return cb.equal(userJoin.get("indexNumber"), indexNumber);
+        };
+    }
+
+    public static Specification<Enrollment> withUserId(Long userId){
+        return (root, query, cb)  -> {
+            if (userId == null) return null;
+            return cb.equal(root.get("enrollStudent").get("userId"), userId);
+        };
+    }
+
+    public static Specification<Enrollment> withSubjectId(Long subjectId){
+        return (root, query, cb)  -> {
+            if (subjectId == null) return null;
+            return cb.equal(root.get("enrollSubject").get("subjectId"), subjectId);
         };
     }
 
@@ -32,11 +50,24 @@ public class EnrollmentSpecifications {
         };
     }
 
-    public static Specification<Enrollment> withStatus(String status){
-        return (root, query, cb)  -> {
-            if (status == null || status.trim().isEmpty()) return null;
-            EnrollStatus enrollStatus = EnrollStatus.valueOf(status.toUpperCase());
-            return cb.equal(root.get("enrollStatus"), enrollStatus);
+    public static Specification<Enrollment> withStatuses(String statuses){
+        return (root, query, cb) -> {
+            if (statuses == null || statuses.trim().isEmpty()) return null;
+
+            String[] statusArray = statuses.split(",");
+            List<Predicate> predicates = new ArrayList<>();
+            for (String status : statusArray) {
+                EnrollStatus enrollStatus;
+                try {
+                    enrollStatus = EnrollStatus.valueOf(status.toUpperCase().trim());
+                    predicates.add(cb.equal(root.get("enrollStatus"), enrollStatus));
+                } catch (IllegalArgumentException e) {
+                    System.out.println("Inappriopriate status: " + status);
+                }
+            }
+            Predicate orPredicate = cb.or(predicates.toArray(new Predicate[0]));
+            return orPredicate;
         };
     }
+
 }

@@ -2,15 +2,12 @@ package edu.agh.dean.classesverifierbe.service;
 
 import edu.agh.dean.classesverifierbe.RO.EnrollmentRO;
 import edu.agh.dean.classesverifierbe.dto.EnrollDTO;
-import edu.agh.dean.classesverifierbe.dto.MultiEnrollDTO;
-import edu.agh.dean.classesverifierbe.dto.EnrollForUserDTO;
 import edu.agh.dean.classesverifierbe.dto.SubjectDTO;
 import edu.agh.dean.classesverifierbe.dto.UserDTO;
+import edu.agh.dean.classesverifierbe.dto.MultiEnrollDTO;
+import edu.agh.dean.classesverifierbe.dto.EnrollForUserDTO;
 import edu.agh.dean.classesverifierbe.exceptions.*;
-import edu.agh.dean.classesverifierbe.model.Enrollment;
-import edu.agh.dean.classesverifierbe.model.Semester;
-import edu.agh.dean.classesverifierbe.model.Subject;
-import edu.agh.dean.classesverifierbe.model.User;
+import edu.agh.dean.classesverifierbe.model.*;
 import edu.agh.dean.classesverifierbe.model.enums.EnrollStatus;
 import edu.agh.dean.classesverifierbe.repository.EnrollmentRepository;
 import edu.agh.dean.classesverifierbe.specifications.EnrollmentSpecifications;
@@ -21,12 +18,11 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-
-import java.util.*;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.*;
 
 @Service
 public class EnrollmentService {
@@ -47,12 +43,7 @@ public class EnrollmentService {
         this.subjectService = subjectService;
     }
 
-//    public List<Enrollment> getAllEnrollments() {
-//        return enrollmentRepository.findAll();
-//    }
-
-    public Page<EnrollmentRO> getAllEnrollments(Pageable pageable, String indexNumber, String subjectName, Long semesterId, String status)
-            throws SemesterNotFoundException {
+    public Page<EnrollmentRO> getAllEnrollments(Pageable pageable, String indexNumber, String subjectName, Long semesterId, String statuses, Long userId, Long subjectId) throws SemesterNotFoundException {
         if(semesterId == null){
             semesterId = semesterService.getCurrentSemester().getSemesterId();
         }
@@ -60,7 +51,10 @@ public class EnrollmentService {
                 .where(EnrollmentSpecifications.withIndexNumber(indexNumber))
                 .and(EnrollmentSpecifications.withSubjectName(subjectName))
                 .and(EnrollmentSpecifications.withSemesterId(semesterId))
-                .and(EnrollmentSpecifications.withStatus(status));
+                .and(EnrollmentSpecifications.withStatuses(statuses))
+                .and(EnrollmentSpecifications.withUserId(userId))
+                .and(EnrollmentSpecifications.withSubjectId(subjectId));
+
         Page<Enrollment> enrollments = enrollmentRepository.findAll(spec, pageable);
         List<EnrollmentRO> enrollmentROS = enrollments.getContent().stream()
                 .map(this::convertToEnrollmentRO)
@@ -69,10 +63,13 @@ public class EnrollmentService {
         return new PageImpl<>(enrollmentROS, pageable, enrollments.getTotalElements());
     }
 
+
     private EnrollmentRO convertToEnrollmentRO(Enrollment enrollment) {
         UserDTO userDTO = modelMapper.map(enrollment.getEnrollStudent(), UserDTO.class);
+        Subject subject = enrollment.getEnrollSubject();
+        Set<SubjectTag> subjectTags = subject.getSubjectTags();
         SubjectDTO subjectDTO = modelMapper.map(enrollment.getEnrollSubject(), SubjectDTO.class);
-
+        subjectDTO.setTagNames(subjectTags.stream().map(SubjectTag::getName).collect(Collectors.toSet()));
         return EnrollmentRO.builder()
                 .enrollmentId(enrollment.getEnrollmentId())
                 .enrollStatus(enrollment.getEnrollStatus())
@@ -159,6 +156,7 @@ public class EnrollmentService {
         Semester semester = semesterService.getSemesterById(semesterId);
         return enrollmentRepository.findEnrollmentByEnrollStudentAndEnrollSubjectAndSemester(user, subject, semester).orElse(null);
     }
+
     public List<Enrollment> assignEnrollmentsForMultipleUsers(MultiEnrollDTO multiEnrollDTO) throws UserNotFoundException,
             SubjectNotFoundException,
             SemesterNotFoundException,
