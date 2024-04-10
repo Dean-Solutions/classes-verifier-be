@@ -3,6 +3,8 @@ package edu.agh.dean.classesverifierbe.controller;
 
 import edu.agh.dean.classesverifierbe.RO.EnrollmentRO;
 import edu.agh.dean.classesverifierbe.dto.EnrollDTO;
+import edu.agh.dean.classesverifierbe.dto.MultiEnrollDTO;
+import edu.agh.dean.classesverifierbe.dto.EnrollForUserDTO;
 import edu.agh.dean.classesverifierbe.exceptions.*;
 import edu.agh.dean.classesverifierbe.model.Enrollment;
 import edu.agh.dean.classesverifierbe.service.EnrollmentService;
@@ -65,6 +67,14 @@ public class EnrollmentController {
         return ResponseEntity.ok(enrollmentService.assignEnrollmentForUser(enrollDTO));
     }
 
+    @PostMapping("/multi")
+    public ResponseEntity<List<Enrollment>> assignEnrollmentsForMultipleUsers(@RequestBody @Valid MultiEnrollDTO multiEnrollDTO) throws UserNotFoundException,
+            SemesterNotFoundException,
+            EnrollmentAlreadyExistException,
+            SubjectNotFoundException {
+        return ResponseEntity.ok(enrollmentService.assignEnrollmentsForMultipleUsers(multiEnrollDTO));
+    }
+
     @PutMapping
     public ResponseEntity<Enrollment> updateAssignStatusForUser(@RequestBody @Valid EnrollDTO enrollDTO) throws UserNotFoundException,
             SubjectNotFoundException,
@@ -75,15 +85,13 @@ public class EnrollmentController {
     }
 
     @GetMapping("/user")
-    public ResponseEntity<List<Enrollment>> getEnrolledSubjectsByUserId(@RequestParam Long userId,
-                                                                        @RequestParam(required = false) Long semesterId) throws UserNotFoundException, SemesterNotFoundException {
-        return ResponseEntity.ok(enrollmentService.getEnrolledSubjectsByUserId(userId, semesterId));
+    public ResponseEntity<List<Enrollment>> getEnrolledSubjectsByUserId(@RequestBody @Valid EnrollForUserDTO enrollForUserDTO) throws UserNotFoundException, SemesterNotFoundException {
+        return ResponseEntity.ok(enrollmentService.getEnrolledSubjectsByUserId(enrollForUserDTO));
     }
 
 
     @GetMapping("/index")
-    public ResponseEntity<List<Enrollment>> getEnrolledSubjectsByUserIndex(@RequestParam String index,
-                                                                           @RequestParam(required = false) Long semesterId) throws UserNotFoundException, SemesterNotFoundException {
-        return ResponseEntity.ok(enrollmentService.getEnrolledSubjectsByUserIndex(index, semesterId));
+    public ResponseEntity<List<Enrollment>> getEnrolledSubjectsByUserIndex(@RequestBody @Valid EnrollForUserDTO enrollForUserDTO) throws UserNotFoundException, SemesterNotFoundException {
+        return ResponseEntity.ok(enrollmentService.getEnrolledSubjectsByUserIndex(enrollForUserDTO));
     }
 }

@@ -2,9 +2,7 @@ package edu.agh.dean.classesverifierbe.service;
 
 import edu.agh.dean.classesverifierbe.RO.UserRO;
 import edu.agh.dean.classesverifierbe.dto.UserDTO;
-import edu.agh.dean.classesverifierbe.exceptions.SemesterNotFoundException;
-import edu.agh.dean.classesverifierbe.exceptions.UserAlreadyExistsException;
-import edu.agh.dean.classesverifierbe.exceptions.UserNotFoundException;
+import edu.agh.dean.classesverifierbe.exceptions.*;
 import edu.agh.dean.classesverifierbe.model.Semester;
 import edu.agh.dean.classesverifierbe.model.User;
 import edu.agh.dean.classesverifierbe.repository.SemesterRepository;
@@ -18,10 +16,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
 public class StudentService {
+
+    public static final int INDEX_LEN = 6;
 
     @Autowired
     private UserRepository userRepository;
@@ -32,7 +33,9 @@ public class StudentService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public User addUser(UserDTO userDTO) throws UserAlreadyExistsException{
+    public User addUser(UserDTO userDTO) throws UserAlreadyExistsException, InvalidIndexException {
+
+        validateStudentIndex(userDTO.getIndexNumber());
 
         if (userRepository.existsByIndexNumber(userDTO.getIndexNumber())) {
             throw new UserAlreadyExistsException("index number", userDTO.getIndexNumber());
@@ -103,4 +106,12 @@ public class StudentService {
         userRepository.delete(user);
         return convertToUserRO(user);
     }
+
+    private void validateStudentIndex(String index) throws InvalidIndexException {
+        if (index == null || index.length() != INDEX_LEN || !index.matches("\\d+")) {
+            throw new InvalidIndexException(index);
+        }
+    }
+
+
 }
