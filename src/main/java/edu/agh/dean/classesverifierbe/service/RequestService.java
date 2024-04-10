@@ -6,6 +6,7 @@ import edu.agh.dean.classesverifierbe.dto.*;
 import edu.agh.dean.classesverifierbe.exceptions.*;
 import edu.agh.dean.classesverifierbe.model.*;
 import edu.agh.dean.classesverifierbe.model.enums.EnrollStatus;
+import edu.agh.dean.classesverifierbe.model.enums.RequestType;
 import edu.agh.dean.classesverifierbe.repository.RequestEnrollRepository;
 import edu.agh.dean.classesverifierbe.repository.RequestRepository;
 
@@ -25,8 +26,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static edu.agh.dean.classesverifierbe.model.enums.RequestEnrollStatus.ACCEPTED;
-import static edu.agh.dean.classesverifierbe.model.enums.RequestEnrollStatus.PENDING;
+import static edu.agh.dean.classesverifierbe.model.enums.RequestEnrollStatus.*;
 
 @Service
 public class RequestService {
@@ -117,10 +117,15 @@ public class RequestService {
         for (RequestEnrollDTO reDTO : requestDTO.getRequestEnrolls()) {
             RequestEnroll requestEnroll = requestEnrollRepository.findById(reDTO.getRequestEnrollId())
                     .orElseThrow(() -> new RequestEnrollNotFoundException("id", reDTO.getRequestEnrollId().toString()));
+
             requestEnroll.setRequestStatus(reDTO.getRequestStatus());
             if (requestEnroll.getRequestStatus() == ACCEPTED) {
                 processEnrollmentChange(requestDTO, reDTO);
             }
+            else if(requestEnroll.getRequestStatus() == REJECTED && request.getRequestType() == RequestType.ADD){
+                enrollmentService.updateEnrollmentForUser(enrollDTOBuilder(reDTO, EnrollStatus.REJECTED));
+            }
+
             requestEnrollRepository.save(requestEnroll);
         }
         Request savedRequest = requestRepository.save(request);
