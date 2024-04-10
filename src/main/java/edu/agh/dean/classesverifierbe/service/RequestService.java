@@ -11,6 +11,7 @@ import edu.agh.dean.classesverifierbe.repository.RequestRepository;
 
 import edu.agh.dean.classesverifierbe.repository.UserRepository;
 import edu.agh.dean.classesverifierbe.specifications.RequestSpecifications;
+import edu.agh.dean.classesverifierbe.specifications.UserSpecifications;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,25 +31,27 @@ import static edu.agh.dean.classesverifierbe.model.enums.RequestEnrollStatus.PEN
 
 @Service
 public class RequestService {
+    private final RequestRepository requestRepository;
+    private final UserRepository userRepository;
+    private final ModelMapper modelMapper;
+    private final RequestEnrollRepository requestEnrollRepository;
+    private final EnrollmentService enrollmentService;
+    private final SemesterService semesterService;
+    private final MailService mailService;
     @Autowired
-    private RequestRepository requestRepository;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private ModelMapper modelMapper;
+    public RequestService(RequestRepository requestRepository, UserRepository userRepository,
+                          ModelMapper modelMapper, RequestEnrollRepository requestEnrollRepository,
+                          EnrollmentService enrollmentService, SemesterService semesterService,
+                          MailService mailService) {
+        this.requestRepository = requestRepository;
+        this.userRepository = userRepository;
+        this.modelMapper = modelMapper;
+        this.requestEnrollRepository = requestEnrollRepository;
+        this.enrollmentService = enrollmentService;
+        this.semesterService = semesterService;
+        this.mailService = mailService;
+    }
 
-    @Autowired
-    private RequestEnrollRepository requestEnrollRepository;
-
-    @Autowired
-    private EnrollmentService enrollmentService;
-    @Autowired
-    private SemesterService semesterService;
-
-    @Autowired
-    private SubjectService subjectService;
-    @Autowired
-    private StudentService studentService;
     public RequestRO getRequestById(Long id) throws RequestNotFoundException{
         Request request = getRawRequestById(id);
         return convertToRequestRO(request);
@@ -67,7 +70,7 @@ public class RequestService {
         Page<Request> requests = requestRepository.findAll(spec, pageable);
         List<RequestRO> requestROs = requests.getContent().stream()
                 .map(this::convertToRequestRO)
-                .collect(Collectors.toList());
+                .toList();
 
         return new PageImpl<>(requestROs, pageable, requests.getTotalElements());
     }
@@ -103,10 +106,11 @@ public class RequestService {
             request.getRequestEnrollment().add(requestEnroll);
         }
         Request savedRequest = requestRepository.save(request);
+        notifyDeans();
         return convertToRequestRO(savedRequest);
     }
     @Transactional
-    public RequestRO updateRequest(RequestDTO requestDTO) throws RequestEnrollNotFoundException, UserNotFoundException, SubjectNotFoundException, SemesterNotFoundException, EnrollmentNotFoundException, EnrollmentAlreadyExistException{
+    public RequestRO updateRequest(RequestDTO requestDTO) throws RequestEnrollNotFoundException, UserNotFoundException, SubjectNotFoundException, SemesterNotFoundException, EnrollmentNotFoundException {
         Request request = requestRepository.findById(requestDTO.getRequestId())
                 .orElseThrow(() -> new IllegalArgumentException("Request not found"));
 
@@ -127,7 +131,7 @@ public class RequestService {
         return convertToRequestRO(savedRequest);
     }
 
-    private void processEnrollmentChange(RequestDTO requestDTO, RequestEnrollDTO reDTO) throws UserNotFoundException, SubjectNotFoundException, SemesterNotFoundException, EnrollmentNotFoundException, EnrollmentAlreadyExistException {
+    private void processEnrollmentChange(RequestDTO requestDTO, RequestEnrollDTO reDTO) throws UserNotFoundException, SubjectNotFoundException, SemesterNotFoundException, EnrollmentNotFoundException {
         switch (requestDTO.getRequestType()) {
             case ACCEPT://dean change enrollment status to ACCEPTED from PENDING when user cant do it
                 enrollmentService.updateEnrollmentForUser(enrollDTOBuilder(reDTO, EnrollStatus.ACCEPTED));
@@ -141,6 +145,11 @@ public class RequestService {
             default:
                 throw new IllegalArgumentException("Invalid request type");
         }
+    }
+
+    private void notifyDeans() {
+        userRepository.findAll(UserSpecifications.hasRoleDean())
+                .forEach(user -> mailService.sendNotification(user.getEmail()));
     }
 
     private EnrollDTO enrollDTOBuilder(RequestEnrollDTO reDTO, EnrollStatus status){

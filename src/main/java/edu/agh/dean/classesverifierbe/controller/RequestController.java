@@ -3,7 +3,6 @@ package edu.agh.dean.classesverifierbe.controller;
 import edu.agh.dean.classesverifierbe.RO.RequestRO;
 import edu.agh.dean.classesverifierbe.dto.RequestDTO;
 import edu.agh.dean.classesverifierbe.exceptions.*;
-import edu.agh.dean.classesverifierbe.model.Request;
 import edu.agh.dean.classesverifierbe.service.RequestService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +30,7 @@ public class RequestController {
     }
 
     @PutMapping
-    public ResponseEntity<RequestRO> updateRequest(@Valid @RequestBody RequestDTO requestDTO) throws RequestEnrollNotFoundException, UserNotFoundException, SubjectNotFoundException, SemesterNotFoundException, EnrollmentNotFoundException, EnrollmentAlreadyExistException {
+    public ResponseEntity<RequestRO> updateRequest(@Valid @RequestBody RequestDTO requestDTO) throws RequestEnrollNotFoundException, UserNotFoundException, SubjectNotFoundException, SemesterNotFoundException, EnrollmentNotFoundException {
         RequestRO updatedRequest = requestService.updateRequest(requestDTO);
         return ResponseEntity.ok(updatedRequest);
     }

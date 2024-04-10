@@ -1,6 +1,7 @@
 package edu.agh.dean.classesverifierbe.specifications;
 
 import edu.agh.dean.classesverifierbe.model.*;
+import edu.agh.dean.classesverifierbe.model.enums.EnrollStatus;
 import edu.agh.dean.classesverifierbe.model.enums.Role;
 import edu.agh.dean.classesverifierbe.model.enums.UserStatus;
 import io.micrometer.common.util.StringUtils;
@@ -9,10 +10,9 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import org.springframework.data.jpa.domain.Specification;
 import jakarta.persistence.criteria.Predicate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Arrays;
+
+import java.util.*;
+
 public class UserSpecifications {
 
     public static Specification<User> withTags(String tags) {
@@ -70,6 +70,20 @@ public class UserSpecifications {
                 cb.equal(root.get("role"), Role.STUDENT_REP)
         );
     }
+
+    public static Specification<User> hasRoleDean() {
+        return (root, query, cb) -> cb.equal(root.get("role"), Role.DEAN);
+    }
+
+    public static Specification<User> withEnrollmentStatus(Set<EnrollStatus> enrollStatuses) {
+        return (root, query, cb) -> {
+            Join<Enrollment, User> userEnrollments = root.join("enrollments");
+            CriteriaBuilder.In<EnrollStatus> inClause = cb.in(userEnrollments.get("enrollStatus"));
+            enrollStatuses.forEach(inClause::value);
+            return inClause;
+        };
+    }
+
     public static Optional<UserStatus> convertStringToUserStatus(String status) {
         if (status == null || status.equalsIgnoreCase("null")) {
             return Optional.empty();

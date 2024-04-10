@@ -1,45 +1,36 @@
 package edu.agh.dean.classesverifierbe.service;
 
-import edu.agh.dean.classesverifierbe.dto.MailDTO;
-import edu.agh.dean.classesverifierbe.model.User;
-import edu.agh.dean.classesverifierbe.repository.EnrollmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 
 @Component
 public class MailService {
 
     private final JavaMailSender emailSender;
 
-    private final EnrollmentRepository enrollmentRepository;
-
-
     @Autowired
-    public MailService(JavaMailSender emailSender, EnrollmentRepository enrollmentRepository) {
+    public MailService(JavaMailSender emailSender) {
         this.emailSender = emailSender;
-        this.enrollmentRepository = enrollmentRepository;
     }
 
     @Async
-    public void sendSimpleMessage(
-            MailDTO mailDTO) {
+    public void sendRemainder(String to) {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(mailDTO.getTo());
-        message.setSubject(mailDTO.getSubject());
-        message.setText(mailDTO.getText());
+        message.setTo(to);
+        message.setSubject("Przypomnienie");
+        message.setText("Masz nadal nie zatwierdzonych przedmiotów!");
         emailSender.send(message);
     }
 
-    public void sendRemindingEmail() {
-
-    }
-
-    private List<User> getUsersWithPendingEnrollment() {
-        return null;
+    @Async
+    public void sendNotification(String to) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject("Powiadomienie");
+        message.setText("Nowy wniosek do rozpatrzenia!\nZaloguj się aby poznać szczegóły");
     }
 }

@@ -14,9 +14,14 @@ import java.util.List;
 
 @Service
 public class SemesterService {
+
+    private final SemesterRepository semesterRepository;
+    private final DeadlineReminderService deadlineReminderService;
     @Autowired
-    private SemesterRepository semesterRepository;
-    private DeadlineReminderService deadlineReminderService;
+    public SemesterService(SemesterRepository semesterRepository, DeadlineReminderService deadlineReminderService) {
+        this.semesterRepository = semesterRepository;
+        this.deadlineReminderService = deadlineReminderService;
+    }
 
     public Semester getSemesterById(Long id) throws SemesterNotFoundException  {
         return semesterRepository.findById(id)
@@ -33,8 +38,20 @@ public class SemesterService {
                 .orElseThrow(() -> new SemesterNotFoundException("Current semester not found"));
     }
 
+    private boolean isSemesterStarted() {
+        try {
+            getCurrentSemester();
+            return true;
+        } catch (SemesterNotFoundException ignored) {
+            return false;
+        }
+    }
+
 
     public Semester createSemester(SemesterDTO semesterDTO) throws SemesterAlreadyExistsException{
+        if (isSemesterStarted()) {
+            throw new SemesterAlreadyExistsException("Semester already started");
+        }
         Semester semester = new Semester();
         semester.setSemesterType(semesterDTO.getSemesterType());
         semester.setYear(semesterDTO.getYear());
@@ -43,7 +60,7 @@ public class SemesterService {
             throw new SemesterAlreadyExistsException("Semester already exists with year: " + semesterDTO.getYear() + " and type: " + semesterDTO.getSemesterType());
         }
         semester.setDeadline(semesterDTO.getDeadline());
-        deadlineReminderService.scheduleReminder(Instant.from(semesterDTO.getDeadline()));
+        deadlineReminderService.scheduleReminder(Instant.from(semesterDTO.getDeadline()).minusSeconds(86400));
         return semesterRepository.save(semester);
     }
 
@@ -55,6 +72,7 @@ public class SemesterService {
         semester.setSemesterType(semesterDTO.getSemesterType());
         semester.setYear(semesterDTO.getYear());
         semester.setDeadline(semesterDTO.getDeadline());
+        deadlineReminderService.updateReminder(Instant.from(semesterDTO.getDeadline()).minusSeconds(86400));
         return semesterRepository.save(semester);
     }
 
