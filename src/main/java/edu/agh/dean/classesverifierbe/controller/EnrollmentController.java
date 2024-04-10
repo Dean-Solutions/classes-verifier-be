@@ -49,9 +49,11 @@ public class EnrollmentController {
                                                 @RequestParam(required = false) String indexNumber,
                                                 @RequestParam(required = false) String subjectName,
                                                 @RequestParam(required = false) Long semesterId,
-                                                @RequestParam(required = false) String status)
+                                                @RequestParam(required = false) String statuses,
+                                                                @RequestParam(required = false) Long userId,
+                                                                @RequestParam(required = false) Long subjectId)
             throws SemesterNotFoundException {
-        Page<EnrollmentRO> enrollments = enrollmentService.getAllEnrollments(pageable, indexNumber, subjectName, semesterId, status);
+        Page<EnrollmentRO> enrollments = enrollmentService.getAllEnrollments(pageable, indexNumber, subjectName, semesterId, statuses,userId,subjectId);
         return ResponseEntity.ok(enrollments);
     }
 
