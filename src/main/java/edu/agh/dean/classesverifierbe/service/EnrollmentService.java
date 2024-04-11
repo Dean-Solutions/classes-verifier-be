@@ -198,4 +198,27 @@ public class EnrollmentService {
         }
         return enrollment;
     }
+
+    public EnrollmentRO deleteEnrollment(Long enrollmentId) {
+        Enrollment enrollment = enrollmentRepository.findById(enrollmentId).orElse(null);
+        if (enrollment != null){
+            enrollmentRepository.delete(enrollment);
+            return convertToEnrollmentRO(enrollment);
+        }
+        return null;
+    }
+
+    public EnrollmentRO deleteEnrollmentBySubjectUserSemester(EnrollDTO enrollDTO) throws UserNotFoundException, SemesterNotFoundException, SubjectNotFoundException {
+        User user = studentService.getRawUserById(enrollDTO.getUserId());
+        Subject subject = subjectService.getSubjectById(enrollDTO.getSubjectId());
+        Semester semester = getSemesterForEnrollment(enrollDTO.getSemesterId());
+        Enrollment enrollment = enrollmentRepository.findEnrollmentByEnrollStudentAndEnrollSubjectAndSemester(user, subject, semester).orElse(null);
+        if (enrollment != null){
+
+            enrollmentRepository.delete(enrollment);
+            return convertToEnrollmentRO(enrollment);
+        }
+        return null;
+    }
+
 }

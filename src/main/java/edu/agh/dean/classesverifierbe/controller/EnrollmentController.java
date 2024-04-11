@@ -59,6 +59,8 @@ public class EnrollmentController {
         return ResponseEntity.ok(enrollments);
     }
 
+
+
     @PostMapping
     public ResponseEntity<Enrollment> assignEnrollmentForUser(@RequestBody @Valid EnrollDTO enrollDTO) throws UserNotFoundException,
             SubjectNotFoundException,
@@ -67,8 +69,20 @@ public class EnrollmentController {
         return ResponseEntity.ok(enrollmentService.assignEnrollmentForUser(enrollDTO));
     }
 
+    @DeleteMapping("/{enrollmentId}")
+    public ResponseEntity<EnrollmentRO> deleteEnrollment(@PathVariable Long enrollmentId) {
+        EnrollmentRO enrollmentRO = enrollmentService.deleteEnrollment(enrollmentId);
+        return ResponseEntity.ok(enrollmentRO);
+    }
+
+    @DeleteMapping
+    public ResponseEntity<EnrollmentRO> deleteEnrollmentBySubjectUserSemester(@RequestBody @Valid EnrollDTO enrollDTO) throws UserNotFoundException, SemesterNotFoundException, SubjectNotFoundException{
+        EnrollmentRO enrollmentRO = enrollmentService.deleteEnrollmentBySubjectUserSemester(enrollDTO);
+        return ResponseEntity.ok(enrollmentRO);
+    }
+
     @PostMapping("/multi")
-    public ResponseEntity<List<Enrollment>> assignEnrollmentsForMultipleUsers(@RequestBody @Valid MultiEnrollDTO multiEnrollDTO) throws UserNotFoundException,
+    public ResponseEntity<List<Enrollment>> assignEnrollmentForMultipleUsers(@RequestBody @Valid MultiEnrollDTO multiEnrollDTO) throws UserNotFoundException,
             SemesterNotFoundException,
             EnrollmentAlreadyExistException,
             SubjectNotFoundException {
