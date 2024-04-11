@@ -1,5 +1,6 @@
 package edu.agh.dean.classesverifierbe.service;
 
+import edu.agh.dean.classesverifierbe.RO.EnrollmentRO;
 import edu.agh.dean.classesverifierbe.RO.RequestEnrollRO;
 import edu.agh.dean.classesverifierbe.RO.RequestRO;
 import edu.agh.dean.classesverifierbe.dto.*;
@@ -45,10 +46,6 @@ public class RequestService {
     @Autowired
     private SemesterService semesterService;
 
-    @Autowired
-    private SubjectService subjectService;
-    @Autowired
-    private StudentService studentService;
     public RequestRO getRequestById(Long id) throws RequestNotFoundException{
         Request request = getRawRequestById(id);
         return convertToRequestRO(request);
@@ -105,7 +102,8 @@ public class RequestService {
         Request savedRequest = requestRepository.save(request);
         return convertToRequestRO(savedRequest);
     }
-    @Transactional
+
+
     public RequestRO updateRequest(RequestDTO requestDTO) throws RequestEnrollNotFoundException, UserNotFoundException, SubjectNotFoundException, SemesterNotFoundException, EnrollmentNotFoundException, EnrollmentAlreadyExistException{
         Request request = requestRepository.findById(requestDTO.getRequestId())
                 .orElseThrow(() -> new IllegalArgumentException("Request not found"));
@@ -119,6 +117,7 @@ public class RequestService {
                     .orElseThrow(() -> new RequestEnrollNotFoundException("id", reDTO.getRequestEnrollId().toString()));
 
             requestEnroll.setRequestStatus(reDTO.getRequestStatus());
+            requestEnrollRepository.save(requestEnroll);
             if (requestEnroll.getRequestStatus() == ACCEPTED) {
                 processEnrollmentChange(requestDTO, reDTO);
             }
@@ -126,7 +125,7 @@ public class RequestService {
                 enrollmentService.updateEnrollmentForUser(enrollDTOBuilder(reDTO, EnrollStatus.REJECTED));
             }
 
-            requestEnrollRepository.save(requestEnroll);
+
         }
         Request savedRequest = requestRepository.save(request);
         return convertToRequestRO(savedRequest);
@@ -140,8 +139,8 @@ public class RequestService {
             case ADD: //dean update  enrollment for user when user demands it - from status PROPOSED to PENDING
                 enrollmentService.updateEnrollmentForUser(enrollDTOBuilder(reDTO, EnrollStatus.PENDING));
                 break;
-            case DELETE: //dean update enrollment status to rejected  for user when user demands it (simply discards enrollment)
-                enrollmentService.updateEnrollmentForUser(enrollDTOBuilder(reDTO, EnrollStatus.REJECTED));
+            case DELETE: //dean delete enrollment for user when he demands it (simply removes enrollment)
+                enrollmentService.deleteEnrollmentBySubjectUserSemester(enrollDTOBuilder(reDTO, EnrollStatus.REJECTED));
                 break;
             default:
                 throw new IllegalArgumentException("Invalid request type");
