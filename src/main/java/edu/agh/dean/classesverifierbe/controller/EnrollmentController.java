@@ -7,11 +7,14 @@ import edu.agh.dean.classesverifierbe.dto.MultiEnrollDTO;
 import edu.agh.dean.classesverifierbe.dto.EnrollForUserDTO;
 import edu.agh.dean.classesverifierbe.exceptions.*;
 import edu.agh.dean.classesverifierbe.model.Enrollment;
+import edu.agh.dean.classesverifierbe.model.User;
+import edu.agh.dean.classesverifierbe.service.AuthContextService;
 import edu.agh.dean.classesverifierbe.service.EnrollmentService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 
@@ -20,31 +23,31 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping("/enrollment")
+@RequestMapping("/enrollments")
+@PreAuthorize("hasAnyRole('DEAN', 'STUDENT_REP', 'STUDENT')")
 public class EnrollmentController {
+
 
     private final EnrollmentService enrollmentService;
 
+    private final AuthContextService authContextService;
     @Autowired
-    public EnrollmentController(EnrollmentService enrollmentService) {
+    public EnrollmentController(EnrollmentService enrollmentService, AuthContextService authContextService) {
         this.enrollmentService = enrollmentService;
+        this.authContextService = authContextService;
     }
 
 
     @PutMapping("/accept/{enrollmentId}")
     public ResponseEntity<EnrollmentRO> confirmEnrollment(@PathVariable Long enrollmentId) throws EnrollmentNotFoundException{
+
         return ResponseEntity.ok(enrollmentService.acceptEnrollment(enrollmentId));
     }
 
     @PutMapping("/accept")
-    public ResponseEntity<List<EnrollmentRO>> confirmEnrollment(@RequestBody List<Long> enrollmentIds) throws EnrollmentNotFoundException{
+    public ResponseEntity<List<EnrollmentRO>> confirmEnrollments(@RequestBody List<Long> enrollmentIds) throws EnrollmentNotFoundException{
         return ResponseEntity.ok(enrollmentService.acceptEnrollments(enrollmentIds));
     }
-
-//    @GetMapping
-//    public ResponseEntity<List<Enrollment>> getAllEnrollments() {
-//        return ResponseEntity.ok(enrollmentService.getAllEnrollments());
-//    }
 
     @GetMapping
     public ResponseEntity<Page<EnrollmentRO>> getAllEnrollments(Pageable pageable,
@@ -54,7 +57,11 @@ public class EnrollmentController {
                                                 @RequestParam(required = false) String statuses,
                                                                 @RequestParam(required = false) Long userId,
                                                                 @RequestParam(required = false) Long subjectId)
-            throws SemesterNotFoundException {
+            throws SemesterNotFoundException,NoPermissionException {
+        User userFromToken = authContextService.getCurrentUser();
+        if(userId != null && !userFromToken.getUserId().equals(userId)){
+            throw new NoPermissionException("You can't get enrollments for other users");
+        }
         Page<EnrollmentRO> enrollments = enrollmentService.getAllEnrollments(pageable, indexNumber, subjectName, semesterId, statuses,userId,subjectId);
         return ResponseEntity.ok(enrollments);
     }
@@ -66,6 +73,8 @@ public class EnrollmentController {
             SubjectNotFoundException,
             SemesterNotFoundException,
             EnrollmentAlreadyExistException {
+        Long userId = enrollDTO.getUserId();
+
         return ResponseEntity.ok(enrollmentService.assignEnrollmentForUser(enrollDTO));
     }
 

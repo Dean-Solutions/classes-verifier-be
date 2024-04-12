@@ -5,18 +5,26 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public enum Permission {
-    STUDENT_READ("student:read"),
-    STUDENT_UPDATE("student:update"),
-    STUDENT_DELETE("student:delete"),
-    STUDENT_CREATE("student:create"),
-    STUDENT_REP_READ("student_rep:read"),
-    STUDENT_REP_UPDATE("student_rep:update"),
-    STUDENT_REP_DELETE("student_rep:delete"),
-    STUDENT_REP_CREATE("student_rep:create"),
-    DEAN_READ("dean:read"),
-    DEAN_UPDATE("dean:update"),
-    DEAN_DELETE("dean:delete"),
-    DEAN_CREATE("dean:create");
+    TAG_READ("tag:read"),
+    TAG_UPDATE("tag:update"),
+    TAG_DELETE("tag:delete"),
+    TAG_CREATE("tag:create"),
+    SUBJECT_READ("subject:read"),
+    SUBJECT_CREATE("subject:create"),
+    SUBJECT_UPDATE("subject:update"),
+    SUBJECT_DELETE("subject:delete"),
+
+    USER_DELETE("user:delete"),
+    USER_CREATE("user:create"),
+    USER_READ("user:read"),
+    SEMESTER_READ("semester:read"),
+    SEMESTER_CREATE("semester:create"),
+    SEMESTER_UPDATE("semester:update"),
+    SEMESTERS_READ("semesters:read"),
+    REQUEST_READ("request:read"),
+    REQUEST_CREATE("request:create"),
+    REQUEST_UPDATE("request:update");
+
 
 
     @Getter

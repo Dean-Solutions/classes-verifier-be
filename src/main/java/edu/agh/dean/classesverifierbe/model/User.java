@@ -110,4 +110,19 @@ public class User implements UserDetails {
         return hashPassword;
     }
 
+    @Override
+    public String toString() {
+        return "User{" +
+                "userId=" + userId +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", indexNumber='" + indexNumber + '\'' +
+                ", email='" + email + '\'' +
+                ", hashPassword='" + hashPassword + '\'' +
+                ", semester=" + semester +
+                ", eduPath=" + eduPath +
+                ", status=" + status +
+                ", role=" + role +
+                '}';
+    }
 }

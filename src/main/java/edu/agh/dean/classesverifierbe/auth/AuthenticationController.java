@@ -1,8 +1,10 @@
 package edu.agh.dean.classesverifierbe.auth;
 
 
+import edu.agh.dean.classesverifierbe.exceptions.NoPermissionException;
 import edu.agh.dean.classesverifierbe.exceptions.UserAlreadyExistsException;
 import edu.agh.dean.classesverifierbe.exceptions.UserNotFoundException;
+import edu.agh.dean.classesverifierbe.model.enums.Role;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +26,14 @@ public class AuthenticationController {
     @PostMapping("/register")
     public ResponseEntity<AuthenticationResponse> register(
             @RequestBody RegisterRequest request
-    ) throws UserAlreadyExistsException {
+    ) throws UserAlreadyExistsException, NoPermissionException{
+
+        if(request.getRole() == null){
+            request.setRole(Role.STUDENT);
+        } else if (request.getRole() != Role.STUDENT) {
+            throw new NoPermissionException("Only students can register");
+        }
+
         return ResponseEntity.ok(service.register(request));
     }
 

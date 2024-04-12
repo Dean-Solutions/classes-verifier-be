@@ -14,6 +14,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -26,12 +27,9 @@ public class SecurityConfiguration {
 
     private final LogoutHandler logoutHandler;
     private static final String[] WHITE_LIST_URL = {
-//            "/enrollment/**",
-//            "/request/**",
-//            "/subjects/**",
-//            "/tags/**",
-//            "/semesters/**",
-//            "/students/**",
+            "/enrollment/**",
+
+
             "/auth/**",
             "/v2/api-docs",
             "/v3/api-docs",

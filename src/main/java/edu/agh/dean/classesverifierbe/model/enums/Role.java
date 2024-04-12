@@ -14,40 +14,49 @@ import java.util.stream.Collectors;
 public enum Role {
     DEAN(
             Set.of(
-                    Permission.STUDENT_READ,
-                    Permission.STUDENT_UPDATE,
-                    Permission.STUDENT_DELETE,
-                    Permission.STUDENT_CREATE,
-                    Permission.STUDENT_REP_READ,
-                    Permission.STUDENT_REP_UPDATE,
-                    Permission.STUDENT_REP_DELETE,
-                    Permission.STUDENT_REP_CREATE,
-                    Permission.DEAN_READ,
-                    Permission.DEAN_UPDATE,
-                    Permission.DEAN_DELETE,
-                    Permission.DEAN_CREATE
+                    Permission.TAG_READ,
+                    Permission.TAG_UPDATE,
+                    Permission.TAG_DELETE,
+                    Permission.TAG_CREATE,
+                    Permission.SUBJECT_READ,
+                    Permission.SUBJECT_CREATE,
+                    Permission.SUBJECT_UPDATE,
+                    Permission.SUBJECT_DELETE,
+                    Permission.USER_READ,
+                    Permission.USER_CREATE,
+                    Permission.USER_DELETE,
+                    Permission.SEMESTER_READ,
+                    Permission.SEMESTERS_READ,
+                    Permission.SEMESTER_UPDATE,
+                    Permission.SEMESTER_CREATE,
+                    Permission.REQUEST_CREATE,
+                    Permission.REQUEST_READ,
+                    Permission.REQUEST_UPDATE
             )
     ),
     STUDENT_REP(
             Set.of(
-                    Permission.STUDENT_READ,
-                    Permission.STUDENT_UPDATE,
-                    Permission.STUDENT_DELETE,
-                    Permission.STUDENT_CREATE,
-                    Permission.STUDENT_REP_READ,
-                    Permission.STUDENT_REP_UPDATE,
-                    Permission.STUDENT_REP_DELETE,
-                    Permission.STUDENT_REP_CREATE
+                    Permission.TAG_READ,
+                    Permission.SUBJECT_READ,
+                    Permission.USER_READ,
+                    Permission.SEMESTER_READ,
+                    Permission.SEMESTERS_READ,
+                    Permission.SEMESTER_UPDATE,
+                    Permission.REQUEST_CREATE,
+                    Permission.REQUEST_READ
+
             )
     ),
     STUDENT(
             Set.of(
-                    Permission.STUDENT_READ,
-                    Permission.STUDENT_UPDATE,
-                    Permission.STUDENT_DELETE,
-                    Permission.STUDENT_CREATE
+                    Permission.TAG_READ,
+                    Permission.SUBJECT_READ,
+                    Permission.USER_READ,
+                    Permission.SEMESTER_READ,
+                    Permission.REQUEST_CREATE,
+                    Permission.REQUEST_READ
             )
-    )
+    );
     @Getter
     private final Set<Permission> permissions;
 
@@ -58,5 +67,13 @@ public enum Role {
                 .collect(Collectors.toList());
         authorities.add(new SimpleGrantedAuthority("ROLE_"+this.name()));//this.name() returns the name of the enum constant
         return authorities;
+    }
+
+    public static Role fromString(String roleStr) {
+        try {
+            return Role.valueOf(roleStr);
+        } catch (IllegalArgumentException e) {
+            return null; // lub obsłuż błąd inaczej
+        }
     }
 }
