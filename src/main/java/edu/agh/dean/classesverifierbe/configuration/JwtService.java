@@ -1,5 +1,6 @@
 package edu.agh.dean.classesverifierbe.configuration;
 
+import edu.agh.dean.classesverifierbe.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -15,10 +16,13 @@ import java.util.function.Function;
 
 @Service
 public class JwtService {
+    @Value("${application.security.jwt.secret-key}")
+    private String secretKey;
+    @Value("${application.security.jwt.expiration}")
+    private long jwtExpiration;
 
-    @Value("${app.secret-key}")
-    private String SECRET_KEY;
-
+    @Value("${application.security.jwt.refresh-token.expiration}")
+    private long refreshExpiration;
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
@@ -33,15 +37,25 @@ public class JwtService {
     }
 
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+
+        return buildToken(extraClaims, userDetails, jwtExpiration);
+    }
+
+    public String generateRefreshToken(UserDetails userDetails) {
+        return buildToken(new HashMap<>(), userDetails, refreshExpiration);
+    }
+
+    private String buildToken(Map<String, Object> extraClaims,
+                              UserDetails userDetails,
+                              long expiration) {
         return Jwts.builder()
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
-
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
@@ -65,7 +79,8 @@ public class JwtService {
 
     private java.security.Key getSignInKey() {
         // This method remains unchanged. It's used for signing JWTs.
-        byte[] keyBytes = io.jsonwebtoken.io.Decoders.BASE64.decode(SECRET_KEY);
+        byte[] keyBytes = io.jsonwebtoken.io.Decoders.BASE64.decode(secretKey);
         return io.jsonwebtoken.security.Keys.hmacShaKeyFor(keyBytes);
     }
 }
+

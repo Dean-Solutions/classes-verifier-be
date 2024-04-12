@@ -1,5 +1,7 @@
 package edu.agh.dean.classesverifierbe.configuration;
 
+
+import edu.agh.dean.classesverifierbe.token.TokenRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,6 +24,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final TokenRepository tokenRepository;
     @Override
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,
@@ -34,28 +37,31 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if(authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
-        } else {
-            jwt = authHeader.substring(7);
-            userEmail = jwtService.extractUsername(jwt);
-            if(userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null){
-
-                UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
-                if(jwtService.isTokenValid(jwt, userDetails)){
-                    //if the token is valid we authenticate the user
-                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            userDetails,
-                            null,
-                            userDetails.getAuthorities()
-                    );
-                    authToken.setDetails(
-                            new WebAuthenticationDetailsSource().buildDetails(request)
-                    );
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
-
-                }
-            }
-            filterChain.doFilter(request, response);
         }
+        jwt = authHeader.substring(7);
+        userEmail = jwtService.extractUsername(jwt);
+        if(userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null){
+
+            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+            var isTokenValid = tokenRepository.findByToken(jwt)
+                    .map(token -> !token.isExpired() && !token.isRevoked())
+                    .orElse(false);
+            if(jwtService.isTokenValid(jwt, userDetails) && isTokenValid){
+                //if the token is valid we authenticate the user
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null,
+                        userDetails.getAuthorities()
+                );
+                authToken.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(request)
+                );
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+
+            }
+        }
+        filterChain.doFilter(request, response);
+
     }
 }
 

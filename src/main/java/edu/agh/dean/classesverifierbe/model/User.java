@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import edu.agh.dean.classesverifierbe.model.enums.EduPath;
 import edu.agh.dean.classesverifierbe.model.enums.Role;
 import edu.agh.dean.classesverifierbe.model.enums.UserStatus;
+import edu.agh.dean.classesverifierbe.token.Token;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -55,6 +56,10 @@ public class User implements UserDetails {
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "enrollStudent")
     private Set<Enrollment> enrollments;
 
+
+    @OneToMany(mappedBy = "user")
+    private List<Token>tokens;
+
     @PrePersist
     @PreUpdate
     private void prepareData(){
@@ -73,7 +78,7 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
+        return role.getAuthorities();
     }
     @Override
     public String getUsername() {
@@ -104,6 +109,5 @@ public class User implements UserDetails {
     public String getPassword() {
         return hashPassword;
     }
-
 
 }
