@@ -56,9 +56,9 @@ public class RequestService {
                 .orElseThrow(() -> new RequestNotFoundException("id", id.toString()));
     }
 
-    public Page<RequestRO> getRequestByCriteria(Pageable pageable, String requestType, String senderId) {
+    public Page<RequestRO> getRequestByCriteria(Pageable pageable, String requestTypes, String senderId) {
         Specification<Request> spec = Specification
-                .where(RequestSpecifications.withRequestType(requestType))
+                .where(RequestSpecifications.withRequestType(requestTypes))
                 .and(RequestSpecifications.withSenderId(senderId));
 
         Page<Request> requests = requestRepository.findAll(spec, pageable);
