@@ -19,36 +19,31 @@ public class DeanApplication {
         SpringApplication.run(DeanApplication.class, args);
     }
 
-    @Bean
-    public CommandLineRunner commandLineRunner(
-            AuthenticationService service
-    ) throws UserAlreadyExistsException {
-        return args -> {
-            var dean = RegisterRequest.builder()
-                    .firstName("Garek")
-                    .lastName("Majęcki")
-                    .email("garek@agh.edu.pl")
-                    .password("123")
-                    .indexNumber("000001")
-                    .role(Role.DEAN)
-                    .build();
-            System.out.println("Dean token: " + service.register(dean).getAccessToken());
-            //token
-            //eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJnYXJla0BhZ2guZWR1LnBsIiwiaWF0IjoxNzEyOTY0MzA4LCJleHAiOjE3MTMwNTA3MDh9.dFHoEOg2s_7RKsbSD3nuHib5CwvaPgM2cFTXJeZkVrE
-
-            var studentRep = RegisterRequest.builder()
-                    .firstName("Jan")
-                    .lastName("Kowalski")
-                    .email("jkowalski@agh.edu.pl")
-                    .indexNumber("000002")
-                    .password("123")
-                    .role(Role.STUDENT_REP)
-                    .build();
-
-            System.out.println("Student representative token: " + service.register(studentRep).getAccessToken());
-            //token
-            //eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqa293YWxza2lAYWdoLmVkdS5wbCIsImlhdCI6MTcxMjk2NDMwOSwiZXhwIjoxNzEzMDUwNzA5fQ._E-H4uFbGlZAB2AXxvOC1SZGi2upC1jk0JFegFeqfMQ
-        };
-    }
+    //execute only once when database is empty. To check tokens, please connect to the database
+//    @Bean
+//    public CommandLineRunner commandLineRunner(
+//            AuthenticationService service
+//    )  {
+//        return args -> {
+//            var dean = RegisterRequest.builder()
+//                    .firstName("Garek")
+//                    .lastName("Majęcki")
+//                    .email("garek@agh.edu.pl")
+//                    .password("123")
+//                    .indexNumber("000001")
+//                    .role(Role.DEAN)
+//                    .build();
+//            System.out.println("Dean token: " + service.register(dean).getAccessToken());
+//            var studentRep = RegisterRequest.builder()
+//                    .firstName("Jan")
+//                    .lastName("Kowalski")
+//                    .email("jkowalski@agh.edu.pl")
+//                    .indexNumber("000002")
+//                    .password("123")
+//                    .role(Role.STUDENT_REP)
+//                    .build();
+//
+//            System.out.println("Student representative token: " + service.register(studentRep).getAccessToken());
+//    }
 
 }

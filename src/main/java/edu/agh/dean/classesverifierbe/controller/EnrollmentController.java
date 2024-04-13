@@ -10,6 +10,8 @@ import edu.agh.dean.classesverifierbe.model.Enrollment;
 import edu.agh.dean.classesverifierbe.model.User;
 import edu.agh.dean.classesverifierbe.service.AuthContextService;
 import edu.agh.dean.classesverifierbe.service.EnrollmentService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +27,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/enrollments")
 @PreAuthorize("hasAnyRole('DEAN', 'STUDENT_REP', 'STUDENT')")
+@Tag(name = "Enrollment Controller", description = "STUDENT, STUDENT_REP, DEAN roles are allowed")
 public class EnrollmentController {
 
 

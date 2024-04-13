@@ -4,8 +4,10 @@ import edu.agh.dean.classesverifierbe.RO.UserRO;
 import edu.agh.dean.classesverifierbe.dto.UserDTO;
 import edu.agh.dean.classesverifierbe.exceptions.*;
 import edu.agh.dean.classesverifierbe.model.User;
+import edu.agh.dean.classesverifierbe.service.AuthContextService;
 import edu.agh.dean.classesverifierbe.service.StudentService;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -26,10 +28,32 @@ public class StudentController {
 
     @Autowired
     private StudentService studentService;
+    @Autowired
+    private AuthContextService authContextService;
+
+    @GetMapping("/my-profile")
+    @Operation(summary = "STUDENT, STUDENT_REP, DEAN are allowed")
+    public ResponseEntity<UserRO> getProfile() throws NoPermissionException {
+        User user = authContextService.getCurrentUser();
+        UserRO userRO = UserRO.builder()
+                .userId(user.getUserId())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .indexNumber(user.getIndexNumber())
+                .semester(user.getSemester())
+                .email(user.getEmail())
+                .role(user.getRole())
+                .eduPath(user.getEduPath())
+                .status(user.getStatus())
+                .eduPath(user.getEduPath())
+                .build();
+        return ResponseEntity.ok(userRO);
+    }
 
 
     @PostMapping
     @PreAuthorize("hasAuthority('user:create')")
+    @Operation(summary = "DEAN is allowed")
     public ResponseEntity<User> addUser(@Valid @RequestBody UserDTO userDto) throws UserAlreadyExistsException,
             InvalidIndexException {
         User newUser = studentService.addUser(userDto);
@@ -39,6 +63,7 @@ public class StudentController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('user:read')")
+    @Operation(summary = "DEAN,STUDENT_REP are allowed")
     public ResponseEntity<UserRO> getUserById(@PathVariable Long id) throws UserNotFoundException {
         UserRO userRO = studentService.getUserById(id);
         return ResponseEntity.ok(userRO);
@@ -46,6 +71,7 @@ public class StudentController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('user:delete')")
+    @Operation(summary = "DEAN is allowed")
     public ResponseEntity<UserRO> deleteUserById(@PathVariable Long id) throws UserNotFoundException {
         UserRO userRO = studentService.removeUserById(id);
         return ResponseEntity.ok(userRO);
@@ -54,6 +80,7 @@ public class StudentController {
 
     @GetMapping("/index/{indexNumber}")
     @PreAuthorize("hasAuthority('user:read')")
+    @Operation(summary = "DEAN,STUDENT_REP are allowed")
     public ResponseEntity<User> getUserByIndexNumber(@PathVariable String indexNumber) throws UserNotFoundException {
         User user = studentService.findUserByIndexNumber(indexNumber);
         return ResponseEntity.ok(user);
@@ -64,6 +91,7 @@ public class StudentController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('user:read')")
+    @Operation(summary = "DEAN,STUDENT_REP are allowed")
     public ResponseEntity<Page<UserRO>> getStudents(Pageable pageable,
                                                     @RequestParam(required = false) String tag,
                                                     @RequestParam(required = false) String name,

@@ -51,7 +51,6 @@ public enum Role {
             Set.of(
                     Permission.TAG_READ,
                     Permission.SUBJECT_READ,
-                    Permission.USER_READ,
                     Permission.SEMESTER_READ,
                     Permission.REQUEST_CREATE,
                     Permission.REQUEST_READ

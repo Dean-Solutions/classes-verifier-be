@@ -5,6 +5,7 @@ import edu.agh.dean.classesverifierbe.exceptions.SemesterAlreadyExistsException;
 import edu.agh.dean.classesverifierbe.exceptions.SemesterNotFoundException;
 import edu.agh.dean.classesverifierbe.model.Semester;
 import edu.agh.dean.classesverifierbe.model.enums.SemesterType;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -38,6 +39,7 @@ public class SemesterController {
     @PostMapping
     @ResponseBody
     @PreAuthorize("hasAuthority('semester:create')")
+    @Operation(summary = "DEAN is allowed")
     public ResponseEntity<?> createSemester(@Valid @RequestBody SemesterDTO semesterDTO) throws SemesterAlreadyExistsException {
         Semester semester = semesterService.createSemester(semesterDTO);
         return new ResponseEntity<>(semester, HttpStatus.CREATED);
@@ -47,6 +49,7 @@ public class SemesterController {
     @GetMapping
     @ResponseBody
     @PreAuthorize("hasAuthority('semesters:read')")
+    @Operation(summary = "DEAN,STUDENT_REP are allowed")
     public ResponseEntity<List<Semester>> getAllSemesters() {
         return ResponseEntity.ok(semesterService.getAllSemesters());
     }
@@ -54,6 +57,7 @@ public class SemesterController {
     @GetMapping("/{id}")
     @ResponseBody
     @PreAuthorize("hasAuthority('semester:read')")
+    @Operation(summary = "DEAN,STUDENT_REP,STUDENT are allowed")
     public ResponseEntity<?> getSemester(@PathVariable Long id) throws SemesterNotFoundException {
         Semester semester = semesterService.getSemesterById(id);
         return ResponseEntity.ok(semester);
@@ -62,6 +66,7 @@ public class SemesterController {
     @GetMapping("/current")
     @ResponseBody
     @PreAuthorize("hasAuthority('semester:read')")
+    @Operation(summary = "DEAN,STUDENT_REP,STUDENT are allowed")
     public ResponseEntity<?> getCurrentSemester() throws SemesterNotFoundException {
         Semester semester = semesterService.getCurrentSemester();
         return ResponseEntity.ok(semester);
@@ -71,6 +76,7 @@ public class SemesterController {
     @GetMapping("/year/{year}/type/{type}")
     @ResponseBody
     @PreAuthorize("hasAuthority('semester:read')")
+    @Operation(summary = "DEAN,STUDENT_REP,STUDENT are allowed")
     public ResponseEntity<?> getSemesterByYearAndType(@PathVariable Integer year, @PathVariable String type) throws SemesterNotFoundException {
         SemesterType semesterType = SemesterType.valueOf(type);
         Semester semester = semesterService.getSemesterByYearAndType(year, semesterType);
@@ -82,6 +88,7 @@ public class SemesterController {
     @PutMapping("/current")
     @ResponseBody
     @PreAuthorize("hasAuthority('semester:update')")
+    @Operation(summary = "DEAN,STUDENT_REP are allowed")
     public ResponseEntity<?> updateCurrentSemester(@Valid @RequestBody SemesterDTO semesterDTO) throws SemesterNotFoundException {
         Semester semester = semesterService.updateCurrentSemester(semesterDTO);
         return ResponseEntity.ok(semester);

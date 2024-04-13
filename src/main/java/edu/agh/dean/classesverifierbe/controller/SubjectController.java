@@ -8,6 +8,7 @@ import edu.agh.dean.classesverifierbe.model.User;
 import edu.agh.dean.classesverifierbe.model.enums.Role;
 import edu.agh.dean.classesverifierbe.service.AuthContextService;
 import edu.agh.dean.classesverifierbe.service.SubjectService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -31,10 +32,9 @@ public class SubjectController {
 
     private final SubjectService subjectService;
     private final ModelMapper modelMapper;
-    private final AuthContextService authContextService;
-
     @PostMapping
     @PreAuthorize("hasAuthority('subject:create')")
+    @Operation(summary = "DEAN is allowed")
     public ResponseEntity<Subject> createSubject(@RequestBody @Valid SubjectDTO subjectDTO) throws SubjectAlreadyExistsException {
         Set<String> tagNames = subjectDTO.getTagNames();
         Subject subject = modelMapper.map(subjectDTO, Subject.class);
@@ -43,6 +43,7 @@ public class SubjectController {
     }
     @PutMapping("/{subjectId}")
     @PreAuthorize("hasAuthority('subject:update')")
+    @Operation(summary = "DEAN is allowed")
     public ResponseEntity<Subject> updateSubject(@PathVariable Long subjectId, @RequestBody @Valid SubjectDTO subjectDTO) throws SubjectNotFoundException {
         Subject subject = modelMapper.map(subjectDTO, Subject.class);
         Set<String> tagNames = subjectDTO.getTagNames();
@@ -52,15 +53,11 @@ public class SubjectController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('subject:read')")
+    @Operation(summary = "DEAN,STUDENT_REP,STUDENT are allowed")
     public ResponseEntity<Page<Subject>> getAllSubjects(Pageable pageable,
                                                         @RequestParam(required = false) String tags,
                                                         @RequestParam(required = false) String name,
                                                         @RequestParam(required = false) Integer semester){
-
-        Role role =authContextService.getCurrentRole();
-        System.out.println(role);
-        User user = authContextService.getCurrentUser();
-        System.out.println(user);
 
         Page<Subject> subjects = subjectService.getAllSubjects(tags, name, semester,pageable);
         return ResponseEntity.ok(subjects);
@@ -68,6 +65,7 @@ public class SubjectController {
 
     @DeleteMapping("/{subjectId}")
     @PreAuthorize("hasAuthority('subject:delete')")
+    @Operation(summary = "DEAN is allowed")
     public ResponseEntity<Subject> deleteSubject(@PathVariable Long subjectId) throws SubjectNotFoundException {
         Subject deletedSubject = subjectService.deleteSubject(subjectId);
         return ResponseEntity.ok(deletedSubject);
@@ -75,6 +73,7 @@ public class SubjectController {
 
     @GetMapping("/{subjectId}")
     @PreAuthorize("hasAuthority('subject:read')")
+    @Operation(summary = "DEAN,STUDENT_REP,STUDENT are allowed")
     public ResponseEntity<Subject> getSubjectById(@PathVariable Long subjectId) throws SubjectNotFoundException {
         Subject subject = subjectService.getSubjectById(subjectId);
         return ResponseEntity.ok(subject);
@@ -83,6 +82,7 @@ public class SubjectController {
 
     @GetMapping("/{subjectId}/users")
     @PreAuthorize("hasAuthority('subject:read')")
+    @Operation(summary = "DEAN,STUDENT_REP,STUDENT are allowed")
     public ResponseEntity<List<UserRO>> getUsersEnrolledInSubjectForSemester(@PathVariable Long subjectId,
                                                                               @RequestParam(required = false) Long semesterId) throws SubjectNotFoundException, SemesterNotFoundException {
             List<UserRO> enrolledUsers = subjectService.getUsersEnrolledInSubjectForSemester(subjectId, semesterId);
@@ -91,6 +91,7 @@ public class SubjectController {
 
     @GetMapping("/semester/{semester}")
     @PreAuthorize("hasAuthority('subject:read')")
+    @Operation(summary = "DEAN,STUDENT_REP,STUDENT are allowed")
     public ResponseEntity<List<Subject>> getSubjectsBySemester(@PathVariable Integer semester) {
         List<Subject> subjects = subjectService.getAllSubjectsBySemester(semester);
         return ResponseEntity.ok(subjects);
