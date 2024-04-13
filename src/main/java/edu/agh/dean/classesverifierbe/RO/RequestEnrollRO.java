@@ -17,5 +17,6 @@ public class RequestEnrollRO {
     private RequestEnrollStatus requestStatus;
     private UserDTO user;
     private SubjectDTO subject;
+    private Long newSubjectId;
 }
 

@@ -21,4 +21,6 @@ public class RequestEnrollDTO {
 
     @NotNull(message = "RequestEnrollStatus is required")
     private RequestEnrollStatus requestStatus;
+
+    private Long newSubjectId;
 }

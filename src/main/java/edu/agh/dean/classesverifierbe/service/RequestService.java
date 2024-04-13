@@ -95,6 +95,7 @@ public class RequestService {
             RequestEnroll requestEnroll = RequestEnroll.builder()
                     .request(request)
                     .enrollment(enrollment)
+                    .newSubjectId(reDTO.getNewSubjectId())
                     .requestStatus(PENDING)
                     .build();
             request.getRequestEnrollment().add(requestEnroll);
@@ -142,6 +143,11 @@ public class RequestService {
             case DELETE: //dean delete enrollment for user when he demands it (simply removes enrollment)
                 enrollmentService.deleteEnrollmentBySubjectUserSemester(enrollDTOBuilder(reDTO, EnrollStatus.REJECTED));
                 break;
+            case CHANGE_SUBJECT://dean needs to delete old enrollment with old subject and add new enrollment with new subject
+                enrollmentService.deleteEnrollmentBySubjectUserSemester(enrollDTOBuilder(reDTO, EnrollStatus.REJECTED));
+                reDTO.setSubjectId(reDTO.getNewSubjectId());
+                enrollmentService.assignEnrollmentForUser(enrollDTOBuilder(reDTO, EnrollStatus.PENDING));
+                break;
             default:
                 throw new IllegalArgumentException("Invalid request type");
         }
@@ -163,6 +169,7 @@ public class RequestService {
         return RequestEnrollRO.builder()
                 .requestEnrollId(requestEnroll.getRequestEnrollId())
                 .requestStatus(requestEnroll.getRequestStatus())
+                .newSubjectId(requestEnroll.getNewSubjectId())
                 .user(userDTO)
                 .subject(subjectDTO)
                 .build();

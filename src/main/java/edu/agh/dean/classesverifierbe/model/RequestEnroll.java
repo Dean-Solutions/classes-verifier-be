@@ -33,4 +33,6 @@ public class RequestEnroll {
     @JsonManagedReference
     private Enrollment enrollment;
 
+    private Long newSubjectId;
+
 }
