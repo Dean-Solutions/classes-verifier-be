@@ -70,7 +70,7 @@ public class RequestService {
     }
 
 
-
+    @Transactional
     public RequestRO createRequest(RequestDTO requestDTO) throws UserNotFoundException, SemesterNotFoundException, SubjectNotFoundException, EnrollmentAlreadyExistException {
         User sender = userRepository.findById(requestDTO.getSenderId())
                 .orElseThrow(() -> new UserNotFoundException(requestDTO.getSenderId().toString()));
@@ -82,6 +82,8 @@ public class RequestService {
                 .user(sender)
                 .build();
         request.setRequestEnrollment(new HashSet<>());
+        requestDTO.getRequestEnrolls().forEach(System.out::println);
+
         for (RequestEnrollDTO reDTO : requestDTO.getRequestEnrolls()) {
             Semester semester = reDTO.getSemesterId() != null ? semesterService.getSemesterById(reDTO.getSemesterId()) : semesterService.getCurrentSemester();
             Enrollment enrollment = enrollmentService.getEnrollmentByUserIdAndSubjectIdAndSemesterId(reDTO.getUserId(), reDTO.getSubjectId(), semester.getSemesterId());
@@ -98,7 +100,10 @@ public class RequestService {
                     .newSubjectId(reDTO.getNewSubjectId())
                     .requestStatus(PENDING)
                     .build();
-            request.getRequestEnrollment().add(requestEnroll);
+
+           request.getRequestEnrollment().add(requestEnroll);
+           requestRepository.save(request);
+            System.out.println("RequestEnroll: " + requestEnroll.toString());
         }
         Request savedRequest = requestRepository.save(request);
         return convertToRequestRO(savedRequest);

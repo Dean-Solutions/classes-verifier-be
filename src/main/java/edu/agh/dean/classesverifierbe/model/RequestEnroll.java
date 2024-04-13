@@ -35,4 +35,13 @@ public class RequestEnroll {
 
     private Long newSubjectId;
 
+    @Override
+    public String toString() {
+        return "RequestEnroll{" +
+                "requestEnrollId=" + requestEnrollId +
+                ", requestStatus=" + requestStatus +
+                ", newSubjectId=" + newSubjectId +
+                '}';
+    }
+
 }
