@@ -22,4 +22,6 @@ public interface UserRepository extends CrudRepository<User, Long>, JpaSpecifica
 
     Page<User> findAll(Specification<User> spec, Pageable pageable);
 
+    Optional<User> findByEmail(String email);
+
 }

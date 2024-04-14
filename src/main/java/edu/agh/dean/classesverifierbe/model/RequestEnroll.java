@@ -33,4 +33,15 @@ public class RequestEnroll {
     @JsonManagedReference
     private Enrollment enrollment;
 
+    private Long newSubjectId;
+
+    @Override
+    public String toString() {
+        return "RequestEnroll{" +
+                "requestEnrollId=" + requestEnrollId +
+                ", requestStatus=" + requestStatus +
+                ", newSubjectId=" + newSubjectId +
+                '}';
+    }
+
 }

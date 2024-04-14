@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/request")
 public class RequestController {
@@ -38,9 +40,9 @@ public class RequestController {
 
     @GetMapping
     public ResponseEntity<Page<RequestRO>> getRequests(Pageable pageable,
-                                                       @RequestParam(required = false) String requestType,
+                                                       @RequestParam(required = false) String requestTypes,
                                                        @RequestParam(required = false) String senderId) {
-        Page<RequestRO> requests = requestService.getRequestByCriteria(pageable, requestType, senderId);
+        Page<RequestRO> requests = requestService.getRequestByCriteria(pageable, requestTypes, senderId);
         return ResponseEntity.ok(requests);
     }
 

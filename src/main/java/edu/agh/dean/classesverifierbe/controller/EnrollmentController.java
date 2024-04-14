@@ -32,12 +32,12 @@ public class EnrollmentController {
 
 
     @PutMapping("/accept/{enrollmentId}")
-    public ResponseEntity<Enrollment> confirmEnrollment(@PathVariable Long enrollmentId) throws EnrollmentNotFoundException{
+    public ResponseEntity<EnrollmentRO> confirmEnrollment(@PathVariable Long enrollmentId) throws EnrollmentNotFoundException{
         return ResponseEntity.ok(enrollmentService.acceptEnrollment(enrollmentId));
     }
 
     @PutMapping("/accept")
-    public ResponseEntity<List<Enrollment>> confirmEnrollment(@RequestBody List<Long> enrollmentIds) throws EnrollmentNotFoundException{
+    public ResponseEntity<List<EnrollmentRO>> confirmEnrollment(@RequestBody List<Long> enrollmentIds) throws EnrollmentNotFoundException{
         return ResponseEntity.ok(enrollmentService.acceptEnrollments(enrollmentIds));
     }
 
@@ -59,6 +59,8 @@ public class EnrollmentController {
         return ResponseEntity.ok(enrollments);
     }
 
+
+
     @PostMapping
     public ResponseEntity<Enrollment> assignEnrollmentForUser(@RequestBody @Valid EnrollDTO enrollDTO) throws UserNotFoundException,
             SubjectNotFoundException,
@@ -67,8 +69,20 @@ public class EnrollmentController {
         return ResponseEntity.ok(enrollmentService.assignEnrollmentForUser(enrollDTO));
     }
 
+    @DeleteMapping("/{enrollmentId}")
+    public ResponseEntity<EnrollmentRO> deleteEnrollment(@PathVariable Long enrollmentId) {
+        EnrollmentRO enrollmentRO = enrollmentService.deleteEnrollment(enrollmentId);
+        return ResponseEntity.ok(enrollmentRO);
+    }
+
+    @DeleteMapping
+    public ResponseEntity<EnrollmentRO> deleteEnrollmentBySubjectUserSemester(@RequestBody @Valid EnrollDTO enrollDTO) throws UserNotFoundException, SemesterNotFoundException, SubjectNotFoundException{
+        EnrollmentRO enrollmentRO = enrollmentService.deleteEnrollmentBySubjectUserSemester(enrollDTO);
+        return ResponseEntity.ok(enrollmentRO);
+    }
+
     @PostMapping("/multi")
-    public ResponseEntity<List<Enrollment>> assignEnrollmentsForMultipleUsers(@RequestBody @Valid MultiEnrollDTO multiEnrollDTO) throws UserNotFoundException,
+    public ResponseEntity<List<EnrollmentRO>> assignEnrollmentForMultipleUsers(@RequestBody @Valid MultiEnrollDTO multiEnrollDTO) throws UserNotFoundException,
             SemesterNotFoundException,
             EnrollmentAlreadyExistException,
             SubjectNotFoundException {
@@ -76,22 +90,22 @@ public class EnrollmentController {
     }
 
     @PutMapping
-    public ResponseEntity<Enrollment> updateAssignStatusForUser(@RequestBody @Valid EnrollDTO enrollDTO) throws UserNotFoundException,
+    public ResponseEntity<EnrollmentRO> updateAssignStatusForUser(@RequestBody @Valid EnrollDTO enrollDTO) throws UserNotFoundException,
             SubjectNotFoundException,
             SemesterNotFoundException,
             EnrollmentNotFoundException {
-        Enrollment updatedEnroll = enrollmentService.updateEnrollmentForUser(enrollDTO);
+        EnrollmentRO updatedEnroll = enrollmentService.updateEnrollmentForUser(enrollDTO);
         return ResponseEntity.ok(updatedEnroll);
     }
 
     @GetMapping("/user")
-    public ResponseEntity<List<Enrollment>> getEnrolledSubjectsByUserId(@RequestBody @Valid EnrollForUserDTO enrollForUserDTO) throws UserNotFoundException, SemesterNotFoundException {
+    public ResponseEntity<List<EnrollmentRO>> getEnrolledSubjectsByUserId(@RequestBody @Valid EnrollForUserDTO enrollForUserDTO) throws UserNotFoundException, SemesterNotFoundException {
         return ResponseEntity.ok(enrollmentService.getEnrolledSubjectsByUserId(enrollForUserDTO));
     }
 
 
     @GetMapping("/index")
-    public ResponseEntity<List<Enrollment>> getEnrolledSubjectsByUserIndex(@RequestBody @Valid EnrollForUserDTO enrollForUserDTO) throws UserNotFoundException, SemesterNotFoundException {
+    public ResponseEntity<List<EnrollmentRO>> getEnrolledSubjectsByUserIndex(@RequestBody @Valid EnrollForUserDTO enrollForUserDTO) throws UserNotFoundException, SemesterNotFoundException {
         return ResponseEntity.ok(enrollmentService.getEnrolledSubjectsByUserIndex(enrollForUserDTO));
     }
 }
