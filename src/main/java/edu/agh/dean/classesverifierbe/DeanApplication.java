@@ -45,5 +45,7 @@ public class DeanApplication {
 //
 //            System.out.println("Student representative token: " + service.register(studentRep).getAccessToken());
 //    }
+//    ;
+//    }
 
 }
