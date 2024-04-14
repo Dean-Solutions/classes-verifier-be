@@ -13,4 +13,8 @@ public class UserNotFoundException extends Exception{
         super("User with given "+ attribute + " not found");
     }
 
+    public UserNotFoundException(){
+        super("User not found");
+    }
+
 }

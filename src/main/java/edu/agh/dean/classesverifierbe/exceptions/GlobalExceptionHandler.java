@@ -119,4 +119,10 @@ public class GlobalExceptionHandler {
         body.put("error", ex.getMessage());
         return body;
     }
+
+    @ExceptionHandler({NoPermissionException.class})
+    @ResponseBody
+    public ResponseEntity<?> handleNoPermissionException(Exception ex) {
+        return new ResponseEntity<>(mapToJson(ex), HttpStatus.FORBIDDEN);
+    }
 }
