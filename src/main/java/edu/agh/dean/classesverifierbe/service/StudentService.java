@@ -44,9 +44,9 @@ public class StudentService {
             throw new UserAlreadyExistsException("email", userDTO.getEmail());
         }
         User user = toUser(userDTO);
-
-        String newPassword = UUID.randomUUID().toString();
-        user.setHashPassword(newPassword);
+        user.setHashPassword(null);
+        //String newPassword = UUID.randomUUID().toString();
+        //user.setHashPassword(newPassword);
 
         return userRepository.save(user);
     }
