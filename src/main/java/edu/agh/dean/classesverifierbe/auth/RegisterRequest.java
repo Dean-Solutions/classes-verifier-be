@@ -29,5 +29,7 @@ public class RegisterRequest {
     @NotBlank(message = "Email is required")
     private String email;
 
+    private Integer semester;
+
     private Role role;
 }

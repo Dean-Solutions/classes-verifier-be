@@ -36,26 +36,40 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
+
     public AuthenticationResponse register(RegisterRequest request) throws UserAlreadyExistsException {
         Optional<User> foundUser = repository.findByEmail(request.getEmail());
-        if(foundUser.isPresent()){
+
+        if(foundUser.isPresent() && foundUser.get().getHashPassword() != null){
             throw new UserAlreadyExistsException();
         }
-
-        var user = User.builder()
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .email(request.getEmail())
-                .role(request.getRole())
-                .hashPassword(passwordEncoder.encode(request.getPassword()))
-                .indexNumber(request.getIndexNumber())
-                .build();
-        var savedUser = repository.save(user);
+        User user;
+        User savedUser;
+        if(foundUser.isEmpty()){
+            user = User.builder()
+                    .firstName(request.getFirstName())
+                    .lastName(request.getLastName())
+                    .email(request.getEmail())
+                    .role(request.getRole())
+                    .semester(request.getSemester())
+                    .hashPassword(passwordEncoder.encode(request.getPassword()))
+                    .indexNumber(request.getIndexNumber())
+                    .build();
+            savedUser = repository.save(user);
+        } else {
+            foundUser.get().setFirstName(request.getFirstName());
+            foundUser.get().setLastName(request.getLastName());
+            foundUser.get().setRole(request.getRole());
+            foundUser.get().setHashPassword(passwordEncoder.encode(request.getPassword()));
+            foundUser.get().setIndexNumber(request.getIndexNumber());
+            foundUser.get().setSemester(request.getSemester());
+            savedUser = repository.save(foundUser.get());
+        }
         System.out.println("User registered successfully");
-        var jwtToken = jwtService.generateToken(user);
-        var refreshToken = jwtService.generateRefreshToken(user);
+        var jwtToken = jwtService.generateToken(savedUser);
+        var refreshToken = jwtService.generateRefreshToken(savedUser);
         saveUserToken(savedUser,jwtToken);
-        return getAuthenticationResponse(jwtToken, refreshToken, user);
+        return getAuthenticationResponse(jwtToken, refreshToken, savedUser);
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) throws UserNotFoundException {
