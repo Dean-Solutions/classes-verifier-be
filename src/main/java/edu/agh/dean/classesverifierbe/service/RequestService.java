@@ -1,11 +1,13 @@
 package edu.agh.dean.classesverifierbe.service;
 
+import edu.agh.dean.classesverifierbe.RO.EnrollmentRO;
 import edu.agh.dean.classesverifierbe.RO.RequestEnrollRO;
 import edu.agh.dean.classesverifierbe.RO.RequestRO;
 import edu.agh.dean.classesverifierbe.dto.*;
 import edu.agh.dean.classesverifierbe.exceptions.*;
 import edu.agh.dean.classesverifierbe.model.*;
 import edu.agh.dean.classesverifierbe.model.enums.EnrollStatus;
+import edu.agh.dean.classesverifierbe.model.enums.RequestType;
 import edu.agh.dean.classesverifierbe.repository.RequestEnrollRepository;
 import edu.agh.dean.classesverifierbe.repository.RequestRepository;
 
@@ -26,8 +28,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static edu.agh.dean.classesverifierbe.model.enums.RequestEnrollStatus.ACCEPTED;
-import static edu.agh.dean.classesverifierbe.model.enums.RequestEnrollStatus.PENDING;
+import static edu.agh.dean.classesverifierbe.model.enums.RequestEnrollStatus.*;
 
 @Service
 public class RequestService {
@@ -52,6 +53,11 @@ public class RequestService {
         this.mailService = mailService;
     }
 
+    @Autowired
+    private EnrollmentService enrollmentService;
+    @Autowired
+    private SemesterService semesterService;
+
     public RequestRO getRequestById(Long id) throws RequestNotFoundException{
         Request request = getRawRequestById(id);
         return convertToRequestRO(request);
@@ -62,9 +68,9 @@ public class RequestService {
                 .orElseThrow(() -> new RequestNotFoundException("id", id.toString()));
     }
 
-    public Page<RequestRO> getRequestByCriteria(Pageable pageable, String requestType, String senderId) {
+    public Page<RequestRO> getRequestByCriteria(Pageable pageable, String requestTypes, String senderId) {
         Specification<Request> spec = Specification
-                .where(RequestSpecifications.withRequestType(requestType))
+                .where(RequestSpecifications.withRequestType(requestTypes))
                 .and(RequestSpecifications.withSenderId(senderId));
 
         Page<Request> requests = requestRepository.findAll(spec, pageable);
@@ -76,7 +82,7 @@ public class RequestService {
     }
 
 
-
+    @Transactional
     public RequestRO createRequest(RequestDTO requestDTO) throws UserNotFoundException, SemesterNotFoundException, SubjectNotFoundException, EnrollmentAlreadyExistException {
         User sender = userRepository.findById(requestDTO.getSenderId())
                 .orElseThrow(() -> new UserNotFoundException(requestDTO.getSenderId().toString()));
@@ -88,6 +94,8 @@ public class RequestService {
                 .user(sender)
                 .build();
         request.setRequestEnrollment(new HashSet<>());
+        requestDTO.getRequestEnrolls().forEach(System.out::println);
+
         for (RequestEnrollDTO reDTO : requestDTO.getRequestEnrolls()) {
             Semester semester = reDTO.getSemesterId() != null ? semesterService.getSemesterById(reDTO.getSemesterId()) : semesterService.getCurrentSemester();
             Enrollment enrollment = enrollmentService.getEnrollmentByUserIdAndSubjectIdAndSemesterId(reDTO.getUserId(), reDTO.getSubjectId(), semester.getSemesterId());
@@ -101,16 +109,21 @@ public class RequestService {
             RequestEnroll requestEnroll = RequestEnroll.builder()
                     .request(request)
                     .enrollment(enrollment)
+                    .newSubjectId(reDTO.getNewSubjectId())
                     .requestStatus(PENDING)
                     .build();
-            request.getRequestEnrollment().add(requestEnroll);
+
+           request.getRequestEnrollment().add(requestEnroll);
+           requestRepository.save(request);
+            System.out.println("RequestEnroll: " + requestEnroll.toString());
         }
         Request savedRequest = requestRepository.save(request);
         notifyDeans();
         return convertToRequestRO(savedRequest);
     }
-    @Transactional
-    public RequestRO updateRequest(RequestDTO requestDTO) throws RequestEnrollNotFoundException, UserNotFoundException, SubjectNotFoundException, SemesterNotFoundException, EnrollmentNotFoundException {
+
+
+    public RequestRO updateRequest(RequestDTO requestDTO) throws RequestEnrollNotFoundException, UserNotFoundException, SubjectNotFoundException, SemesterNotFoundException, EnrollmentNotFoundException, EnrollmentAlreadyExistException{
         Request request = requestRepository.findById(requestDTO.getRequestId())
                 .orElseThrow(() -> new IllegalArgumentException("Request not found"));
 
@@ -121,11 +134,17 @@ public class RequestService {
         for (RequestEnrollDTO reDTO : requestDTO.getRequestEnrolls()) {
             RequestEnroll requestEnroll = requestEnrollRepository.findById(reDTO.getRequestEnrollId())
                     .orElseThrow(() -> new RequestEnrollNotFoundException("id", reDTO.getRequestEnrollId().toString()));
+
             requestEnroll.setRequestStatus(reDTO.getRequestStatus());
+            requestEnrollRepository.save(requestEnroll);
             if (requestEnroll.getRequestStatus() == ACCEPTED) {
                 processEnrollmentChange(requestDTO, reDTO);
             }
-            requestEnrollRepository.save(requestEnroll);
+            else if(requestEnroll.getRequestStatus() == REJECTED && request.getRequestType() == RequestType.ADD){
+                enrollmentService.updateEnrollmentForUser(enrollDTOBuilder(reDTO, EnrollStatus.REJECTED));
+            }
+
+
         }
         Request savedRequest = requestRepository.save(request);
         return convertToRequestRO(savedRequest);
@@ -139,8 +158,13 @@ public class RequestService {
             case ADD: //dean update  enrollment for user when user demands it - from status PROPOSED to PENDING
                 enrollmentService.updateEnrollmentForUser(enrollDTOBuilder(reDTO, EnrollStatus.PENDING));
                 break;
-            case DELETE: //dean update enrollment status to rejected  for user when user demands it (simply discards enrollment)
-                enrollmentService.updateEnrollmentForUser(enrollDTOBuilder(reDTO, EnrollStatus.REJECTED));
+            case DELETE: //dean delete enrollment for user when he demands it (simply removes enrollment)
+                enrollmentService.deleteEnrollmentBySubjectUserSemester(enrollDTOBuilder(reDTO, EnrollStatus.REJECTED));
+                break;
+            case CHANGE_SUBJECT://dean needs to delete old enrollment with old subject and add new enrollment with new subject
+                enrollmentService.deleteEnrollmentBySubjectUserSemester(enrollDTOBuilder(reDTO, EnrollStatus.REJECTED));
+                reDTO.setSubjectId(reDTO.getNewSubjectId());
+                enrollmentService.assignEnrollmentForUser(enrollDTOBuilder(reDTO, EnrollStatus.PENDING));
                 break;
             default:
                 throw new IllegalArgumentException("Invalid request type");
@@ -168,6 +192,7 @@ public class RequestService {
         return RequestEnrollRO.builder()
                 .requestEnrollId(requestEnroll.getRequestEnrollId())
                 .requestStatus(requestEnroll.getRequestStatus())
+                .newSubjectId(requestEnroll.getNewSubjectId())
                 .user(userDTO)
                 .subject(subjectDTO)
                 .build();

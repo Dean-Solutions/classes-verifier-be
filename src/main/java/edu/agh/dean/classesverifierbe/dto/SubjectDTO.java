@@ -19,6 +19,7 @@ public class SubjectDTO {
     private String description;
     private Integer semester;
     private Set<String> tagNames;
+    private Long subjectId;
 
 
 }

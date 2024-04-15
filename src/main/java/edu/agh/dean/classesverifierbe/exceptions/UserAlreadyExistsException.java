@@ -12,4 +12,8 @@ public class UserAlreadyExistsException extends Exception {
     public UserAlreadyExistsException(String attribute) {
         super("User with given "+ attribute + " already exists");
     }
+
+    public UserAlreadyExistsException(){
+        super("User already exists");
+    }
 }
