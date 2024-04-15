@@ -24,6 +24,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.modelmapper:modelmapper:3.2.0'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-mail', version: '3.2.3'
+    implementation group: 'org.freemarker', name: 'freemarker', version: '2.3.32'
 
     implementation group: 'jakarta.validation', name: 'jakarta.validation-api', version: '3.0.2'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: '3.2.3'

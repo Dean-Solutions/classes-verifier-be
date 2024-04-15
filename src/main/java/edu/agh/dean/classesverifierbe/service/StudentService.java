@@ -5,6 +5,7 @@ import edu.agh.dean.classesverifierbe.dto.UserDTO;
 import edu.agh.dean.classesverifierbe.exceptions.*;
 import edu.agh.dean.classesverifierbe.model.Semester;
 import edu.agh.dean.classesverifierbe.model.User;
+import edu.agh.dean.classesverifierbe.model.enums.EnrollStatus;
 import edu.agh.dean.classesverifierbe.repository.SemesterRepository;
 import edu.agh.dean.classesverifierbe.repository.UserRepository;
 import edu.agh.dean.classesverifierbe.specifications.UserSpecifications;
@@ -16,7 +17,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -112,6 +112,15 @@ public class StudentService {
             throw new InvalidIndexException(index);
         }
     }
+    public List<User> getUsersWithPendingEnrollment(Semester semester, Set<EnrollStatus> enrollStatuses) {
+        return userRepository.findAll(
+                UserSpecifications.
+                        withEnrollmentStatus(enrollStatuses)
+                        .and(UserSpecifications.withSemester(semester)));
+    }
 
+    public List<User> findAllDeans() {
+        return userRepository.findAll(UserSpecifications.hasRoleDean());
+    }
 
 }
