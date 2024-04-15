@@ -27,4 +27,6 @@ public class Semester {
     private Integer year;
 
     private LocalDateTime deadline;
+
+    private LocalDateTime reminderBeforeDeadline;
 }

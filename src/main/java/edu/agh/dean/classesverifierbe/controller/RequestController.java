@@ -3,7 +3,6 @@ package edu.agh.dean.classesverifierbe.controller;
 import edu.agh.dean.classesverifierbe.RO.RequestRO;
 import edu.agh.dean.classesverifierbe.dto.RequestDTO;
 import edu.agh.dean.classesverifierbe.exceptions.*;
-import edu.agh.dean.classesverifierbe.model.Request;
 import edu.agh.dean.classesverifierbe.service.RequestService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;

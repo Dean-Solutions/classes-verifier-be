@@ -1,19 +1,13 @@
 package edu.agh.dean.classesverifierbe;
 
-import edu.agh.dean.classesverifierbe.auth.AuthenticationService;
-import edu.agh.dean.classesverifierbe.auth.RegisterRequest;
-import edu.agh.dean.classesverifierbe.exceptions.UserAlreadyExistsException;
-import edu.agh.dean.classesverifierbe.exceptions.UserNotFoundException;
-import edu.agh.dean.classesverifierbe.model.enums.Role;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
+@EnableAsync
+@EnableScheduling
 public class DeanApplication {
     public static void main(String[] args) {
         SpringApplication.run(DeanApplication.class, args);

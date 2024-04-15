@@ -1,6 +1,5 @@
 package edu.agh.dean.classesverifierbe.service;
 
-import edu.agh.dean.classesverifierbe.RO.EnrollmentRO;
 import edu.agh.dean.classesverifierbe.RO.RequestEnrollRO;
 import edu.agh.dean.classesverifierbe.RO.RequestRO;
 import edu.agh.dean.classesverifierbe.dto.*;
@@ -12,8 +11,11 @@ import edu.agh.dean.classesverifierbe.repository.RequestEnrollRepository;
 import edu.agh.dean.classesverifierbe.repository.RequestRepository;
 
 import edu.agh.dean.classesverifierbe.repository.UserRepository;
+import edu.agh.dean.classesverifierbe.service.mail.MailHelperService;
 import edu.agh.dean.classesverifierbe.specifications.RequestSpecifications;
+import edu.agh.dean.classesverifierbe.specifications.UserSpecifications;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -30,21 +32,29 @@ import java.util.stream.Collectors;
 import static edu.agh.dean.classesverifierbe.model.enums.RequestEnrollStatus.*;
 
 @Service
+@Slf4j
 public class RequestService {
+    private final RequestRepository requestRepository;
+    private final StudentService studentService;
+    private final ModelMapper modelMapper;
+    private final RequestEnrollRepository requestEnrollRepository;
+    private final EnrollmentService enrollmentService;
+    private final SemesterService semesterService;
+    private final MailHelperService mailHelperService;
     @Autowired
-    private RequestRepository requestRepository;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private ModelMapper modelMapper;
+    public RequestService(RequestRepository requestRepository, StudentService studentService,
+                          ModelMapper modelMapper, RequestEnrollRepository requestEnrollRepository,
+                          EnrollmentService enrollmentService, SemesterService semesterService,
+                          MailHelperService mailHelperService) {
+        this.requestRepository = requestRepository;
+        this.studentService = studentService;
+        this.modelMapper = modelMapper;
+        this.requestEnrollRepository = requestEnrollRepository;
+        this.enrollmentService = enrollmentService;
+        this.semesterService = semesterService;
+        this.mailHelperService = mailHelperService;
+    }
 
-    @Autowired
-    private RequestEnrollRepository requestEnrollRepository;
-
-    @Autowired
-    private EnrollmentService enrollmentService;
-    @Autowired
-    private SemesterService semesterService;
 
     public RequestRO getRequestById(Long id) throws RequestNotFoundException{
         Request request = getRawRequestById(id);
@@ -64,7 +74,7 @@ public class RequestService {
         Page<Request> requests = requestRepository.findAll(spec, pageable);
         List<RequestRO> requestROs = requests.getContent().stream()
                 .map(this::convertToRequestRO)
-                .collect(Collectors.toList());
+                .toList();
 
         return new PageImpl<>(requestROs, pageable, requests.getTotalElements());
     }
@@ -72,8 +82,7 @@ public class RequestService {
 
     @Transactional
     public RequestRO createRequest(RequestDTO requestDTO) throws UserNotFoundException, SemesterNotFoundException, SubjectNotFoundException, EnrollmentAlreadyExistException {
-        User sender = userRepository.findById(requestDTO.getSenderId())
-                .orElseThrow(() -> new UserNotFoundException(requestDTO.getSenderId().toString()));
+        User sender = studentService.getRawUserById(requestDTO.getSenderId());
 
         Request request = Request.builder()
                 .description(requestDTO.getDescription())
@@ -103,9 +112,10 @@ public class RequestService {
 
            request.getRequestEnrollment().add(requestEnroll);
            requestRepository.save(request);
-            System.out.println("RequestEnroll: " + requestEnroll.toString());
+            log.info("RequestEnroll: " + requestEnroll.toString());
         }
         Request savedRequest = requestRepository.save(request);
+        notifyDeans();
         return convertToRequestRO(savedRequest);
     }
 
@@ -126,9 +136,11 @@ public class RequestService {
             requestEnrollRepository.save(requestEnroll);
             if (requestEnroll.getRequestStatus() == ACCEPTED) {
                 processEnrollmentChange(requestDTO, reDTO);
+                mailHelperService.sendNotification(studentService.getRawUserById(reDTO.getUserId()));
             }
             else if(requestEnroll.getRequestStatus() == REJECTED && request.getRequestType() == RequestType.ADD){
                 enrollmentService.updateEnrollmentForUser(enrollDTOBuilder(reDTO, EnrollStatus.REJECTED));
+                mailHelperService.sendNotification(studentService.getRawUserById(reDTO.getUserId()));
             }
 
 
@@ -156,6 +168,11 @@ public class RequestService {
             default:
                 throw new IllegalArgumentException("Invalid request type");
         }
+    }
+
+    private void notifyDeans() {
+        studentService.findAllDeans()
+                .forEach(mailHelperService::sendDeanNotification);
     }
 
     private EnrollDTO enrollDTOBuilder(RequestEnrollDTO reDTO, EnrollStatus status){

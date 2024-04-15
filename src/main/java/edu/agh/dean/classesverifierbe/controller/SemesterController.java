@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import edu.agh.dean.classesverifierbe.service.SemesterService;
 
@@ -36,7 +35,7 @@ public class SemesterController {
     public ResponseEntity<String> handleSemesterAlreadyExists(SemesterAlreadyExistsException exception) {
         return ResponseEntity.badRequest().body(exception.getMessage());
     }
-    @PostMapping
+    @PostMapping()
     @ResponseBody
     @PreAuthorize("hasAuthority('semester:create')")
     @Operation(summary = "DEAN is allowed")
