@@ -44,29 +44,32 @@ public class AuthenticationService {
             throw new UserAlreadyExistsException();
         }
         User user;
+        User savedUser;
         if(foundUser.isEmpty()){
             user = User.builder()
                     .firstName(request.getFirstName())
                     .lastName(request.getLastName())
                     .email(request.getEmail())
                     .role(request.getRole())
+                    .semester(request.getSemester())
                     .hashPassword(passwordEncoder.encode(request.getPassword()))
                     .indexNumber(request.getIndexNumber())
                     .build();
+            savedUser = repository.save(user);
         } else {
-            user = foundUser.get();
-            user.setFirstName(request.getFirstName());
-            user.setLastName(request.getLastName());
-            user.setRole(request.getRole());
-            user.setHashPassword(passwordEncoder.encode(request.getPassword()));
-            user.setIndexNumber(request.getIndexNumber());
+            foundUser.get().setFirstName(request.getFirstName());
+            foundUser.get().setLastName(request.getLastName());
+            foundUser.get().setRole(request.getRole());
+            foundUser.get().setHashPassword(passwordEncoder.encode(request.getPassword()));
+            foundUser.get().setIndexNumber(request.getIndexNumber());
+            foundUser.get().setSemester(request.getSemester());
+            savedUser = repository.save(foundUser.get());
         }
-        var savedUser = repository.save(user);
         System.out.println("User registered successfully");
-        var jwtToken = jwtService.generateToken(user);
-        var refreshToken = jwtService.generateRefreshToken(user);
+        var jwtToken = jwtService.generateToken(savedUser);
+        var refreshToken = jwtService.generateRefreshToken(savedUser);
         saveUserToken(savedUser,jwtToken);
-        return getAuthenticationResponse(jwtToken, refreshToken, user);
+        return getAuthenticationResponse(jwtToken, refreshToken, savedUser);
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) throws UserNotFoundException {
