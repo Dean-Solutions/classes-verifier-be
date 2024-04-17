@@ -108,7 +108,7 @@ public class RequestService {
                     List<RequestEnroll> requestEnrolls = requestEnrollRepository.findByEnrollmentId(enrollment.getEnrollmentId());
                     // check if any request for given enrollment have status PENDING (currently in process)
                     if(requestEnrolls.stream().anyMatch(re -> re.getRequestStatus() == PENDING)){
-                            throw new RequestEnrollAlreadyExistsException("Enrollment for user with id: " + reDTO.getUserId() + " and subject with id: " + reDTO.getSubjectId() + " already exists in db for given semester");
+                            throw new RequestEnrollAlreadyExistsException("Enrollment for user with id: " + reDTO.getUserId() + " and subject with id: " + reDTO.getSubjectId() + " already have request with status PENDING");
                     }
              }
             RequestEnroll requestEnroll = RequestEnroll.builder()
