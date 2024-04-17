@@ -81,7 +81,7 @@ public class RequestService {
 
 
     @Transactional
-    public RequestRO createRequest(RequestDTO requestDTO) throws UserNotFoundException, SemesterNotFoundException, SubjectNotFoundException, EnrollmentAlreadyExistException {
+    public RequestRO createRequest(RequestDTO requestDTO) throws UserNotFoundException, SemesterNotFoundException, SubjectNotFoundException, EnrollmentAlreadyExistException, EnrollmentNotFoundException,RequestEnrollAlreadyExistsException{
         User sender = studentService.getRawUserById(requestDTO.getSenderId());
 
         Request request = Request.builder()
@@ -96,13 +96,21 @@ public class RequestService {
         for (RequestEnrollDTO reDTO : requestDTO.getRequestEnrolls()) {
             Semester semester = reDTO.getSemesterId() != null ? semesterService.getSemesterById(reDTO.getSemesterId()) : semesterService.getCurrentSemester();
             Enrollment enrollment = enrollmentService.getEnrollmentByUserIdAndSubjectIdAndSemesterId(reDTO.getUserId(), reDTO.getSubjectId(), semester.getSemesterId());
-             if(enrollment == null){
+             if(enrollment == null && request.getRequestType() == RequestType.ADD){
                     enrollment = enrollmentService.assignEnrollmentForUser(EnrollDTO.builder()
                             .userId(reDTO.getUserId())
                             .subjectId(reDTO.getSubjectId())
                             .enrollStatus(EnrollStatus.PROPOSED)
                             .build());
-            }
+            }else if(enrollment == null){
+                throw new EnrollmentNotFoundException("Enrollment for user with id: " + reDTO.getUserId() + " and subject with id: " + reDTO.getSubjectId() + " not found in db for given semester");
+            } else if(enrollment != null){
+                    List<RequestEnroll> requestEnrolls = requestEnrollRepository.findByEnrollmentId(enrollment.getEnrollmentId());
+                    // check if any request for given enrollment have status PENDING (currently in process)
+                    if(requestEnrolls.stream().anyMatch(re -> re.getRequestStatus() == PENDING)){
+                            throw new RequestEnrollAlreadyExistsException("Enrollment for user with id: " + reDTO.getUserId() + " and subject with id: " + reDTO.getSubjectId() + " already exists in db for given semester");
+                    }
+             }
             RequestEnroll requestEnroll = RequestEnroll.builder()
                     .request(request)
                     .enrollment(enrollment)

@@ -85,11 +85,14 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(mapToJson(ex), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler({EnrollmentAlreadyExistException.class})
+    @ExceptionHandler({EnrollmentAlreadyExistException.class,EnrollmentNotFoundException.class})
     @ResponseBody
     public ResponseEntity<?> handleEnrollmentExceptions(Exception ex) {
         if (ex instanceof EnrollmentAlreadyExistException) {
             return new ResponseEntity<>(mapToJson(ex), HttpStatus.CONFLICT);
+        }
+        else if(ex instanceof EnrollmentNotFoundException){
+            return new ResponseEntity<>(mapToJson(ex), HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(mapToJson(ex), HttpStatus.BAD_REQUEST);
     }
@@ -103,14 +106,17 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(mapToJson(ex), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler({RequestEnrollNotFoundException.class, RequestEnrollSingleRequestAlreadyExistsException.class})
+    @ExceptionHandler({RequestEnrollNotFoundException.class, RequestEnrollSingleRequestAlreadyExistsException.class,RequestEnrollAlreadyExistsException.class})
     @ResponseBody
     public ResponseEntity<?> handleRequestEnrollException(Exception ex) {
         if (ex instanceof RequestEnrollNotFoundException) {
             return new ResponseEntity<>(mapToJson(ex), HttpStatus.NOT_FOUND);
         }
         else if(ex instanceof  RequestEnrollSingleRequestAlreadyExistsException){
-            return new ResponseEntity<>(mapToJson(ex), HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(mapToJson(ex), HttpStatus.CONFLICT);
+        }
+        else if(ex instanceof RequestEnrollAlreadyExistsException){
+            return new ResponseEntity<>(mapToJson(ex), HttpStatus.CONFLICT);
         }
         return new ResponseEntity<>(mapToJson(ex), HttpStatus.BAD_REQUEST);
     }

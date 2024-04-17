@@ -5,4 +5,8 @@ public class EnrollmentNotFoundException extends Exception {
         super("Enrollment not found in db");
     }
 
+    public EnrollmentNotFoundException(String message) {
+        super(message);
+    }
+
 }
