@@ -104,13 +104,12 @@ public class RequestService {
                             .build());
             }else if(enrollment == null){
                 throw new EnrollmentNotFoundException("Enrollment for user with id: " + reDTO.getUserId() + " and subject with id: " + reDTO.getSubjectId() + " not found in db for given semester");
-            } else if(enrollment != null){
-                    List<RequestEnroll> requestEnrolls = requestEnrollRepository.findByEnrollmentId(enrollment.getEnrollmentId());
-                    // check if any request for given enrollment have status PENDING (currently in process)
-                    if(requestEnrolls.stream().anyMatch(re -> re.getRequestStatus() == PENDING)){
-                            throw new RequestEnrollAlreadyExistsException("Enrollment for user with id: " + reDTO.getUserId() + " and subject with id: " + reDTO.getSubjectId() + " already have request with status PENDING");
-                    }
+            }
+             List<RequestEnroll> requestEnrolls = requestEnrollRepository.findByEnrollmentId(enrollment.getEnrollmentId());
+             if(requestEnrolls.stream().anyMatch(re -> re.getRequestStatus() == PENDING)){
+                 throw new RequestEnrollAlreadyExistsException("Enrollment for user with id: " + reDTO.getUserId() + " and subject with id: " + reDTO.getSubjectId() + " already have request with status PENDING");
              }
+
             RequestEnroll requestEnroll = RequestEnroll.builder()
                     .request(request)
                     .enrollment(enrollment)
