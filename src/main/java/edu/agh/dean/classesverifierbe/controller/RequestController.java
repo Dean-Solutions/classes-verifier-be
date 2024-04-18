@@ -31,7 +31,7 @@ public class RequestController {
     @PostMapping
     @PreAuthorize("hasAuthority('request:create')")
     @Operation(summary = "DEAN,STUDENT_REP, STUDENT are allowed")
-    public ResponseEntity<RequestRO> createRequest(@Valid @RequestBody RequestDTO requestDTO) throws UserNotFoundException, SemesterNotFoundException, SubjectNotFoundException, EnrollmentAlreadyExistException {
+    public ResponseEntity<RequestRO> createRequest(@Valid @RequestBody RequestDTO requestDTO) throws UserNotFoundException, SemesterNotFoundException, SubjectNotFoundException, EnrollmentAlreadyExistException, EnrollmentNotFoundException, RequestEnrollAlreadyExistsException {
         RequestRO newRequest = requestService.createRequest(requestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(newRequest);
     }
