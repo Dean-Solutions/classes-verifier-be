@@ -14,6 +14,7 @@ import edu.agh.dean.classesverifierbe.service.EnrollmentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -29,18 +30,13 @@ import java.util.List;
 @RequestMapping("/enrollments")
 @PreAuthorize("hasAnyRole('DEAN', 'STUDENT_REP', 'STUDENT')")
 @Tag(name = "Enrollment Controller", description = "STUDENT, STUDENT_REP, DEAN roles are allowed")
+@RequiredArgsConstructor
 public class EnrollmentController {
 
 
     private final EnrollmentService enrollmentService;
 
     private final AuthContextService authContextService;
-    @Autowired
-    public EnrollmentController(EnrollmentService enrollmentService, AuthContextService authContextService) {
-        this.enrollmentService = enrollmentService;
-        this.authContextService = authContextService;
-    }
-
 
     @PutMapping("/accept/{enrollmentId}")
     public ResponseEntity<EnrollmentRO> confirmEnrollment(@PathVariable Long enrollmentId) throws EnrollmentNotFoundException{

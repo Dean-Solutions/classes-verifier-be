@@ -1,6 +1,10 @@
 package edu.agh.dean.classesverifierbe.service;
 
 import edu.agh.dean.classesverifierbe.RO.UserRO;
+import edu.agh.dean.classesverifierbe.auth.AuthenticationResponse;
+import edu.agh.dean.classesverifierbe.auth.AuthenticationService;
+import edu.agh.dean.classesverifierbe.auth.RegisterRequest;
+import edu.agh.dean.classesverifierbe.dto.ChangePasswordDTO;
 import edu.agh.dean.classesverifierbe.dto.UserDTO;
 import edu.agh.dean.classesverifierbe.exceptions.*;
 import edu.agh.dean.classesverifierbe.model.Semester;
@@ -8,47 +12,51 @@ import edu.agh.dean.classesverifierbe.model.User;
 import edu.agh.dean.classesverifierbe.model.enums.EnrollStatus;
 import edu.agh.dean.classesverifierbe.repository.SemesterRepository;
 import edu.agh.dean.classesverifierbe.repository.UserRepository;
+import edu.agh.dean.classesverifierbe.service.mail.MailHelperService;
 import edu.agh.dean.classesverifierbe.specifications.UserSpecifications;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class StudentService {
 
     public static final int INDEX_LEN = 6;
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private SemesterRepository semesterRepository;
+    private final SemesterRepository semesterRepository;
 
-    @Autowired
-    private ModelMapper modelMapper;
+    private final ModelMapper modelMapper;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthContextService authContextService;
+    private final AuthenticationService authenticationService;
+    private final MailHelperService mailHelperService;
+    public UserRO addUser(RegisterRequest request) throws UserAlreadyExistsException, InvalidIndexException, UserNotFoundException {
 
-    public User addUser(UserDTO userDTO) throws UserAlreadyExistsException, InvalidIndexException {
+        validateStudentIndex(request.getIndexNumber());
 
-        validateStudentIndex(userDTO.getIndexNumber());
-
-        if (userRepository.existsByIndexNumber(userDTO.getIndexNumber())) {
-            throw new UserAlreadyExistsException("index number", userDTO.getIndexNumber());
+        if (userRepository.existsByIndexNumber(request.getIndexNumber())) {
+            throw new UserAlreadyExistsException("index number", request.getIndexNumber());
         }
-        if(userRepository.existsByEmail(userDTO.getEmail())){
-            throw new UserAlreadyExistsException("email", userDTO.getEmail());
+        if(userRepository.existsByEmail(request.getEmail())){
+            throw new UserAlreadyExistsException("email", request.getEmail());
         }
-        User user = toUser(userDTO);
-        user.setHashPassword(null);
-        //String newPassword = UUID.randomUUID().toString();
-        //user.setHashPassword(newPassword);
-
-        return userRepository.save(user);
+        AuthenticationResponse newUser = authenticationService.register(request);
+        var user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new UserNotFoundException("email", request.getEmail()));
+        mailHelperService.sendWelcomeEmail(user, newUser.getPassword());
+        UserRO userRO = convertToUserRO(user);
+        userRO.setHashPassword(null);
+        return userRO;
     }
 
 
@@ -121,6 +129,28 @@ public class StudentService {
 
     public List<User> findAllDeans() {
         return userRepository.findAll(UserSpecifications.hasRoleDean());
+    }
+
+    public void changePassword(ChangePasswordDTO request, Principal connectedUser) throws IncorrectPasswordException, PasswordsDoNotMatchException {
+        var user = authContextService.getUserFromPrincipal(connectedUser);
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new IncorrectPasswordException();
+        }
+        if (!request.getNewPassword().equals(request.getConfirmationPassword())) {
+            throw new PasswordsDoNotMatchException();
+        }
+        user.setHashPassword((passwordEncoder.encode(request.getNewPassword())));
+        userRepository.save(user);
+    }
+
+    public void changePasswordForcefully(Long id, ChangePasswordDTO changePasswordDTO) throws UserNotFoundException,IncorrectPasswordException {
+        var user = getRawUserById(id);
+        var newPassword = changePasswordDTO.getNewPassword();
+        if(newPassword == null ||newPassword.isEmpty()){
+            throw new IncorrectPasswordException();
+        }
+        user.setHashPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
     }
 
 }

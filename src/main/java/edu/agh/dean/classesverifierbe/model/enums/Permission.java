@@ -23,8 +23,10 @@ public enum Permission {
     SEMESTERS_READ("semesters:read"),
     REQUEST_READ("request:read"),
     REQUEST_CREATE("request:create"),
-    REQUEST_UPDATE("request:update");
+    REQUEST_UPDATE("request:update"),
 
+    USER_CHANGE_PASSWORD("user:change-password"),
+    USER_CHANGE_PASSWORD_BY_FORCE("user:change-password-forcefully");
 
 
     @Getter

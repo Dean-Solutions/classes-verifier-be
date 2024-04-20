@@ -7,6 +7,7 @@ import edu.agh.dean.classesverifierbe.exceptions.SubjectTagNotFoundException;
 import edu.agh.dean.classesverifierbe.service.SubjectTagService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,14 +19,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/tags")
 @PreAuthorize("hasAnyRole('STUDENT', 'DEAN','STUDENT_REP')")
+@RequiredArgsConstructor
 public class SubjectTagController {
 
     private final SubjectTagService tagService;
-
-    @Autowired
-    public SubjectTagController(SubjectTagService tagService) {
-        this.tagService = tagService;
-    }
 
     @PostMapping
     @PreAuthorize("hasAuthority('tag:create')")

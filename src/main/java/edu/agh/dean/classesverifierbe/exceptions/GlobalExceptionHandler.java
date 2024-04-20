@@ -131,4 +131,17 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleNoPermissionException(Exception ex) {
         return new ResponseEntity<>(mapToJson(ex), HttpStatus.FORBIDDEN);
     }
+
+
+    @ExceptionHandler({IncorrectPasswordException.class, PasswordsDoNotMatchException.class})
+    @ResponseBody
+    public ResponseEntity<?> handlePasswordExceptions(Exception ex) {
+        if (ex instanceof IncorrectPasswordException) {
+            return new ResponseEntity<>(mapToJson(ex), HttpStatus.BAD_REQUEST);
+        }
+        else if(ex instanceof PasswordsDoNotMatchException){
+            return new ResponseEntity<>(mapToJson(ex), HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(mapToJson(ex), HttpStatus.BAD_REQUEST);
+    }
 }

@@ -6,6 +6,7 @@ import edu.agh.dean.classesverifierbe.exceptions.SubjectTagAlreadyExistsExceptio
 import edu.agh.dean.classesverifierbe.exceptions.SubjectTagNotFoundException;
 import edu.agh.dean.classesverifierbe.model.SubjectTag;
 import edu.agh.dean.classesverifierbe.repository.SubjectTagRepository;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,16 +14,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.Optional;
 @Service
+@RequiredArgsConstructor
 public class SubjectTagService {
 
     private final SubjectTagRepository subjectTagRepository;
     private final ModelMapper modelMapper;
 
-    @Autowired
-    public SubjectTagService(SubjectTagRepository subjectTagRepository, ModelMapper modelMapper) {
-        this.subjectTagRepository = subjectTagRepository;
-        this.modelMapper = modelMapper;
-    }
 
     public SubjectTagRO createTag(SubjectTagDTO tagDto) throws SubjectTagAlreadyExistsException {
         Optional<SubjectTag> existingTag = subjectTagRepository.findByName(tagDto.getName());

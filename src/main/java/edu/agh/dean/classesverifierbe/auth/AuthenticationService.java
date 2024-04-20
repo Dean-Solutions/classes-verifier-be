@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -40,36 +41,30 @@ public class AuthenticationService {
     public AuthenticationResponse register(RegisterRequest request) throws UserAlreadyExistsException {
         Optional<User> foundUser = repository.findByEmail(request.getEmail());
 
-        if(foundUser.isPresent() && foundUser.get().getHashPassword() != null){
+        if(foundUser.isPresent()){
             throw new UserAlreadyExistsException();
         }
-        User user;
-        User savedUser;
-        if(foundUser.isEmpty()){
-            user = User.builder()
+        var user = User.builder()
                     .firstName(request.getFirstName())
                     .lastName(request.getLastName())
                     .email(request.getEmail())
                     .role(request.getRole())
                     .semester(request.getSemester())
-                    .hashPassword(passwordEncoder.encode(request.getPassword()))
                     .indexNumber(request.getIndexNumber())
                     .build();
-            savedUser = repository.save(user);
-        } else {
-            foundUser.get().setFirstName(request.getFirstName());
-            foundUser.get().setLastName(request.getLastName());
-            foundUser.get().setRole(request.getRole());
-            foundUser.get().setHashPassword(passwordEncoder.encode(request.getPassword()));
-            foundUser.get().setIndexNumber(request.getIndexNumber());
-            foundUser.get().setSemester(request.getSemester());
-            savedUser = repository.save(foundUser.get());
+        String password = request.getPassword();
+        if(password != null){
+            user.setHashPassword(passwordEncoder.encode(password));
+        }else{
+            password = UUID.randomUUID().toString();
+            user.setHashPassword(passwordEncoder.encode(password));
         }
-        System.out.println("User registered successfully");
+        var savedUser = repository.save(user);
+
         var jwtToken = jwtService.generateToken(savedUser);
         var refreshToken = jwtService.generateRefreshToken(savedUser);
         saveUserToken(savedUser,jwtToken);
-        return getAuthenticationResponse(jwtToken, refreshToken, savedUser);
+        return getAuthenticationResponse(jwtToken, refreshToken, savedUser, password);
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) throws UserNotFoundException {
@@ -86,7 +81,7 @@ public class AuthenticationService {
         var refreshToken = jwtService.generateRefreshToken(user);
         revokeAllUserTokens(user);
         saveUserToken(user,jwtToken);
-        return getAuthenticationResponse(jwtToken,refreshToken,user);
+        return getAuthenticationResponse(jwtToken,refreshToken,user,null);
     }
 
     private void revokeAllUserTokens(User user){
@@ -141,7 +136,7 @@ public class AuthenticationService {
 
     }
 
-    private AuthenticationResponse getAuthenticationResponse(String jwtToken, String refreshToken, User user) {
+    private AuthenticationResponse getAuthenticationResponse(String jwtToken, String refreshToken, User user, String password) {
         return AuthenticationResponse.builder()
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)
@@ -150,6 +145,7 @@ public class AuthenticationService {
                 .semester(user.getSemester())
                 .status(user.getStatus())
                 .email(user.getEmail())
+                .password(password)
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .indexNumber(user.getIndexNumber())

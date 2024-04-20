@@ -31,7 +31,9 @@ public enum Role {
                     Permission.SEMESTER_CREATE,
                     Permission.REQUEST_CREATE,
                     Permission.REQUEST_READ,
-                    Permission.REQUEST_UPDATE
+                    Permission.REQUEST_UPDATE,
+                    Permission.USER_CHANGE_PASSWORD,
+                    Permission.USER_CHANGE_PASSWORD_BY_FORCE
             )
     ),
     STUDENT_REP(
@@ -43,8 +45,8 @@ public enum Role {
                     Permission.SEMESTERS_READ,
                     Permission.SEMESTER_UPDATE,
                     Permission.REQUEST_CREATE,
-                    Permission.REQUEST_READ
-
+                    Permission.REQUEST_READ,
+                    Permission.USER_CHANGE_PASSWORD
             )
     ),
     STUDENT(
@@ -53,7 +55,8 @@ public enum Role {
                     Permission.SUBJECT_READ,
                     Permission.SEMESTER_READ,
                     Permission.REQUEST_CREATE,
-                    Permission.REQUEST_READ
+                    Permission.REQUEST_READ,
+                    Permission.USER_CHANGE_PASSWORD
             )
     );
     @Getter
