@@ -33,9 +33,7 @@ public class EnrollmentService {
     private final StudentService studentService;
     private final SemesterService semesterService;
     private final SubjectService subjectService;
-    private ModelMapper modelMapper;
-
-
+    private final ModelMapper modelMapper;
 
     public Page<EnrollmentRO> getAllEnrollments(Pageable pageable, String indexNumber, String subjectName, Long semesterId, String statuses, Long userId, Long subjectId) throws SemesterNotFoundException {
         if(semesterId == null){
