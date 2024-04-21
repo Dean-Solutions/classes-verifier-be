@@ -37,10 +37,6 @@ public class EnrollmentController {
 
 
     private final EnrollmentService enrollmentService;
-
-    private final AuthContextService authContextService;
-    private final MailHelperService emailHelperService;
-
     @PutMapping("/accept/{enrollmentId}")
     public ResponseEntity<EnrollmentRO> confirmEnrollment(@PathVariable Long enrollmentId) throws EnrollmentNotFoundException{
 
@@ -63,9 +59,6 @@ public class EnrollmentController {
                                                                 Principal principal)
             throws SemesterNotFoundException {
 
-        var user =authContextService.getUserFromPrincipal(principal);
-        emailHelperService.sendWelcomeEmail(user, "cos");
-        emailHelperService.sendNotification(user);
         Page<EnrollmentRO> enrollments = enrollmentService.getAllEnrollments(pageable, indexNumber, subjectName, semesterId, statuses,userId,subjectId);
         return ResponseEntity.ok(enrollments);
     }
@@ -77,8 +70,6 @@ public class EnrollmentController {
             SubjectNotFoundException,
             SemesterNotFoundException,
             EnrollmentAlreadyExistException {
-        Long userId = enrollDTO.getUserId();
-
         return ResponseEntity.ok(enrollmentService.assignEnrollmentForUser(enrollDTO));
     }
 
