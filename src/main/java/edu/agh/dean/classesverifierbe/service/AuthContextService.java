@@ -4,11 +4,13 @@ import edu.agh.dean.classesverifierbe.configuration.JwtService;
 import edu.agh.dean.classesverifierbe.model.User;
 import edu.agh.dean.classesverifierbe.model.enums.Role;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,6 +36,11 @@ public class AuthContextService {
             return null;
         }
         User user = (User) authentication.getPrincipal();
+        return user;
+    }
+
+    public User getUserFromPrincipal(Principal connectedUser) {
+        var user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
         return user;
     }
 

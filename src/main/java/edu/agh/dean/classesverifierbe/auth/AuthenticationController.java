@@ -33,8 +33,9 @@ public class AuthenticationController {
         } else if (request.getRole() != Role.STUDENT) {
             throw new NoPermissionException("Only students can register");
         }
-
-        return ResponseEntity.ok(service.register(request));
+        AuthenticationResponse response = service.register(request);
+        response.setPassword(null);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/login")

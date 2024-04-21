@@ -11,6 +11,7 @@ import edu.agh.dean.classesverifierbe.model.User;
 import edu.agh.dean.classesverifierbe.repository.SubjectRepository;
 import edu.agh.dean.classesverifierbe.repository.SubjectTagRepository;
 import edu.agh.dean.classesverifierbe.specifications.SubjectSpecifications;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,19 +26,13 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class SubjectService {
 
     private final SubjectRepository subjectRepository;
     private final SubjectTagRepository subjectTagRepository;
 
     private final SemesterService semesterService;
-
-    @Autowired
-    public SubjectService(SubjectRepository subjectRepository, SubjectTagRepository subjectTagRepository, SemesterService semesterService) {
-        this.subjectRepository = subjectRepository;
-        this.subjectTagRepository = subjectTagRepository;
-        this.semesterService = semesterService;
-    }
 
     public Subject createSubject(Subject subject, Set<String> tagNames) throws SubjectAlreadyExistsException {
         if(subjectRepository.findByName(subject.getName()) != null){

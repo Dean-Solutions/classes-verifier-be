@@ -11,9 +11,11 @@ import edu.agh.dean.classesverifierbe.model.User;
 import edu.agh.dean.classesverifierbe.model.enums.Role;
 import edu.agh.dean.classesverifierbe.service.AuthContextService;
 import edu.agh.dean.classesverifierbe.service.EnrollmentService;
+import edu.agh.dean.classesverifierbe.service.mail.MailHelperService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 
 
+import java.security.Principal;
 import java.util.List;
 
 
@@ -29,19 +32,11 @@ import java.util.List;
 @RequestMapping("/enrollments")
 @PreAuthorize("hasAnyRole('DEAN', 'STUDENT_REP', 'STUDENT')")
 @Tag(name = "Enrollment Controller", description = "STUDENT, STUDENT_REP, DEAN roles are allowed")
+@RequiredArgsConstructor
 public class EnrollmentController {
 
 
     private final EnrollmentService enrollmentService;
-
-    private final AuthContextService authContextService;
-    @Autowired
-    public EnrollmentController(EnrollmentService enrollmentService, AuthContextService authContextService) {
-        this.enrollmentService = enrollmentService;
-        this.authContextService = authContextService;
-    }
-
-
     @PutMapping("/accept/{enrollmentId}")
     public ResponseEntity<EnrollmentRO> confirmEnrollment(@PathVariable Long enrollmentId) throws EnrollmentNotFoundException{
 
@@ -55,12 +50,13 @@ public class EnrollmentController {
 
     @GetMapping
     public ResponseEntity<Page<EnrollmentRO>> getAllEnrollments(Pageable pageable,
-                                                @RequestParam(required = false) String indexNumber,
-                                                @RequestParam(required = false) String subjectName,
-                                                @RequestParam(required = false) Long semesterId,
-                                                @RequestParam(required = false) String statuses,
+                                                                @RequestParam(required = false) String indexNumber,
+                                                                @RequestParam(required = false) String subjectName,
+                                                                @RequestParam(required = false) Long semesterId,
+                                                                @RequestParam(required = false) String statuses,
                                                                 @RequestParam(required = false) Long userId,
-                                                                @RequestParam(required = false) Long subjectId)
+                                                                @RequestParam(required = false) Long subjectId,
+                                                                Principal principal)
             throws SemesterNotFoundException {
 
         Page<EnrollmentRO> enrollments = enrollmentService.getAllEnrollments(pageable, indexNumber, subjectName, semesterId, statuses,userId,subjectId);
@@ -74,8 +70,6 @@ public class EnrollmentController {
             SubjectNotFoundException,
             SemesterNotFoundException,
             EnrollmentAlreadyExistException {
-        Long userId = enrollDTO.getUserId();
-
         return ResponseEntity.ok(enrollmentService.assignEnrollmentForUser(enrollDTO));
     }
 

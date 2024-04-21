@@ -30,5 +30,6 @@ public class AuthenticationResponse {
     private EduPath eduPath;
     private UserStatus status;
     private Role role;
+    private String password;
 }
 

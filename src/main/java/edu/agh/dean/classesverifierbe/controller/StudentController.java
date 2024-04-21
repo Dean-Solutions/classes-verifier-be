@@ -1,6 +1,8 @@
 package edu.agh.dean.classesverifierbe.controller;
 
 import edu.agh.dean.classesverifierbe.RO.UserRO;
+import edu.agh.dean.classesverifierbe.auth.RegisterRequest;
+import edu.agh.dean.classesverifierbe.dto.ChangePasswordDTO;
 import edu.agh.dean.classesverifierbe.dto.UserDTO;
 import edu.agh.dean.classesverifierbe.exceptions.*;
 import edu.agh.dean.classesverifierbe.model.User;
@@ -9,6 +11,7 @@ import edu.agh.dean.classesverifierbe.service.StudentService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -18,18 +21,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 
 @RestController
 @RequestMapping("/students")
 @PreAuthorize("hasAnyRole('STUDENT', 'STUDENT_REP', 'DEAN')")
+@RequiredArgsConstructor
 public class StudentController {
 
-    @Autowired
-    private StudentService studentService;
-    @Autowired
-    private AuthContextService authContextService;
+
+    private final StudentService studentService;
+
+    private final AuthContextService authContextService;
 
     @GetMapping("/my-profile")
     @Operation(summary = "STUDENT, STUDENT_REP, DEAN are allowed")
@@ -54,9 +59,10 @@ public class StudentController {
     @PostMapping
     @PreAuthorize("hasAuthority('user:create')")
     @Operation(summary = "DEAN is allowed")
-    public ResponseEntity<User> addUser(@Valid @RequestBody UserDTO userDto) throws UserAlreadyExistsException,
-            InvalidIndexException {
-        User newUser = studentService.addUser(userDto);
+    public ResponseEntity<UserRO> addUser(@Valid @RequestBody RegisterRequest request) throws UserAlreadyExistsException,
+            InvalidIndexException, UserNotFoundException{
+        UserRO newUser = studentService.addUser(request);
+        newUser.setHashPassword(null);
         return new ResponseEntity<>(newUser, HttpStatus.CREATED);
 
     }
@@ -109,6 +115,28 @@ public class StudentController {
             usersRO = new PageImpl<>(List.of(), pageable, 0);
             return ResponseEntity.ok(usersRO);
         }
+    }
+
+    @PreAuthorize("hasAuthority('user:change-password')")
+    @PatchMapping("/change-password")
+    @Operation(summary = "DEAN,STUDENT_REP,STUDENT are allowed")
+    public ResponseEntity<?> changePassword(
+            @RequestBody ChangePasswordDTO request,
+            Principal principal
+    ) throws IncorrectPasswordException, PasswordsDoNotMatchException{
+        studentService.changePassword(request,principal);
+        return ResponseEntity.ok().build();
+    }
+
+    @PreAuthorize("hasAuthority('user:change-password-forcefully')")
+    @PatchMapping("/{id}/force-change-password")
+    @Operation(summary = "DEAN is allowed: only newPassword from changePasswordDTO is considered.")
+    public ResponseEntity<?> changePasswordByForce(
+            @PathVariable Long id,
+            @RequestBody ChangePasswordDTO changePasswordDTO
+    ) throws IncorrectPasswordException, UserNotFoundException{
+        studentService.changePasswordForcefully(id,changePasswordDTO);
+        return ResponseEntity.ok().build();
     }
 
 

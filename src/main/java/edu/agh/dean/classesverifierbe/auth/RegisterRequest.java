@@ -23,8 +23,9 @@ public class RegisterRequest {
     @NotBlank(message = "Index number is required")
     private String indexNumber;
 
-    @NotBlank(message = "Password is required")
+
     private String password;
+
     @Email(message = "Email must be valid")
     @NotBlank(message = "Email is required")
     private String email;

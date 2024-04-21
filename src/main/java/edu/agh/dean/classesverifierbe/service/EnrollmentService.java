@@ -11,6 +11,7 @@ import edu.agh.dean.classesverifierbe.model.*;
 import edu.agh.dean.classesverifierbe.model.enums.EnrollStatus;
 import edu.agh.dean.classesverifierbe.repository.EnrollmentRepository;
 import edu.agh.dean.classesverifierbe.specifications.EnrollmentSpecifications;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -25,23 +26,14 @@ import java.util.stream.Collectors;
 import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class EnrollmentService {
 
     private final EnrollmentRepository enrollmentRepository;
     private final StudentService studentService;
     private final SemesterService semesterService;
     private final SubjectService subjectService;
-
-    @Autowired
-    private ModelMapper modelMapper;
-
-    @Autowired
-    public EnrollmentService(EnrollmentRepository enrollmentRepository, StudentService studentService, SemesterService semesterService, SubjectService subjectService) {
-        this.enrollmentRepository = enrollmentRepository;
-        this.studentService = studentService;
-        this.semesterService = semesterService;
-        this.subjectService = subjectService;
-    }
+    private final ModelMapper modelMapper;
 
     public Page<EnrollmentRO> getAllEnrollments(Pageable pageable, String indexNumber, String subjectName, Long semesterId, String statuses, Long userId, Long subjectId) throws SemesterNotFoundException {
         if(semesterId == null){

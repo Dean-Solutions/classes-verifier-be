@@ -6,6 +6,7 @@ import edu.agh.dean.classesverifierbe.exceptions.*;
 import edu.agh.dean.classesverifierbe.service.RequestService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,14 +20,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/requests")
 @PreAuthorize("hasAnyRole('DEAN', 'STUDENT_REP', 'STUDENT')")
+@RequiredArgsConstructor
 public class RequestController {
 
     private final RequestService requestService;
-
-    @Autowired
-    public RequestController(RequestService requestService) {
-        this.requestService = requestService;
-    }
 
     @PostMapping
     @PreAuthorize("hasAuthority('request:create')")

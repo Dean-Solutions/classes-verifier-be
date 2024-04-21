@@ -15,6 +15,7 @@ import edu.agh.dean.classesverifierbe.service.mail.MailHelperService;
 import edu.agh.dean.classesverifierbe.specifications.RequestSpecifications;
 import edu.agh.dean.classesverifierbe.specifications.UserSpecifications;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,7 @@ import static edu.agh.dean.classesverifierbe.model.enums.RequestEnrollStatus.*;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class RequestService {
     private final RequestRepository requestRepository;
     private final StudentService studentService;
@@ -41,20 +43,6 @@ public class RequestService {
     private final EnrollmentService enrollmentService;
     private final SemesterService semesterService;
     private final MailHelperService mailHelperService;
-    @Autowired
-    public RequestService(RequestRepository requestRepository, StudentService studentService,
-                          ModelMapper modelMapper, RequestEnrollRepository requestEnrollRepository,
-                          EnrollmentService enrollmentService, SemesterService semesterService,
-                          MailHelperService mailHelperService) {
-        this.requestRepository = requestRepository;
-        this.studentService = studentService;
-        this.modelMapper = modelMapper;
-        this.requestEnrollRepository = requestEnrollRepository;
-        this.enrollmentService = enrollmentService;
-        this.semesterService = semesterService;
-        this.mailHelperService = mailHelperService;
-    }
-
 
     public RequestRO getRequestById(Long id) throws RequestNotFoundException{
         Request request = getRawRequestById(id);

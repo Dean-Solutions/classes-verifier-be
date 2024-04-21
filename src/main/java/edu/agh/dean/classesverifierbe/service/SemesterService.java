@@ -8,6 +8,7 @@ import edu.agh.dean.classesverifierbe.model.User;
 import edu.agh.dean.classesverifierbe.model.enums.EnrollStatus;
 import edu.agh.dean.classesverifierbe.repository.SemesterRepository;
 import edu.agh.dean.classesverifierbe.service.mail.MailHelperService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
@@ -24,6 +25,7 @@ import java.util.concurrent.ScheduledFuture;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class SemesterService {
 
     private final SemesterRepository semesterRepository;
@@ -31,15 +33,6 @@ public class SemesterService {
     private final TaskScheduler taskScheduler;
     private final MailHelperService mailHelperService;
     private ScheduledFuture<?> futureTask;
-
-    @Autowired
-    public SemesterService(SemesterRepository semesterRepository, StudentService studentService, TaskScheduler taskScheduler, MailHelperService mailHelperService) {
-        this.semesterRepository = semesterRepository;
-        this.studentService = studentService;
-        this.taskScheduler = taskScheduler;
-        this.mailHelperService = mailHelperService;
-    }
-
     public Semester getSemesterById(Long id) throws SemesterNotFoundException  {
         return semesterRepository.findById(id)
                 .orElseThrow(() -> new SemesterNotFoundException("Semester not found with id: " + id));

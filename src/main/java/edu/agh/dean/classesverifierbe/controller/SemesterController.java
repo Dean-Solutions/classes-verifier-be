@@ -7,6 +7,7 @@ import edu.agh.dean.classesverifierbe.model.Semester;
 import edu.agh.dean.classesverifierbe.model.enums.SemesterType;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,10 +20,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/semesters")
 @PreAuthorize("hasAnyRole('DEAN', 'STUDENT_REP', 'STUDENT')")
+@RequiredArgsConstructor
 public class SemesterController {
-
-    @Autowired
-    private  SemesterService semesterService;
+    private final SemesterService semesterService;
 
     @ExceptionHandler(SemesterNotFoundException.class)
     @ResponseBody
