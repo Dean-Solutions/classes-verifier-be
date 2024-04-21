@@ -11,6 +11,7 @@ import edu.agh.dean.classesverifierbe.model.User;
 import edu.agh.dean.classesverifierbe.model.enums.Role;
 import edu.agh.dean.classesverifierbe.service.AuthContextService;
 import edu.agh.dean.classesverifierbe.service.EnrollmentService;
+import edu.agh.dean.classesverifierbe.service.mail.MailHelperService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 
 
+import java.security.Principal;
 import java.util.List;
 
 
@@ -37,6 +39,7 @@ public class EnrollmentController {
     private final EnrollmentService enrollmentService;
 
     private final AuthContextService authContextService;
+    private final MailHelperService emailHelperService;
 
     @PutMapping("/accept/{enrollmentId}")
     public ResponseEntity<EnrollmentRO> confirmEnrollment(@PathVariable Long enrollmentId) throws EnrollmentNotFoundException{
@@ -51,14 +54,18 @@ public class EnrollmentController {
 
     @GetMapping
     public ResponseEntity<Page<EnrollmentRO>> getAllEnrollments(Pageable pageable,
-                                                @RequestParam(required = false) String indexNumber,
-                                                @RequestParam(required = false) String subjectName,
-                                                @RequestParam(required = false) Long semesterId,
-                                                @RequestParam(required = false) String statuses,
+                                                                @RequestParam(required = false) String indexNumber,
+                                                                @RequestParam(required = false) String subjectName,
+                                                                @RequestParam(required = false) Long semesterId,
+                                                                @RequestParam(required = false) String statuses,
                                                                 @RequestParam(required = false) Long userId,
-                                                                @RequestParam(required = false) Long subjectId)
+                                                                @RequestParam(required = false) Long subjectId,
+                                                                Principal principal)
             throws SemesterNotFoundException {
 
+        var user =authContextService.getUserFromPrincipal(principal);
+        emailHelperService.sendWelcomeEmail(user, "cos");
+        emailHelperService.sendNotification(user);
         Page<EnrollmentRO> enrollments = enrollmentService.getAllEnrollments(pageable, indexNumber, subjectName, semesterId, statuses,userId,subjectId);
         return ResponseEntity.ok(enrollments);
     }
