@@ -14,6 +14,7 @@ import edu.agh.dean.classesverifierbe.repository.SemesterRepository;
 import edu.agh.dean.classesverifierbe.repository.UserRepository;
 import edu.agh.dean.classesverifierbe.service.mail.MailHelperService;
 import edu.agh.dean.classesverifierbe.specifications.UserSpecifications;
+import edu.agh.dean.classesverifierbe.token.TokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -41,6 +42,7 @@ public class StudentService {
     private final AuthContextService authContextService;
     private final AuthenticationService authenticationService;
     private final MailHelperService mailHelperService;
+    private final TokenRepository tokenRepository;
     public UserRO addUser(RegisterRequest request) throws UserAlreadyExistsException, InvalidIndexException, UserNotFoundException {
 
         validateStudentIndex(request.getIndexNumber());
@@ -111,9 +113,23 @@ public class StudentService {
 
     public UserRO removeUserById(Long id) throws UserNotFoundException {
         User user = getRawUserById(id);
+        if (user.getRequests() != null) {
+            user.getRequests().clear();
+        }
+        if (user.getEnrollments() != null) {
+            user.getEnrollments().clear();
+        }
+        if (user.getTokens() != null) {
+            user.getTokens().forEach(token -> tokenRepository.delete(token));
+            user.getTokens().clear();
+        }
+
         userRepository.delete(user);
+
         return convertToUserRO(user);
     }
+
+
 
     private void validateStudentIndex(String index) throws InvalidIndexException {
         if (index == null || index.length() != INDEX_LEN || !index.matches("\\d+")) {
