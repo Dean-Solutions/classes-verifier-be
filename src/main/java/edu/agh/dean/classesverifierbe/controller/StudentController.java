@@ -1,5 +1,6 @@
 package edu.agh.dean.classesverifierbe.controller;
 
+import edu.agh.dean.classesverifierbe.RO.SuccessRO;
 import edu.agh.dean.classesverifierbe.RO.UserRO;
 import edu.agh.dean.classesverifierbe.auth.RegisterRequest;
 import edu.agh.dean.classesverifierbe.dto.ChangePasswordDTO;
@@ -120,23 +121,24 @@ public class StudentController {
     @PreAuthorize("hasAuthority('user:change-password')")
     @PatchMapping("/change-password")
     @Operation(summary = "DEAN,STUDENT_REP,STUDENT are allowed")
-    public ResponseEntity<?> changePassword(
+    public ResponseEntity<SuccessRO> changePassword(
             @RequestBody ChangePasswordDTO request,
             Principal principal
     ) throws IncorrectPasswordException, PasswordsDoNotMatchException{
         studentService.changePassword(request,principal);
-        return ResponseEntity.ok().build();
+
+        return ResponseEntity.ok(SuccessRO.builder().success(true).build());
     }
 
     @PreAuthorize("hasAuthority('user:change-password-forcefully')")
     @PatchMapping("/{id}/force-change-password")
     @Operation(summary = "DEAN is allowed: only newPassword from changePasswordDTO is considered.")
-    public ResponseEntity<?> changePasswordByForce(
+    public ResponseEntity<SuccessRO> changePasswordByForce(
             @PathVariable Long id,
             @RequestBody ChangePasswordDTO changePasswordDTO
     ) throws IncorrectPasswordException, UserNotFoundException{
         studentService.changePasswordForcefully(id,changePasswordDTO);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(SuccessRO.builder().success(true).build());
     }
 
 
